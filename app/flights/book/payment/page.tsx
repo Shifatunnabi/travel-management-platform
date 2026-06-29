@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   ChevronRight, CreditCard, Smartphone, Shield,
   Tag, CheckCircle, Lock,
@@ -23,7 +23,6 @@ const paymentMethods: { id: PaymentMethod; name: string; icon: string; color: st
 
 export default function PaymentPage() {
   const router = useRouter();
-  const params = useSearchParams();
   const [method, setMethod] = useState<PaymentMethod>("card");
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
@@ -191,7 +190,7 @@ export default function PaymentPage() {
 
                   {/* Coupon */}
                   <div>
-                    <label className="text-xs font-semibold text-slate-600 block mb-1.5 flex items-center gap-1">
+                    <label className="text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
                       <Tag size={12} /> Coupon Code
                     </label>
                     <div className="flex gap-2">

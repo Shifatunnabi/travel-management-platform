@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight, User, Mail, Phone, Shield } from "lucide-react";
@@ -8,7 +8,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Button from "@/components/ui/Button";
 
-export default function HotelGuestsPage() {
+function HotelGuestsInner() {
   const router = useRouter();
   const params = useSearchParams();
   const hotelId = params.get("hotelId") || "ht-001";
@@ -133,5 +133,13 @@ export default function HotelGuestsPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function HotelGuestsPage() {
+  return (
+    <Suspense>
+      <HotelGuestsInner />
+    </Suspense>
   );
 }

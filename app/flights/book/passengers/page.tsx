@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -70,7 +70,7 @@ function SelectField({
   );
 }
 
-export default function PassengersPage() {
+function PassengersInner() {
   const router = useRouter();
   const params = useSearchParams();
   const flightId = params.get("flightId") || "fl-001";
@@ -231,5 +231,13 @@ export default function PassengersPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function PassengersPage() {
+  return (
+    <Suspense>
+      <PassengersInner />
+    </Suspense>
   );
 }
