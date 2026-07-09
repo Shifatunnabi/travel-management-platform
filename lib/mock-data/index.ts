@@ -230,12 +230,14 @@ export const faqs: FAQ[] = [
 ];
 
 export const partners: Partner[] = [
-  { id: "p-001", name: "Biman Bangladesh Airlines", logo: "/demo/bimanbd.png" },
-  { id: "p-002", name: "US-Bangla Airlines", logo: "/demo/usbangla.png" },
-  { id: "p-003", name: "Emirates", logo: "/demo/bimanbd.png" },
-  { id: "p-004", name: "Qatar Airways", logo: "/demo/usbangla.png" },
-  { id: "p-005", name: "Turkish Airlines", logo: "/demo/bimanbd.png" },
-  { id: "p-006", name: "Air Arabia", logo: "/demo/usbangla.png" },
+  { id: "p-001", name: "Biman Bangladesh Airlines", logo: "/demo/biman-bd.png" },
+  { id: "p-002", name: "US-Bangla Airlines", logo: "/demo/us-bangla.png" },
+  { id: "p-003", name: "Novo Air", logo: "/demo/novoair.png" },
+  { id: "p-004", name: "Air Astra", logo: "/demo/air-astra.png" },
+  { id: "p-005", name: "Biman Bangladesh Airlines", logo: "/demo/biman-bd.png" },
+  { id: "p-006", name: "US-Bangla Airlines", logo: "/demo/us-bangla.png" },
+  { id: "p-007", name: "Novo Air", logo: "/demo/novoair.png" },
+  { id: "p-008", name: "Air Astra", logo: "/demo/air-astra.png" },
 ];
 
 export { mockFlights } from "./flights";

@@ -7,6 +7,7 @@ import PromoSection from "@/components/home/PromoSection";
 import TrustSection from "@/components/home/TrustSection";
 import Testimonials from "@/components/home/Testimonials";
 import TravelPartners from "@/components/home/TravelPartners";
+import TutorialVideos from "@/components/home/TutorialVideos";
 import FAQ from "@/components/home/FAQ";
 
 export default function HomePage() {
@@ -20,6 +21,7 @@ export default function HomePage() {
         <PromoSection />
         <PopularHotels />
         <TrustSection />
+        <TutorialVideos />
         <Testimonials />
         <FAQ />
       </main>

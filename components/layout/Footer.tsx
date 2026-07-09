@@ -33,6 +33,47 @@ const paymentMethods = [
   { name: "DBBL", bg: "bg-purple-600", text: "DBBL" },
 ];
 
+function FacebookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.45 2.91h-2.33V22c4.78-.76 8.44-4.92 8.44-9.94Z" />
+    </svg>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="3.8" />
+      <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <path d="M16.6 5.82c-.9-.78-1.43-1.9-1.43-3.12h-3.09v12.4c0 1.43-1.16 2.6-2.6 2.6a2.6 2.6 0 0 1-2.6-2.6c0-1.71 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64a5.7 5.7 0 0 0 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.32 7.32 0 0 0 4.3 1.38V7.3c-1.06 0-2.32-.44-3.24-1.48Z" />
+    </svg>
+  );
+}
+
+function YoutubeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.49 20.5 12 20.5 12 20.5s7.51 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81ZM9.75 15.5v-7l6.5 3.5-6.5 3.5Z" />
+    </svg>
+  );
+}
+
+const socialLinks = [
+  { name: "Facebook", href: "#", Icon: FacebookIcon, bg: "bg-[#1877F2] hover:bg-[#1877F2]" },
+  { name: "Instagram", href: "#", Icon: InstagramIcon, bg: "bg-gradient-to-br from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888]" },
+  { name: "TikTok", href: "#", Icon: TikTokIcon, bg: "bg-black hover:bg-black" },
+  { name: "YouTube", href: "#", Icon: YoutubeIcon, bg: "bg-[#FF0000] hover:bg-[#FF0000]" },
+];
+
 export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-300">
@@ -106,19 +147,14 @@ export default function Footer() {
             </div>
             {/* Social links */}
             <div className="flex items-center gap-3 pt-1">
-              {[
-                { label: "f", href: "#", name: "Facebook" },
-                { label: "𝕏", href: "#", name: "Twitter" },
-                { label: "in", href: "#", name: "Instagram" },
-                { label: "▶", href: "#", name: "YouTube" },
-              ].map(({ label, href, name }) => (
+              {socialLinks.map(({ name, href, Icon, bg }) => (
                 <a
                   key={name}
                   href={href}
                   aria-label={name}
-                  className="w-9 h-9 rounded-lg bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors text-sm font-bold"
+                  className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center text-white transition-opacity hover:opacity-85`}
                 >
-                  {label}
+                  <Icon />
                 </a>
               ))}
             </div>

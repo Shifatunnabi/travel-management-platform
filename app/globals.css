@@ -109,3 +109,12 @@ button:focus-visible {
 .animate-pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
 }
+
+@keyframes marquee-rtl {
+  from { transform: translateX(0); }
+  to { transform: translateX(-25%); }
+}
+
+.animate-marquee-rtl {
+  animation: marquee-rtl 36s linear infinite;
+}
