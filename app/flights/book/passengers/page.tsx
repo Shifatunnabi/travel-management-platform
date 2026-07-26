@@ -12,7 +12,7 @@ import Footer from "@/components/layout/Footer";
 import Button from "@/components/ui/Button";
 
 const titles = ["Mr", "Ms", "Mrs", "Dr"];
-const genders = ["Male", "Female"];
+const genders = ["Male", "Female", "Other"];
 
 function InputField({
   label,

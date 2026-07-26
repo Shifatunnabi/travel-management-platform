@@ -153,7 +153,7 @@ export interface Passenger {
   title: "Mr" | "Ms" | "Mrs" | "Dr";
   firstName: string;
   lastName: string;
-  gender: "male" | "female";
+  gender: "male" | "female" | "other";
   nationality: string;
   dateOfBirth: string;
   passportNumber: string;

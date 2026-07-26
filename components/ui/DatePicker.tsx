@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DatePickerProps {
@@ -14,6 +15,7 @@ interface DatePickerProps {
 }
 
 const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const PANEL_WIDTH = 288;
 
 function toISO(date: Date) {
   return date.toISOString().split("T")[0];
@@ -34,19 +36,52 @@ export default function DatePicker({
   align = "left",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const base = value ? new Date(`${value}T00:00:00`) : min ? new Date(`${min}T00:00:00`) : new Date();
   const [viewMonth, setViewMonth] = useState(base.getMonth());
   const [viewYear, setViewYear] = useState(base.getFullYear());
 
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
+    if (!open) return;
+
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const left = Math.max(
+        8,
+        Math.min(align === "right" ? rect.right - PANEL_WIDTH : rect.left, window.innerWidth - PANEL_WIDTH - 8)
+      );
+      setCoords({ top: rect.bottom + 8, left });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", () => setOpen(false), true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [open, align]);
+
+  useEffect(() => {
+    if (!open) return;
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (
+        triggerRef.current && !triggerRef.current.contains(target) &&
+        panelRef.current && !panelRef.current.contains(target)
+      ) {
+        setOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+  }, [open]);
 
   const minDate = min ? new Date(`${min}T00:00:00`) : null;
   const firstOfMonth = new Date(viewYear, viewMonth, 1);
@@ -80,8 +115,9 @@ export default function DatePicker({
   };
 
   return (
-    <div ref={ref} className={containerClassName}>
+    <div className={containerClassName}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="w-full h-full text-left border border-slate-200 hover:border-blue-400 rounded-xl px-3 py-2.5 transition-all"
@@ -95,9 +131,11 @@ export default function DatePicker({
         </div>
       </button>
 
-      {open && (
+      {open && mounted && coords && createPortal(
         <div
-          className={`absolute top-full mt-2 ${align === "right" ? "right-0" : "left-0"} bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 w-72 z-50`}
+          ref={panelRef}
+          style={{ position: "fixed", top: coords.top, left: coords.left, width: PANEL_WIDTH }}
+          className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-999"
         >
           <div className="flex items-center justify-between mb-3">
             <button
@@ -152,7 +190,8 @@ export default function DatePicker({
               )
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

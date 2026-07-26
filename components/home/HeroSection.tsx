@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plane, Building2, FileText, Compass, Clock } from "lucide-react";
+import { Plane, Building2, FileText, TreePalm, Clock } from "lucide-react";
 import FlightSearchForm from "./FlightSearchForm";
 import HotelSearchForm from "./HotelSearchForm";
 
@@ -11,7 +11,7 @@ const tabs: { id: Tab; label: string; icon: typeof Plane }[] = [
   { id: "hotel", label: "Hotel", icon: Building2 },
   { id: "flight", label: "Flight", icon: Plane },
   { id: "visa", label: "Visa", icon: FileText },
-  { id: "tours", label: "Tours", icon: Compass },
+  { id: "tours", label: "Tours", icon: TreePalm },
 ];
 
 export default function HeroSection() {
@@ -45,12 +45,12 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center pt-32 pb-16 gap-8">
         {/* Capsule tab selector */}
-        <div className="flex items-center bg-white/15 backdrop-blur-md border border-white/25 rounded-full p-1.5 gap-1 shadow-xl flex-wrap justify-center">
+        <div className="flex items-center bg-white/15 backdrop-blur-md border border-white/25 rounded-full p-1 sm:p-1.5 gap-0.5 sm:gap-1 shadow-xl w-full sm:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+              className={`flex flex-1 sm:flex-initial flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 px-1 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[10px] sm:text-sm font-semibold transition-all duration-200 ${
                 activeTab === id
                   ? "bg-white text-blue-700 shadow-md"
                   : "text-white hover:bg-white/10"
