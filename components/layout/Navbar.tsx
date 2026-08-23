@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, Phone, User, ChevronDown } from "lucide-react";
+import { X, Phone, User } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 const navLinks = [
@@ -29,24 +29,36 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  const navBg = isHome && !scrolled ? "bg-transparent" : "bg-white shadow-md";
-  const textColor = isHome && !scrolled ? "text-white" : "text-slate-800";
-  const linkHover = isHome && !scrolled ? "hover:text-blue-200" : "hover:text-blue-600";
+  // Over the hero the bar itself is transparent; the white haze comes from the
+  // taller gradient layer below, which fades out *under* the content instead of
+  // across it. Once scrolled it hands over to a solid white bar.
+  const navBg =
+    isHome && !scrolled
+      ? "bg-white shadow-navbar lg:bg-transparent lg:shadow-none"
+      : "bg-white shadow-navbar";
+  const heroHaze = isHome && !scrolled ? "opacity-100" : "opacity-0";
 
   return (
     <>
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${navBg}`}
       >
+        {/* Twice the bar's height, so the content sits in the dense top half and
+            the haze dissolves into the hero below it. */}
+        <div
+          aria-hidden="true"
+          className={`hidden lg:block absolute inset-x-0 top-0 h-16 lg:h-20 -z-10 pointer-events-none bg-gradient-to-b from-white/80 via-white/50 to-transparent backdrop-blur-sm transition-opacity duration-300 ${heroHaze}`}
+        />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-18">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0">
               <Image
-                src="/logo.png"
-                alt="Tofiza"
-                width={130}
-                height={36}
+                src="/asset/tofiza.png"
+                alt="Tofiza Tours & Travels"
+                width={306}
+                height={90}
                 className="h-9 w-auto object-contain"
                 priority
               />
@@ -58,12 +70,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${textColor} ${linkHover} ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     pathname === link.href
-                      ? isHome && !scrolled
-                        ? "bg-white/15"
-                        : "bg-blue-50 text-blue-700"
-                      : ""
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-800 hover:text-blue-600"
                   }`}
                 >
                   {link.label}
@@ -75,21 +85,13 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-3">
               <a
                 href="tel:+8801700000000"
-                className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${textColor} ${linkHover}`}
+                className="flex items-center gap-1.5 text-sm font-medium text-slate-800 hover:text-blue-600 transition-colors"
               >
                 <Phone size={15} />
                 <span>Support</span>
               </a>
               <Link href="/auth/login">
-                <Button
-                  variant={isHome && !scrolled ? "outline" : "secondary"}
-                  size="sm"
-                  className={
-                    isHome && !scrolled
-                      ? "border-white text-white hover:bg-white hover:text-blue-700"
-                      : ""
-                  }
-                >
+                <Button variant="secondary" size="sm">
                   <User size={15} />
                   Sign In
                 </Button>
@@ -104,10 +106,19 @@ export default function Navbar() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className={`lg:hidden p-2 rounded-lg transition-colors ${textColor} hover:bg-white/10`}
+              className="lg:hidden w-10 h-10 shrink-0 rounded-xl bg-brand text-white flex items-center justify-center shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
               aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileOpen ? (
+                <X size={20} />
+              ) : (
+                <span className="flex flex-col gap-[4px]" aria-hidden="true">
+                  <span className="block w-[18px] h-[2px] rounded-full bg-current" />
+                  <span className="block w-[18px] h-[2px] rounded-full bg-current" />
+                  <span className="block w-[18px] h-[2px] rounded-full bg-current" />
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -129,7 +140,7 @@ export default function Navbar() {
         }`}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <Image src="/logo.png" alt="Tofiza" width={110} height={30} className="h-8 w-auto" />
+          <Image src="/asset/tofiza.png" alt="Tofiza Tours & Travels" width={272} height={80} className="h-8 w-auto object-contain" />
           <button
             onClick={() => setMobileOpen(false)}
             className="p-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100"
@@ -146,7 +157,7 @@ export default function Navbar() {
               href={link.href}
               className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 pathname === link.href
-                  ? "bg-blue-50 text-blue-700"
+                  ? "bg-blue-600 text-white"
                   : "text-slate-700 hover:bg-slate-50"
               }`}
             >

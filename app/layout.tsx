@@ -13,12 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tofiza – Book Flights & Hotels",
+  title: "Tofiza Tours & Travels",
   description:
     "Tofiza is your premium travel companion. Book flights and hotels at the best prices with instant confirmation.",
   keywords: ["flight booking", "hotel booking", "travel", "tofiza"],
   openGraph: {
-    title: "Tofiza – Book Flights & Hotels",
+    title: "Tofiza Tours & Travels",
     description: "Your premium travel companion for flights and hotels.",
     type: "website",
   },

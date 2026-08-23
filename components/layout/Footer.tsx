@@ -114,11 +114,11 @@ export default function Footer() {
           {/* Brand col */}
           <div className="lg:col-span-2 space-y-5">
             <Image
-              src="/logo.png"
-              alt="Tofiza"
-              width={130}
-              height={36}
-              className="h-9 w-auto brightness-0 invert"
+              src="/asset/tofiza.png"
+              alt="Tofiza Tours & Travels"
+              width={306}
+              height={90}
+              className="h-9 w-auto object-contain brightness-0 invert"
             />
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
               Tofiza is your premium travel companion for booking flights and

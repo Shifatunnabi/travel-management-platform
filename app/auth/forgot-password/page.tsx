@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <Image src="/logo.png" alt="Tofiza" width={150} height={42} className="h-10 w-auto brightness-0 invert mx-auto" />
+            <Image src="/asset/tofiza.png" alt="Tofiza Tours & Travels" width={340} height={100} className="h-10 w-auto object-contain brightness-0 invert mx-auto" />
           </Link>
         </div>
 

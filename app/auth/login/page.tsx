@@ -28,11 +28,11 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <Image
-              src="/logo.png"
-              alt="Tofiza"
-              width={150}
-              height={42}
-              className="h-10 w-auto brightness-0 invert mx-auto"
+              src="/asset/tofiza.png"
+              alt="Tofiza Tours & Travels"
+              width={340}
+              height={100}
+              className="h-10 w-auto object-contain brightness-0 invert mx-auto"
             />
           </Link>
           <p className="text-blue-200 text-sm mt-2">Sign in to your travel account</p>
