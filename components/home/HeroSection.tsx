@@ -52,14 +52,14 @@ export default function HeroSection() {
               onClick={() => setActiveTab(id)}
               className={`flex flex-1 sm:flex-initial flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 px-1 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[10px] sm:text-sm font-semibold transition-all duration-200 ${
                 activeTab === id
-                  ? "bg-white text-blue-700 shadow-md"
+                  ? "bg-white text-brand-700 shadow-md"
                   : "text-white hover:bg-white/10"
               }`}
               aria-pressed={activeTab === id}
             >
               <Icon
                 size={16}
-                className={activeTab === id ? "text-blue-600" : "text-white"}
+                className={activeTab === id ? "text-brand-600" : "text-white"}
               />
               {label}
             </button>
@@ -72,8 +72,8 @@ export default function HeroSection() {
           {activeTab === "hotel" && <HotelSearchForm />}
           {(activeTab === "visa" || activeTab === "tours") && (
             <div className="flex flex-col items-center justify-center text-center py-16 px-6">
-              <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-4">
-                <Clock size={26} className="text-blue-500" />
+              <div className="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mb-4">
+                <Clock size={26} className="text-brand-500" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-1.5">
                 {activeMeta.label} booking is coming soon

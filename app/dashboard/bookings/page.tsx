@@ -61,9 +61,9 @@ export default function BookingsPage() {
         {filtered.map((booking) => (
           <div key={booking.id} className="bg-white rounded-2xl border border-slate-200 p-5">
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${booking.type === "flight" ? "bg-blue-100" : "bg-purple-100"}`}>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${booking.type === "flight" ? "bg-brand-100" : "bg-purple-100"}`}>
                 {booking.type === "flight" ? (
-                  <Plane size={20} className="text-blue-600" />
+                  <Plane size={20} className="text-brand-600" />
                 ) : (
                   <Building2 size={20} className="text-purple-600" />
                 )}
@@ -92,12 +92,12 @@ export default function BookingsPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-colors">
                     <Eye size={13} />
                     View Details
                   </button>
                   {booking.status === "completed" && (
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-colors">
                       <Download size={13} />
                       Download Ticket
                     </button>

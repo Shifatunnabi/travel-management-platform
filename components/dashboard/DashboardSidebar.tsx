@@ -24,7 +24,7 @@ export default function DashboardSidebar() {
       <div className="bg-white rounded-2xl border border-slate-200 p-5 lg:sticky lg:top-24">
         {/* User info */}
         <div className="flex items-center gap-3 mb-6 pb-5 border-b border-slate-100">
-          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+          <div className="w-12 h-12 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
             F
           </div>
           <div className="min-w-0">
@@ -43,18 +43,18 @@ export default function DashboardSidebar() {
                 href={href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   active
-                    ? "bg-blue-50 text-blue-700"
+                    ? "bg-brand-50 text-brand-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
-                <Icon size={17} className={active ? "text-blue-600" : "text-slate-400"} />
+                <Icon size={17} className={active ? "text-brand-600" : "text-slate-400"} />
                 <span className="flex-1">{label}</span>
                 {badge && (
                   <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                     {badge}
                   </span>
                 )}
-                {active && <ChevronRight size={14} className="text-blue-400" />}
+                {active && <ChevronRight size={14} className="text-brand-400" />}
               </Link>
             );
           })}

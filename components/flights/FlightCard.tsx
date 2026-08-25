@@ -19,7 +19,7 @@ export default function FlightCard({ flight }: FlightCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-slate-200 hover:border-brand-300 hover:shadow-lg transition-all duration-300 overflow-hidden">
       {/* Main card */}
       <div className="p-5">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
@@ -57,13 +57,13 @@ export default function FlightCard({ flight }: FlightCardProps) {
             <div className="flex-1 flex flex-col items-center gap-1 min-w-0">
               <p className="text-xs text-slate-400 font-medium">{flight.duration}</p>
               <div className="w-full flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full border-2 border-blue-400 shrink-0" />
+                <div className="w-2 h-2 rounded-full border-2 border-brand-400 shrink-0" />
                 <div className="flex-1 h-px bg-slate-300 relative">
                   {flight.stops > 0 && (
                     <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-amber-400 border border-white" />
                   )}
                 </div>
-                <Plane size={14} className="text-blue-500 shrink-0" />
+                <Plane size={14} className="text-brand-500 shrink-0" />
                 <div className="flex-1 h-px bg-slate-300" />
                 <div className="w-2 h-2 rounded-full border-2 border-slate-400 shrink-0" />
               </div>
@@ -117,7 +117,7 @@ export default function FlightCard({ flight }: FlightCardProps) {
               <p className="text-xs text-slate-500">per person</p>
               <Link
                 href={`/flights/${flight.id}`}
-                className="mt-2 block px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors text-center"
+                className="mt-2 block px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition-colors text-center"
               >
                 Select
               </Link>
@@ -129,7 +129,7 @@ export default function FlightCard({ flight }: FlightCardProps) {
       {/* Expand toggle */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs text-blue-600 hover:bg-blue-50 border-t border-slate-100 transition-colors font-medium"
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs text-brand-600 hover:bg-brand-50 border-t border-slate-100 transition-colors font-medium"
       >
         {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         {expanded ? "Hide details" : "View fare details"}
@@ -140,7 +140,7 @@ export default function FlightCard({ flight }: FlightCardProps) {
         <div className="border-t border-slate-100 p-5 bg-slate-50 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-              <Luggage size={14} className="text-blue-500" /> Baggage
+              <Luggage size={14} className="text-brand-500" /> Baggage
             </p>
             <div className="space-y-1 text-slate-600">
               <p>Checked: {flight.baggage}</p>
@@ -149,7 +149,7 @@ export default function FlightCard({ flight }: FlightCardProps) {
           </div>
           <div>
             <p className="font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-              <Info size={14} className="text-blue-500" /> Fare Details
+              <Info size={14} className="text-brand-500" /> Fare Details
             </p>
             <div className="space-y-1 text-slate-600">
               <p>Type: {flight.fareType}</p>
@@ -159,7 +159,7 @@ export default function FlightCard({ flight }: FlightCardProps) {
           </div>
           <div>
             <p className="font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-              <CheckCircle size={14} className="text-blue-500" /> Policy
+              <CheckCircle size={14} className="text-brand-500" /> Policy
             </p>
             <div className="space-y-1">
               <p className={flight.refundable ? "text-emerald-600" : "text-slate-500"}>

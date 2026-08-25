@@ -25,13 +25,13 @@ export default function ProfilePage() {
         {/* Avatar */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-3xl shrink-0">
+            <div className="w-20 h-20 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-3xl shrink-0">
               F
             </div>
             <div>
               <h2 className="font-bold text-slate-900 text-lg">Farhan Ahmed</h2>
               <p className="text-slate-500 text-sm">Member since 2024</p>
-              <button type="button" className="mt-2 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+              <button type="button" className="mt-2 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-colors">
                 Change Photo
               </button>
             </div>
@@ -41,7 +41,7 @@ export default function ProfilePage() {
         {/* Personal info */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6">
           <h2 className="font-bold text-slate-900 mb-5 flex items-center gap-2">
-            <User size={18} className="text-blue-500" />
+            <User size={18} className="text-brand-500" />
             Personal Information
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -60,7 +60,7 @@ export default function ProfilePage() {
                   <input
                     type={type}
                     defaultValue={defaultValue}
-                    className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                    className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                   />
                 </div>
               </div>
@@ -71,7 +71,7 @@ export default function ProfilePage() {
         {/* Passport */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6">
           <h2 className="font-bold text-slate-900 mb-5 flex items-center gap-2">
-            <CreditCard size={18} className="text-blue-500" />
+            <CreditCard size={18} className="text-brand-500" />
             Passport & Travel Documents
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -86,7 +86,7 @@ export default function ProfilePage() {
                 <input
                   type={type}
                   placeholder={placeholder}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                 />
               </div>
             ))}

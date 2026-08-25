@@ -26,7 +26,7 @@ const footerLinks = {
 };
 
 const paymentMethods = [
-  { name: "Visa", bg: "bg-blue-600", text: "Visa" },
+  { name: "Visa", bg: "bg-brand-600", text: "Visa" },
   { name: "Mastercard", bg: "bg-red-500", text: "MC" },
   { name: "bKash", bg: "bg-pink-600", text: "bKash" },
   { name: "Nagad", bg: "bg-orange-500", text: "Nagad" },
@@ -78,12 +78,12 @@ export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-300">
       {/* Newsletter strip */}
-      <div className="bg-blue-700">
+      <div className="bg-brand-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h3 className="text-white text-xl font-bold">Get exclusive travel deals</h3>
-              <p className="text-blue-200 text-sm mt-1">
+              <p className="text-brand-200 text-sm mt-1">
                 Subscribe and receive the best offers directly in your inbox
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function Footer() {
               />
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-white text-blue-700 font-semibold text-sm rounded-xl hover:bg-blue-50 transition-colors shrink-0"
+                className="px-5 py-2.5 bg-white text-brand-700 font-semibold text-sm rounded-xl hover:bg-brand-50 transition-colors shrink-0"
               >
                 Subscribe
               </button>
@@ -130,18 +130,18 @@ export default function Footer() {
                 href="tel:+8801700000000"
                 className="flex items-center gap-2 text-sm hover:text-white transition-colors"
               >
-                <Phone size={14} className="text-blue-400 shrink-0" />
+                <Phone size={14} className="text-brand-400 shrink-0" />
                 +880 1700-000000 (24/7)
               </a>
               <a
                 href="mailto:support@tofiza.com"
                 className="flex items-center gap-2 text-sm hover:text-white transition-colors"
               >
-                <Mail size={14} className="text-blue-400 shrink-0" />
+                <Mail size={14} className="text-brand-400 shrink-0" />
                 support@tofiza.com
               </a>
               <span className="flex items-center gap-2 text-sm">
-                <MapPin size={14} className="text-blue-400 shrink-0" />
+                <MapPin size={14} className="text-brand-400 shrink-0" />
                 Gulshan, Dhaka 1212, Bangladesh
               </span>
             </div>

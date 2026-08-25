@@ -11,7 +11,7 @@ export default function FAQ() {
     <section className="py-16 lg:py-24 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-2">
+          <p className="text-brand-600 text-sm font-semibold uppercase tracking-widest mb-2">
             Got Questions?
           </p>
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
@@ -19,7 +19,7 @@ export default function FAQ() {
           </h2>
           <p className="text-slate-500 mt-3 text-base">
             Everything you need to know about Tofiza. Can't find an answer?{" "}
-            <a href="/contact" className="text-blue-600 hover:underline font-medium">
+            <a href="/contact" className="text-brand-600 hover:underline font-medium">
               Contact us
             </a>
           </p>
@@ -32,7 +32,7 @@ export default function FAQ() {
               <div
                 key={faq.id}
                 className={`border rounded-2xl overflow-hidden transition-all duration-200 ${
-                  isOpen ? "border-blue-200 shadow-sm" : "border-slate-200"
+                  isOpen ? "border-brand-200 shadow-sm" : "border-slate-200"
                 }`}
               >
                 <button
@@ -42,14 +42,14 @@ export default function FAQ() {
                 >
                   <span
                     className={`font-semibold text-sm leading-snug pr-4 ${
-                      isOpen ? "text-blue-700" : "text-slate-800"
+                      isOpen ? "text-brand-700" : "text-slate-800"
                     }`}
                   >
                     {faq.question}
                   </span>
                   <span className="shrink-0">
                     {isOpen ? (
-                      <ChevronUp size={18} className="text-blue-500" />
+                      <ChevronUp size={18} className="text-brand-500" />
                     ) : (
                       <ChevronDown size={18} className="text-slate-400" />
                     )}

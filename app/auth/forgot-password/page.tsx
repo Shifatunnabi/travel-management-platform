@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-700 via-brand-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
@@ -31,8 +31,8 @@ export default function ForgotPasswordPage() {
         <div className="bg-white rounded-3xl shadow-2xl p-8">
           {!submitted ? (
             <>
-              <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-5">
-                <Mail size={26} className="text-blue-600" />
+              <div className="w-14 h-14 rounded-2xl bg-brand-100 flex items-center justify-center mb-5">
+                <Mail size={26} className="text-brand-600" />
               </div>
               <h1 className="text-2xl font-bold text-slate-900 mb-2">Forgot password?</h1>
               <p className="text-slate-500 text-sm mb-6">
@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@email.com"
                       required
-                      className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                      className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                     />
                   </div>
                 </div>
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
               <p className="font-semibold text-slate-800 text-sm mb-6">{email}</p>
               <p className="text-xs text-slate-400">
                 Didn't receive it? Check your spam folder or{" "}
-                <button onClick={() => setSubmitted(false)} className="text-blue-600 hover:underline">
+                <button onClick={() => setSubmitted(false)} className="text-brand-600 hover:underline">
                   try again
                 </button>
               </p>
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
 
           <Link
             href="/auth/login"
-            className="mt-6 flex items-center justify-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
+            className="mt-6 flex items-center justify-center gap-1.5 text-sm text-slate-500 hover:text-brand-600 transition-colors"
           >
             <ArrowLeft size={14} />
             Back to login

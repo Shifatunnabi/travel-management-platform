@@ -72,8 +72,8 @@ export default function Navbar() {
                   href={link.href}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     pathname === link.href
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-800 hover:text-blue-600"
+                      ? "bg-brand-600 text-white"
+                      : "text-slate-800 hover:text-brand-600"
                   }`}
                 >
                   {link.label}
@@ -85,7 +85,7 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-3">
               <a
                 href="tel:+8801700000000"
-                className="flex items-center gap-1.5 text-sm font-medium text-slate-800 hover:text-blue-600 transition-colors"
+                className="flex items-center gap-1.5 text-sm font-medium text-slate-800 hover:text-brand-600 transition-colors"
               >
                 <Phone size={15} />
                 <span>Support</span>
@@ -157,7 +157,7 @@ export default function Navbar() {
               href={link.href}
               className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 pathname === link.href
-                  ? "bg-blue-600 text-white"
+                  ? "bg-brand-600 text-white"
                   : "text-slate-700 hover:bg-slate-50"
               }`}
             >
@@ -182,7 +182,7 @@ export default function Navbar() {
             href="tel:+8801700000000"
             className="flex items-center gap-2 text-sm text-slate-600 px-2 pt-2"
           >
-            <Phone size={15} className="text-blue-600" />
+            <Phone size={15} className="text-brand-600" />
             <span>+880 1700-000000 (24/7)</span>
           </a>
         </div>

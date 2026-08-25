@@ -107,11 +107,11 @@ export default function FlightSearchForm() {
       <button
         type="button"
         onClick={() => setShowPaxDrop(!showPaxDrop)}
-        className="w-full text-left border border-slate-200 hover:border-blue-400 rounded-xl px-3 py-2.5 transition-all"
+        className="w-full text-left border border-slate-200 hover:border-brand-400 rounded-xl px-3 py-2.5 transition-all"
       >
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Traveler, Class</p>
         <div className="flex items-center gap-1.5">
-          <Users size={14} className="text-blue-500 shrink-0" />
+          <Users size={14} className="text-brand-500 shrink-0" />
           <span className="text-sm font-bold text-slate-800 truncate">
             {totalTravelers} Traveler{totalTravelers > 1 ? "s" : ""}
           </span>
@@ -132,13 +132,13 @@ export default function FlightSearchForm() {
                 <button
                   type="button"
                   onClick={() => updateAdults(adults - 1)}
-                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                 >−</button>
-                <span className="w-5 text-center font-bold text-blue-600 text-sm">{adults}</span>
+                <span className="w-5 text-center font-bold text-brand-600 text-sm">{adults}</span>
                 <button
                   type="button"
                   onClick={() => updateAdults(adults + 1)}
-                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                 >+</button>
               </div>
             </div>
@@ -152,13 +152,13 @@ export default function FlightSearchForm() {
                 <button
                   type="button"
                   onClick={() => setChildren((c) => Math.max(0, c - 1))}
-                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                 >−</button>
-                <span className="w-5 text-center font-bold text-blue-600 text-sm">{children}</span>
+                <span className="w-5 text-center font-bold text-brand-600 text-sm">{children}</span>
                 <button
                   type="button"
                   onClick={() => setChildren((c) => Math.min(8, c + 1))}
-                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                 >+</button>
               </div>
             </div>
@@ -172,13 +172,13 @@ export default function FlightSearchForm() {
                 <button
                   type="button"
                   onClick={() => setInfants((i) => Math.max(0, i - 1))}
-                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                 >−</button>
-                <span className="w-5 text-center font-bold text-blue-600 text-sm">{infants}</span>
+                <span className="w-5 text-center font-bold text-brand-600 text-sm">{infants}</span>
                 <button
                   type="button"
                   onClick={() => setInfants((i) => Math.min(adults, i + 1))}
-                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                  className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                 >+</button>
               </div>
             </div>
@@ -193,15 +193,15 @@ export default function FlightSearchForm() {
                   key={cls}
                   onClick={() => setCabinClass(cls)}
                   className={`flex items-center gap-2 text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                    cabinClass === cls ? "bg-blue-50 text-blue-700 font-semibold" : "text-slate-700 hover:bg-slate-50"
+                    cabinClass === cls ? "bg-brand-50 text-brand-700 font-semibold" : "text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   <span
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                      cabinClass === cls ? "border-blue-600" : "border-slate-300"
+                      cabinClass === cls ? "border-brand-600" : "border-slate-300"
                     }`}
                   >
-                    {cabinClass === cls && <span className="w-2 h-2 rounded-full bg-blue-600" />}
+                    {cabinClass === cls && <span className="w-2 h-2 rounded-full bg-brand-600" />}
                   </span>
                   {cls}
                 </button>
@@ -211,7 +211,7 @@ export default function FlightSearchForm() {
           <button
             type="button"
             onClick={() => setShowPaxDrop(false)}
-            className="mt-4 w-full py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className="mt-4 w-full py-2 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-colors"
           >
             Done
           </button>
@@ -229,11 +229,11 @@ export default function FlightSearchForm() {
             <span
               onClick={() => setTripType(type)}
               className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
-                tripType === type ? "border-blue-600" : "border-slate-300"
+                tripType === type ? "border-brand-600" : "border-slate-300"
               }`}
             >
               {tripType === type && (
-                <span className="w-2 h-2 rounded-full bg-blue-600" />
+                <span className="w-2 h-2 rounded-full bg-brand-600" />
               )}
             </span>
             <span
@@ -251,10 +251,10 @@ export default function FlightSearchForm() {
           {/* ── Row 1: FROM ⇄ TO ─────────────────────────────── */}
           <div className="flex items-stretch gap-2 mb-2">
             {/* FROM */}
-            <div className="flex-1 min-w-0 border border-slate-200 hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 rounded-xl px-3 py-2.5 transition-all">
+            <div className="flex-1 min-w-0 border border-slate-200 hover:border-brand-400 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 rounded-xl px-3 py-2.5 transition-all">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">From</p>
               <div className="flex items-center gap-2">
-                <Plane size={14} className="text-blue-500 shrink-0" />
+                <Plane size={14} className="text-brand-500 shrink-0" />
                 <input
                   type="text"
                   value={from}
@@ -273,17 +273,17 @@ export default function FlightSearchForm() {
               <button
                 onClick={swap}
                 aria-label="Swap cities"
-                className="w-8 h-8 rounded-full border-2 border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm"
+                className="w-8 h-8 rounded-full border-2 border-slate-200 bg-white hover:border-brand-400 hover:bg-brand-50 flex items-center justify-center transition-all shadow-sm"
               >
-                <ArrowLeftRight size={13} className="text-blue-500" />
+                <ArrowLeftRight size={13} className="text-brand-500" />
               </button>
             </div>
 
             {/* TO */}
-            <div className="flex-1 min-w-0 border border-slate-200 hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 rounded-xl px-3 py-2.5 transition-all">
+            <div className="flex-1 min-w-0 border border-slate-200 hover:border-brand-400 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 rounded-xl px-3 py-2.5 transition-all">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">To</p>
               <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-blue-500 shrink-0" />
+                <MapPin size={14} className="text-brand-500 shrink-0" />
                 <input
                   type="text"
                   value={to}
@@ -321,10 +321,10 @@ export default function FlightSearchForm() {
             ) : (
               <button
                 onClick={() => setTripType("round-trip")}
-                className="flex-1 min-w-0 border border-dashed border-blue-300 rounded-xl px-3 py-2.5 bg-blue-50/50 hover:bg-blue-50 transition-all text-left"
+                className="flex-1 min-w-0 border border-dashed border-brand-300 rounded-xl px-3 py-2.5 bg-brand-50/50 hover:bg-brand-50 transition-all text-left"
               >
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Return</p>
-                <p className="text-sm text-blue-500 font-semibold">+ Add return</p>
+                <p className="text-sm text-brand-500 font-semibold">+ Add return</p>
                 <p className="text-[11px] text-slate-400">Save on round trips</p>
               </button>
             )}
@@ -339,12 +339,12 @@ export default function FlightSearchForm() {
           <div className="space-y-2 mb-2">
             {legs.map((leg, i) => (
               <div key={leg.key} className="flex items-stretch gap-2">
-                <div className="flex-1 min-w-0 border border-slate-200 hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 rounded-xl px-3 py-2.5 transition-all">
+                <div className="flex-1 min-w-0 border border-slate-200 hover:border-brand-400 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 rounded-xl px-3 py-2.5 transition-all">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                     Flight {i + 1} — From
                   </p>
                   <div className="flex items-center gap-2">
-                    <Plane size={14} className="text-blue-500 shrink-0" />
+                    <Plane size={14} className="text-brand-500 shrink-0" />
                     <input
                       type="text"
                       value={leg.from}
@@ -355,10 +355,10 @@ export default function FlightSearchForm() {
                   </div>
                 </div>
 
-                <div className="flex-1 min-w-0 border border-slate-200 hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 rounded-xl px-3 py-2.5 transition-all">
+                <div className="flex-1 min-w-0 border border-slate-200 hover:border-brand-400 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 rounded-xl px-3 py-2.5 transition-all">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">To</p>
                   <div className="flex items-center gap-2">
-                    <MapPin size={14} className="text-blue-500 shrink-0" />
+                    <MapPin size={14} className="text-brand-500 shrink-0" />
                     <input
                       type="text"
                       value={leg.to}
@@ -394,7 +394,7 @@ export default function FlightSearchForm() {
             {legs.length < 5 && (
               <button
                 onClick={addLeg}
-                className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 px-1 py-1.5"
+                className="flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-700 px-1 py-1.5"
               >
                 <Plus size={15} /> Add another flight
               </button>
@@ -410,7 +410,7 @@ export default function FlightSearchForm() {
       <div className="mt-4 flex justify-center">
         <button
           onClick={handleSearch}
-          className="flex items-center gap-2.5 px-10 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+          className="flex items-center gap-2.5 px-10 py-3 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Search size={16} />
           Search Flights

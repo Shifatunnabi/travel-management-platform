@@ -29,7 +29,7 @@ const upcomingBookings = [
 ];
 
 const stats = [
-  { icon: Plane, label: "Flights Booked", value: "12", color: "bg-blue-100 text-blue-600" },
+  { icon: Plane, label: "Flights Booked", value: "12", color: "bg-brand-100 text-brand-600" },
   { icon: Building2, label: "Hotels Stayed", value: "8", color: "bg-purple-100 text-purple-600" },
   { icon: CheckCircle, label: "Completed Trips", value: "18", color: "bg-emerald-100 text-emerald-600" },
   { icon: TrendingUp, label: "Miles Saved", value: "₹42K", color: "bg-amber-100 text-amber-600" },
@@ -39,22 +39,22 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome header */}
-      <div className="bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-6 text-white">
+      <div className="bg-gradient-to-r from-brand-700 to-brand-600 rounded-2xl p-6 text-white">
         <h1 className="text-2xl font-bold mb-1">Welcome back, Farhan! ✈️</h1>
-        <p className="text-blue-200 text-sm">
+        <p className="text-brand-200 text-sm">
           You have {upcomingBookings.length} upcoming trip{upcomingBookings.length > 1 ? "s" : ""}. Have a great journey!
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/flights/search"
-            className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-xl text-sm font-semibold hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-brand-700 rounded-xl text-sm font-semibold hover:bg-brand-50 transition-colors"
           >
             <Plane size={15} />
             Book a Flight
           </Link>
           <Link
             href="/hotels/search"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-800 text-white rounded-xl text-sm font-semibold hover:bg-blue-900 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-800 text-white rounded-xl text-sm font-semibold hover:bg-brand-900 transition-colors"
           >
             <Building2 size={15} />
             Book a Hotel
@@ -79,12 +79,12 @@ export default function DashboardPage() {
       <div className="bg-white rounded-2xl border border-slate-200 p-5">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-bold text-slate-900 flex items-center gap-2">
-            <Clock size={18} className="text-blue-500" />
+            <Clock size={18} className="text-brand-500" />
             Upcoming Bookings
           </h2>
           <Link
             href="/dashboard/bookings"
-            className="flex items-center gap-1 text-blue-600 text-sm font-medium hover:text-blue-700"
+            className="flex items-center gap-1 text-brand-600 text-sm font-medium hover:text-brand-700"
           >
             View all <ArrowRight size={14} />
           </Link>
@@ -94,11 +94,11 @@ export default function DashboardPage() {
           {upcomingBookings.map((booking) => (
             <div
               key={booking.id}
-              className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors"
+              className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-brand-200 transition-colors"
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${booking.type === "flight" ? "bg-blue-100" : "bg-purple-100"}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${booking.type === "flight" ? "bg-brand-100" : "bg-purple-100"}`}>
                 {booking.type === "flight" ? (
-                  <Plane size={18} className="text-blue-600" />
+                  <Plane size={18} className="text-brand-600" />
                 ) : (
                   <Building2 size={18} className="text-purple-600" />
                 )}
@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 <p className="font-bold text-slate-900 text-sm">{booking.price}</p>
                 <Link
                   href="/dashboard/bookings"
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-xs text-brand-600 hover:text-brand-700 font-medium"
                 >
                   View
                 </Link>
@@ -137,20 +137,20 @@ export default function DashboardPage() {
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[
-          { title: "Popular Destinations", desc: "Explore trending travel spots", href: "/flights/search", icon: MapPin, color: "blue" },
-          { title: "Hotel Deals", desc: "Find great stays at low prices", href: "/hotels/search", icon: Building2, color: "purple" },
-        ].map(({ title, desc, href, icon: Icon, color }) => (
+          { title: "Popular Destinations", desc: "Explore trending travel spots", href: "/flights/search", icon: MapPin, iconBg: "bg-brand-100", iconFg: "text-brand-600" },
+          { title: "Hotel Deals", desc: "Find great stays at low prices", href: "/hotels/search", icon: Building2, iconBg: "bg-purple-100", iconFg: "text-purple-600" },
+        ].map(({ title, desc, href, icon: Icon, iconBg, iconFg }) => (
           <Link
             key={title}
             href={href}
-            className="group bg-white rounded-2xl border border-slate-200 p-5 hover:border-blue-300 hover:shadow-md transition-all"
+            className="group bg-white rounded-2xl border border-slate-200 p-5 hover:border-brand-300 hover:shadow-md transition-all"
           >
-            <div className={`w-10 h-10 rounded-xl bg-${color}-100 flex items-center justify-center mb-3`}>
-              <Icon size={18} className={`text-${color}-600`} />
+            <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center mb-3`}>
+              <Icon size={18} className={iconFg} />
             </div>
             <h3 className="font-bold text-slate-900 text-sm mb-1">{title}</h3>
             <p className="text-slate-500 text-xs">{desc}</p>
-            <div className="mt-3 flex items-center gap-1 text-blue-600 text-xs font-medium group-hover:gap-2 transition-all">
+            <div className="mt-3 flex items-center gap-1 text-brand-600 text-xs font-medium group-hover:gap-2 transition-all">
               Explore <ArrowRight size={12} />
             </div>
           </Link>

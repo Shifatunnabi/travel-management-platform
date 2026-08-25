@@ -30,10 +30,10 @@ export default function HotelSearchForm() {
   return (
     <div className="p-5 sm:p-6 flex flex-col gap-2">
       {/* ── Row 1: Destination (full width) ─────────────── */}
-      <div className="border border-slate-200 hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 rounded-xl px-3 py-2.5 transition-all">
+      <div className="border border-slate-200 hover:border-brand-400 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 rounded-xl px-3 py-2.5 transition-all">
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Destination</p>
         <div className="flex items-center gap-2">
-          <MapPin size={14} className="text-blue-500 shrink-0" />
+          <MapPin size={14} className="text-brand-500 shrink-0" />
           <input
             type="text"
             value={destination}
@@ -72,11 +72,11 @@ export default function HotelSearchForm() {
           <button
             type="button"
             onClick={() => setShowGuestDrop(!showGuestDrop)}
-            className="w-full text-left border border-slate-200 hover:border-blue-400 rounded-xl px-3 py-2.5 transition-all"
+            className="w-full text-left border border-slate-200 hover:border-brand-400 rounded-xl px-3 py-2.5 transition-all"
           >
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Guests</p>
             <div className="flex items-center gap-1.5">
-              <Users size={14} className="text-blue-500 shrink-0" />
+              <Users size={14} className="text-brand-500 shrink-0" />
               <span className="text-sm font-bold text-slate-800 truncate">
                 {guests} Guest{guests > 1 ? "s" : ""}
               </span>
@@ -100,13 +100,13 @@ export default function HotelSearchForm() {
                     <button
                       type="button"
                       onClick={() => set(Math.max(min, value - 1))}
-                      className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                      className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                     >−</button>
                     <span className="w-5 text-center font-bold text-slate-800 text-sm">{value}</span>
                     <button
                       type="button"
                       onClick={() => set(Math.min(max, value + 1))}
-                      className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-lg leading-none transition-colors"
+                      className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-lg leading-none transition-colors"
                     >+</button>
                   </div>
                 </div>
@@ -114,7 +114,7 @@ export default function HotelSearchForm() {
               <button
                 type="button"
                 onClick={() => setShowGuestDrop(false)}
-                className="mt-4 w-full py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                className="mt-4 w-full py-2 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-colors"
               >
                 Done
               </button>
@@ -126,7 +126,7 @@ export default function HotelSearchForm() {
         <div className="min-w-0 border border-slate-200 rounded-xl px-3 py-2.5">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Rooms</p>
           <div className="flex items-center gap-1.5">
-            <BedDouble size={14} className="text-blue-500 shrink-0" />
+            <BedDouble size={14} className="text-brand-500 shrink-0" />
             <span className="text-sm font-bold text-slate-800 truncate flex-1">
               {rooms} Room{rooms > 1 ? "s" : ""}
             </span>
@@ -134,12 +134,12 @@ export default function HotelSearchForm() {
               <button
                 type="button"
                 onClick={() => setRooms(Math.max(1, rooms - 1))}
-                className="w-6 h-6 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-base leading-none transition-colors"
+                className="w-6 h-6 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-base leading-none transition-colors"
               >−</button>
               <button
                 type="button"
                 onClick={() => setRooms(Math.min(5, rooms + 1))}
-                className="w-6 h-6 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 text-base leading-none transition-colors"
+                className="w-6 h-6 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 text-base leading-none transition-colors"
               >+</button>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function HotelSearchForm() {
       <div className="mt-2 flex justify-center">
         <button
           onClick={handleSearch}
-          className="flex items-center gap-2.5 px-10 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+          className="flex items-center gap-2.5 px-10 py-3 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Search size={16} />
           Search Hotels

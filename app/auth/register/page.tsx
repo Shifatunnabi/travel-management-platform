@@ -25,13 +25,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-800 to-slate-900 flex items-center justify-center p-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-700 via-brand-800 to-slate-900 flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <Image src="/asset/tofiza.png" alt="Tofiza Tours & Travels" width={340} height={100} className="h-10 w-auto object-contain brightness-0 invert mx-auto" />
           </Link>
-          <p className="text-blue-200 text-sm mt-2">Create your free travel account</p>
+          <p className="text-brand-200 text-sm mt-2">Create your free travel account</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl p-8">
@@ -44,12 +44,12 @@ export default function RegisterPage() {
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">First Name</label>
                 <div className="relative">
                   <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" placeholder="First" required className="w-full border border-slate-200 rounded-xl pl-8 pr-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none" />
+                  <input type="text" placeholder="First" required className="w-full border border-slate-200 rounded-xl pl-8 pr-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none" />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Last Name</label>
-                <input type="text" placeholder="Last" required className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none" />
+                <input type="text" placeholder="Last" required className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none" />
               </div>
             </div>
 
@@ -57,7 +57,7 @@ export default function RegisterPage() {
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
               <div className="relative">
                 <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input type="email" placeholder="you@email.com" required className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none" />
+                <input type="email" placeholder="you@email.com" required className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none" />
               </div>
             </div>
 
@@ -65,7 +65,7 @@ export default function RegisterPage() {
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Phone Number</label>
               <div className="relative">
                 <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input type="tel" placeholder="+880 1XXX-XXXXXX" className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none" />
+                <input type="tel" placeholder="+880 1XXX-XXXXXX" className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none" />
               </div>
             </div>
 
@@ -79,7 +79,7 @@ export default function RegisterPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"
                   required
-                  className="w-full border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                  className="w-full border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -98,12 +98,12 @@ export default function RegisterPage() {
             </div>
 
             <label className="flex items-start gap-2 cursor-pointer">
-              <input type="checkbox" required className="w-4 h-4 rounded border-slate-300 text-blue-600 mt-0.5 shrink-0" />
+              <input type="checkbox" required className="w-4 h-4 rounded border-slate-300 text-brand-600 mt-0.5 shrink-0" />
               <span className="text-xs text-slate-600 leading-relaxed">
                 I agree to Tofiza's{" "}
-                <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>{" "}
+                <Link href="/terms" className="text-brand-600 hover:underline">Terms of Service</Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
+                <Link href="/privacy" className="text-brand-600 hover:underline">Privacy Policy</Link>
               </span>
             </label>
 
@@ -125,7 +125,7 @@ export default function RegisterPage() {
 
           <p className="mt-5 text-center text-sm text-slate-500">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link href="/auth/login" className="text-brand-600 hover:text-brand-700 font-semibold">
               Sign in
             </Link>
           </p>

@@ -15,7 +15,7 @@ export default function PopularHotels() {
         {/* Header */}
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-2">
+            <p className="text-brand-600 text-sm font-semibold uppercase tracking-widest mb-2">
               Top Rated Hotels
             </p>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
@@ -27,7 +27,7 @@ export default function PopularHotels() {
           </div>
           <Link
             href="/hotels/search"
-            className="hidden sm:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:text-blue-700 transition-colors"
+            className="hidden sm:flex items-center gap-1.5 text-brand-600 font-semibold text-sm hover:text-brand-700 transition-colors"
           >
             View all <ArrowRight size={16} />
           </Link>
@@ -39,7 +39,7 @@ export default function PopularHotels() {
             <Link
               key={hotel.id}
               href={`/hotels/${hotel.id}`}
-              className="group bg-white rounded-2xl border border-slate-100 hover:border-blue-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 block"
+              className="group bg-white rounded-2xl border border-slate-100 hover:border-brand-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 block"
             >
               {/* Image */}
               <div className="relative h-48 overflow-hidden">
@@ -71,7 +71,7 @@ export default function PopularHotels() {
                   ))}
                 </div>
 
-                <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 mb-1 group-hover:text-blue-700 transition-colors">
+                <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 mb-1 group-hover:text-brand-700 transition-colors">
                   {hotel.name}
                 </h3>
 
@@ -82,7 +82,7 @@ export default function PopularHotels() {
 
                 {/* Rating */}
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-md">
+                  <span className="bg-brand-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-md">
                     {hotel.rating.toFixed(1)}
                   </span>
                   <RatingStars rating={hotel.rating} size="sm" />
@@ -111,7 +111,7 @@ export default function PopularHotels() {
                     </p>
                     <p className="text-xs text-slate-500">per night</p>
                   </div>
-                  <span className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg group-hover:bg-blue-700 transition-colors">
+                  <span className="px-3 py-1.5 bg-brand-600 text-white text-xs font-semibold rounded-lg group-hover:bg-brand-700 transition-colors">
                     Book Now
                   </span>
                 </div>
@@ -124,7 +124,7 @@ export default function PopularHotels() {
         <div className="mt-6 flex justify-center sm:hidden">
           <Link
             href="/hotels/search"
-            className="flex items-center gap-1.5 text-blue-600 font-semibold text-sm"
+            className="flex items-center gap-1.5 text-brand-600 font-semibold text-sm"
           >
             View all hotels <ArrowRight size={16} />
           </Link>

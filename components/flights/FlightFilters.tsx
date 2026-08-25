@@ -83,7 +83,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
                 type="checkbox"
                 checked={filters.stops.includes(opt.value)}
                 onChange={() => toggleStop(opt.value)}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
               <span className="text-sm text-slate-700">{opt.label}</span>
             </label>
@@ -108,7 +108,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
             step={500}
             value={filters.priceMax}
             onChange={(e) => update({ priceMax: Number(e.target.value) })}
-            className="w-full accent-blue-600"
+            className="w-full accent-brand-600"
           />
         </div>
       </div>
@@ -127,7 +127,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
                 name="refundable"
                 checked={filters.refundable === val}
                 onChange={() => update({ refundable: filters.refundable === val ? null : val })}
-                className="w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 border-slate-300 text-brand-600 focus:ring-brand-500"
               />
               <span className="text-sm text-slate-700">{label}</span>
             </label>
@@ -145,7 +145,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
                 type="checkbox"
                 checked={filters.airlines.includes(airline)}
                 onChange={() => toggleAirline(airline)}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
               <span className="text-sm text-slate-700 leading-tight">{airline}</span>
             </label>
@@ -160,7 +160,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
       {/* Mobile trigger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed bottom-5 right-5 z-40 flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-full shadow-xl font-semibold text-sm"
+        className="lg:hidden fixed bottom-5 right-5 z-40 flex items-center gap-2 px-4 py-3 bg-brand-600 text-white rounded-full shadow-xl font-semibold text-sm"
       >
         <SlidersHorizontal size={16} />
         Filters{activeCount > 0 && ` (${activeCount})`}
@@ -180,7 +180,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
             <FilterContent />
             <button
               onClick={() => setMobileOpen(false)}
-              className="mt-6 w-full py-3 bg-blue-600 text-white rounded-xl font-semibold"
+              className="mt-6 w-full py-3 bg-brand-600 text-white rounded-xl font-semibold"
             >
               Apply Filters
             </button>
@@ -193,11 +193,11 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
         <div className="bg-white rounded-2xl border border-slate-200 p-5 sticky top-24">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-bold text-slate-900 flex items-center gap-2">
-              <SlidersHorizontal size={16} className="text-blue-500" />
+              <SlidersHorizontal size={16} className="text-brand-500" />
               Filters
             </h2>
             {activeCount > 0 && (
-              <span className="bg-blue-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-brand-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                 {activeCount}
               </span>
             )}

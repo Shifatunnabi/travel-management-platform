@@ -29,7 +29,7 @@ export default function FlightConfirmationPage() {
           {/* Booking reference card */}
           <div className="bg-white rounded-2xl border-2 border-emerald-200 p-6 text-center mb-5">
             <p className="text-slate-500 text-sm mb-2">Booking Reference</p>
-            <p className="text-3xl font-bold text-blue-700 tracking-widest font-mono mb-1">
+            <p className="text-3xl font-bold text-brand-700 tracking-widest font-mono mb-1">
               {bookingRef}
             </p>
             <p className="text-xs text-slate-400">
@@ -40,7 +40,7 @@ export default function FlightConfirmationPage() {
           {/* Ticket summary */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-5">
             <h2 className="font-bold text-slate-900 mb-5 flex items-center gap-2">
-              <Plane size={18} className="text-blue-500" />
+              <Plane size={18} className="text-brand-500" />
               Flight Summary
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -51,7 +51,7 @@ export default function FlightConfirmationPage() {
                 { icon: Plane, label: "Flight", value: "BG 147" },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="text-center p-3 bg-slate-50 rounded-xl">
-                  <Icon size={16} className="text-blue-500 mx-auto mb-1.5" />
+                  <Icon size={16} className="text-brand-500 mx-auto mb-1.5" />
                   <p className="text-xs text-slate-500">{label}</p>
                   <p className="font-semibold text-slate-800 text-sm mt-0.5">{value}</p>
                 </div>
@@ -65,11 +65,11 @@ export default function FlightConfirmationPage() {
           </div>
 
           {/* Email confirmation */}
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-6 flex items-start gap-3">
-            <Mail size={20} className="text-blue-500 shrink-0 mt-0.5" />
+          <div className="bg-brand-50 border border-brand-200 rounded-2xl p-5 mb-6 flex items-start gap-3">
+            <Mail size={20} className="text-brand-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-blue-900 text-sm">E-ticket sent to your email</p>
-              <p className="text-blue-700 text-xs mt-0.5">
+              <p className="font-semibold text-brand-900 text-sm">E-ticket sent to your email</p>
+              <p className="text-brand-700 text-xs mt-0.5">
                 Your e-ticket and booking confirmation have been sent to your registered email address. Please check your spam folder if you don't see it.
               </p>
             </div>
@@ -77,20 +77,20 @@ export default function FlightConfirmationPage() {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors">
+            <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-colors">
               <Download size={18} />
               Download E-Ticket
             </button>
             <Link
               href="/dashboard/bookings"
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-slate-200 hover:border-blue-300 text-slate-700 font-bold rounded-xl transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-slate-200 hover:border-brand-300 text-slate-700 font-bold rounded-xl transition-colors"
             >
               <LayoutDashboard size={18} />
               My Bookings
             </Link>
             <Link
               href="/"
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-slate-200 hover:border-blue-300 text-slate-700 font-bold rounded-xl transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-slate-200 hover:border-brand-300 text-slate-700 font-bold rounded-xl transition-colors"
             >
               <Home size={18} />
               Back to Home

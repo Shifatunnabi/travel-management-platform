@@ -39,7 +39,7 @@ function InputField({
         <input
           type={type}
           placeholder={placeholder}
-          className={`w-full border border-slate-200 rounded-xl py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder-slate-300 ${Icon ? "pl-9 pr-3" : "px-3"}`}
+          className={`w-full border border-slate-200 rounded-xl py-2.5 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition-all placeholder-slate-300 ${Icon ? "pl-9 pr-3" : "px-3"}`}
         />
       </div>
     </div>
@@ -60,7 +60,7 @@ function SelectField({
       <label className="block text-xs font-semibold text-slate-600 mb-1.5">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <select className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-white">
+      <select className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition-all bg-white">
         <option value="">Select {label}</option>
         {options.map((opt) => (
           <option key={opt} value={opt}>{opt}</option>
@@ -88,22 +88,22 @@ function PassengersInner() {
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center gap-2 text-sm mb-3">
-              <Link href="/" className="text-slate-500 hover:text-blue-600">Home</Link>
+              <Link href="/" className="text-slate-500 hover:text-brand-600">Home</Link>
               <ChevronRight size={14} className="text-slate-400" />
-              <Link href="/flights/search" className="text-slate-500 hover:text-blue-600">Flights</Link>
+              <Link href="/flights/search" className="text-slate-500 hover:text-brand-600">Flights</Link>
               <ChevronRight size={14} className="text-slate-400" />
               <span className="text-slate-800 font-medium">Passenger Info</span>
             </div>
             <div className="flex items-center gap-0">
               {["Passenger Info", "Payment", "Confirmation"].map((step, i) => (
                 <div key={step} className="flex items-center">
-                  <div className={`flex items-center gap-2 ${i === 0 ? "text-blue-700" : "text-slate-400"}`}>
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-500"}`}>
+                  <div className={`flex items-center gap-2 ${i === 0 ? "text-brand-700" : "text-slate-400"}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? "bg-brand-600 text-white" : "bg-slate-200 text-slate-500"}`}>
                       {i + 1}
                     </div>
-                    <span className={`text-sm font-medium ${i === 0 ? "text-blue-700" : "text-slate-400"}`}>{step}</span>
+                    <span className={`text-sm font-medium ${i === 0 ? "text-brand-700" : "text-slate-400"}`}>{step}</span>
                   </div>
-                  {i < 2 && <div className={`h-px w-8 sm:w-16 mx-2 ${i === 0 ? "bg-blue-300" : "bg-slate-200"}`} />}
+                  {i < 2 && <div className={`h-px w-8 sm:w-16 mx-2 ${i === 0 ? "bg-brand-300" : "bg-slate-200"}`} />}
                 </div>
               ))}
             </div>
@@ -139,7 +139,7 @@ function PassengersInner() {
 
                   <div className="mt-5 pt-5 border-t border-slate-100">
                     <h3 className="font-semibold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                      <CreditCard size={15} className="text-blue-500" />
+                      <CreditCard size={15} className="text-brand-500" />
                       Passport Details
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -152,7 +152,7 @@ function PassengersInner() {
                 {/* Contact info */}
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
                   <h2 className="font-bold text-slate-900 text-lg mb-1 flex items-center gap-2">
-                    <Mail size={18} className="text-blue-500" />
+                    <Mail size={18} className="text-brand-500" />
                     Contact Information
                   </h2>
                   <p className="text-slate-500 text-sm mb-5">
@@ -172,7 +172,7 @@ function PassengersInner() {
                   <textarea
                     rows={3}
                     placeholder="e.g. Wheelchair assistance, vegetarian meal, window seat preference..."
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder-slate-300 resize-none"
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition-all placeholder-slate-300 resize-none"
                   />
                   <p className="text-xs text-slate-400 mt-1.5">
                     Requests are subject to availability and not guaranteed
@@ -213,7 +213,7 @@ function PassengersInner() {
                     </div>
                     <div className="flex justify-between font-bold text-slate-900">
                       <span>Total</span>
-                      <span className="text-blue-700">৳4,725</span>
+                      <span className="text-brand-700">৳4,725</span>
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">

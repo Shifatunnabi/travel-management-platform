@@ -11,7 +11,7 @@ export default function FeaturedDestinations() {
         {/* Header */}
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-2">
+            <p className="text-brand-600 text-sm font-semibold uppercase tracking-widest mb-2">
               Popular Destinations
             </p>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
@@ -23,7 +23,7 @@ export default function FeaturedDestinations() {
           </div>
           <Link
             href="/flights/search"
-            className="hidden sm:flex items-center gap-1.5 text-blue-600 font-semibold text-sm hover:text-blue-700 transition-colors"
+            className="hidden sm:flex items-center gap-1.5 text-brand-600 font-semibold text-sm hover:text-brand-700 transition-colors"
           >
             View all <ArrowRight size={16} />
           </Link>
@@ -96,7 +96,7 @@ export default function FeaturedDestinations() {
         <div className="mt-6 flex justify-center sm:hidden">
           <Link
             href="/flights/search"
-            className="flex items-center gap-1.5 text-blue-600 font-semibold text-sm"
+            className="flex items-center gap-1.5 text-brand-600 font-semibold text-sm"
           >
             View all destinations <ArrowRight size={16} />
           </Link>

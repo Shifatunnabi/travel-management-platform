@@ -139,7 +139,7 @@ export const promoOffers: PromoOffer[] = [
     description: "Limited seats available. Book now and save big on international flights",
     discount: "BDT 3,500 OFF",
     image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800",
-    badgeColor: "bg-blue-600",
+    badgeColor: "bg-brand-600",
     expiresAt: "2026-07-31",
     type: "flight",
     code: "DUBAI25",

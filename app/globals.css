@@ -16,6 +16,17 @@
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-brand: #0b1878;
+  --color-brand-50: #f0f1fc;
+  --color-brand-100: #dee2f9;
+  --color-brand-200: #c0c5f2;
+  --color-brand-300: #8f99e5;
+  --color-brand-400: #5161d6;
+  --color-brand-500: #2032b6;
+  --color-brand-600: #0b1878;
+  --color-brand-700: #091363;
+  --color-brand-800: #070f4d;
+  --color-brand-900: #050c3a;
+  --color-brand-950: #030726;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -64,7 +75,7 @@ input:focus,
 select:focus,
 textarea:focus,
 button:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #2032b6;
   outline-offset: 2px;
 }
 

@@ -14,7 +14,7 @@ export default function HotelCard({ hotel }: HotelCardProps) {
   return (
     <Link
       href={`/hotels/${hotel.id}`}
-      className="group block bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl overflow-hidden transition-all duration-300"
+      className="group block bg-white rounded-2xl border border-slate-200 hover:border-brand-300 hover:shadow-xl overflow-hidden transition-all duration-300"
     >
       <div className="flex flex-col sm:flex-row">
         {/* Image */}
@@ -55,7 +55,7 @@ export default function HotelCard({ hotel }: HotelCardProps) {
               )}
             </div>
 
-            <h3 className="font-bold text-slate-900 text-lg leading-tight mb-1.5 group-hover:text-blue-700 transition-colors">
+            <h3 className="font-bold text-slate-900 text-lg leading-tight mb-1.5 group-hover:text-brand-700 transition-colors">
               {hotel.name}
             </h3>
 
@@ -68,7 +68,7 @@ export default function HotelCard({ hotel }: HotelCardProps) {
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-3">
-              <span className="bg-blue-700 text-white text-xs font-bold px-2 py-1 rounded-lg">
+              <span className="bg-brand-700 text-white text-xs font-bold px-2 py-1 rounded-lg">
                 {hotel.rating.toFixed(1)}
               </span>
               <RatingStars rating={hotel.rating} size="sm" />
@@ -84,7 +84,7 @@ export default function HotelCard({ hotel }: HotelCardProps) {
                   key={amenity}
                   className="flex items-center gap-1 text-xs text-slate-600 bg-slate-50 border border-slate-100 rounded-full px-2 py-0.5"
                 >
-                  <CheckCircle size={10} className="text-blue-400" />
+                  <CheckCircle size={10} className="text-brand-400" />
                   {amenity}
                 </span>
               ))}
@@ -106,7 +106,7 @@ export default function HotelCard({ hotel }: HotelCardProps) {
               </p>
               <p className="text-xs text-slate-500">per night · excl. taxes</p>
             </div>
-            <span className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors">
+            <span className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition-colors">
               View Rooms
             </span>
           </div>

@@ -14,7 +14,7 @@ import Button from "@/components/ui/Button";
 type PaymentMethod = "card" | "bkash" | "nagad" | "rocket" | "bank";
 
 const paymentMethods: { id: PaymentMethod; name: string; icon: string; color: string }[] = [
-  { id: "card", name: "Credit / Debit Card", icon: "💳", color: "border-blue-500 bg-blue-50" },
+  { id: "card", name: "Credit / Debit Card", icon: "💳", color: "border-brand-500 bg-brand-50" },
   { id: "bkash", name: "bKash", icon: "📱", color: "border-pink-500 bg-pink-50" },
   { id: "nagad", name: "Nagad", icon: "📱", color: "border-orange-500 bg-orange-50" },
   { id: "rocket", name: "Rocket (DBBL)", icon: "🚀", color: "border-purple-500 bg-purple-50" },
@@ -52,18 +52,18 @@ export default function PaymentPage() {
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center gap-2 text-sm mb-3">
-              <Link href="/" className="text-slate-500 hover:text-blue-600">Home</Link>
+              <Link href="/" className="text-slate-500 hover:text-brand-600">Home</Link>
               <ChevronRight size={14} className="text-slate-400" />
               <span className="text-slate-800 font-medium">Payment</span>
             </div>
             <div className="flex items-center gap-0">
               {["Passenger Info", "Payment", "Confirmation"].map((step, i) => (
                 <div key={step} className="flex items-center">
-                  <div className={`flex items-center gap-2 ${i === 1 ? "text-blue-700" : i === 0 ? "text-emerald-600" : "text-slate-400"}`}>
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${i === 1 ? "bg-blue-600 text-white" : i === 0 ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"}`}>
+                  <div className={`flex items-center gap-2 ${i === 1 ? "text-brand-700" : i === 0 ? "text-emerald-600" : "text-slate-400"}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${i === 1 ? "bg-brand-600 text-white" : i === 0 ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"}`}>
                       {i === 0 ? "✓" : i + 1}
                     </div>
-                    <span className={`text-sm font-medium hidden sm:block ${i === 1 ? "text-blue-700" : i === 0 ? "text-emerald-600" : "text-slate-400"}`}>{step}</span>
+                    <span className={`text-sm font-medium hidden sm:block ${i === 1 ? "text-brand-700" : i === 0 ? "text-emerald-600" : "text-slate-400"}`}>{step}</span>
                   </div>
                   {i < 2 && <div className={`h-px w-8 sm:w-16 mx-2 ${i === 0 ? "bg-emerald-300" : "bg-slate-200"}`} />}
                 </div>
@@ -80,7 +80,7 @@ export default function PaymentPage() {
                 {/* Payment method selector */}
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
                   <h2 className="font-bold text-slate-900 text-lg mb-5 flex items-center gap-2">
-                    <CreditCard size={18} className="text-blue-500" />
+                    <CreditCard size={18} className="text-brand-500" />
                     Payment Method
                   </h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
@@ -108,7 +108,7 @@ export default function PaymentPage() {
                           type="text"
                           placeholder="1234 5678 9012 3456"
                           maxLength={19}
-                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -118,7 +118,7 @@ export default function PaymentPage() {
                             type="text"
                             placeholder="MM / YY"
                             maxLength={7}
-                            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                           />
                         </div>
                         <div>
@@ -127,7 +127,7 @@ export default function PaymentPage() {
                             type="password"
                             placeholder="•••"
                             maxLength={4}
-                            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                           />
                         </div>
                       </div>
@@ -136,7 +136,7 @@ export default function PaymentPage() {
                         <input
                           type="text"
                           placeholder="As on card"
-                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                         />
                       </div>
                     </div>
@@ -151,7 +151,7 @@ export default function PaymentPage() {
                       <input
                         type="tel"
                         placeholder="+880 1XXX-XXXXXX"
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                       />
                       <p className="text-xs text-slate-400 mt-1.5">
                         You will receive a payment request on this number
@@ -183,9 +183,9 @@ export default function PaymentPage() {
                   <h3 className="font-bold text-slate-900">Order Summary</h3>
 
                   {/* Flight info */}
-                  <div className="p-3 bg-blue-50 rounded-xl text-sm">
-                    <p className="font-semibold text-blue-900">Dhaka → Cox's Bazar</p>
-                    <p className="text-blue-700 text-xs mt-0.5">4 Jul 2026 · 1 Passenger · Economy</p>
+                  <div className="p-3 bg-brand-50 rounded-xl text-sm">
+                    <p className="font-semibold text-brand-900">Dhaka → Cox's Bazar</p>
+                    <p className="text-brand-700 text-xs mt-0.5">4 Jul 2026 · 1 Passenger · Economy</p>
                   </div>
 
                   {/* Coupon */}
@@ -200,13 +200,13 @@ export default function PaymentPage() {
                         onChange={(e) => setCoupon(e.target.value.toUpperCase())}
                         placeholder="TOFIZA300"
                         disabled={couponApplied}
-                        className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none disabled:bg-slate-50"
+                        className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none disabled:bg-slate-50"
                       />
                       <button
                         type="button"
                         onClick={applyCoupon}
                         disabled={couponApplied}
-                        className="px-3 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 disabled:bg-slate-300 transition-colors"
+                        className="px-3 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 disabled:bg-slate-300 transition-colors"
                       >
                         Apply
                       </button>
@@ -236,7 +236,7 @@ export default function PaymentPage() {
                     )}
                     <div className="flex justify-between font-bold text-slate-900 border-t border-slate-100 pt-2">
                       <span>Total</span>
-                      <span className="text-blue-700 text-lg">৳{total.toLocaleString()}</span>
+                      <span className="text-brand-700 text-lg">৳{total.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -247,7 +247,7 @@ export default function PaymentPage() {
 
                   <p className="text-xs text-center text-slate-400">
                     By completing this purchase you agree to our{" "}
-                    <Link href="/terms" className="text-blue-500 hover:underline">Terms of Service</Link>
+                    <Link href="/terms" className="text-brand-500 hover:underline">Terms of Service</Link>
                   </p>
                 </div>
               </div>

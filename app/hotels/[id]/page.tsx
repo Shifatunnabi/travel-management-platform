@@ -70,9 +70,9 @@ export default async function HotelDetailsPage({
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Link href="/" className="hover:text-blue-600">Home</Link>
+              <Link href="/" className="hover:text-brand-600">Home</Link>
               <ChevronRight size={14} />
-              <Link href="/hotels/search" className="hover:text-blue-600">Hotels</Link>
+              <Link href="/hotels/search" className="hover:text-brand-600">Hotels</Link>
               <ChevronRight size={14} />
               <span className="text-slate-800 font-medium truncate">{hotel.name}</span>
             </div>
@@ -80,7 +80,7 @@ export default async function HotelDetailsPage({
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Link href="/hotels/search" className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-sm font-medium mb-5">
+          <Link href="/hotels/search" className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 text-sm font-medium mb-5">
             <ArrowLeft size={15} />
             Back to results
           </Link>
@@ -127,7 +127,7 @@ export default async function HotelDetailsPage({
                   </div>
                   <div className="text-right shrink-0">
                     <div className="flex items-center gap-2 justify-end mb-1">
-                      <span className="bg-blue-700 text-white text-lg font-bold px-2.5 py-1 rounded-xl">
+                      <span className="bg-brand-700 text-white text-lg font-bold px-2.5 py-1 rounded-xl">
                         {hotel.rating.toFixed(1)}
                       </span>
                     </div>
@@ -145,7 +145,7 @@ export default async function HotelDetailsPage({
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {hotel.amenities.map((amenity) => (
                     <div key={amenity} className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl text-sm text-slate-700">
-                      <CheckCircle size={14} className="text-blue-500 shrink-0" />
+                      <CheckCircle size={14} className="text-brand-500 shrink-0" />
                       {amenity}
                     </div>
                   ))}
@@ -159,7 +159,7 @@ export default async function HotelDetailsPage({
                   {rooms.map((room) => (
                     <div
                       key={room.id}
-                      className="border border-slate-200 hover:border-blue-300 rounded-xl p-4 transition-colors"
+                      className="border border-slate-200 hover:border-brand-300 rounded-xl p-4 transition-colors"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                         <div className="flex-1">
@@ -190,7 +190,7 @@ export default async function HotelDetailsPage({
                           </p>
                           <Link
                             href={`/hotels/book/guests?hotelId=${hotel.id}&roomId=${room.id}`}
-                            className="mt-2 block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors text-center"
+                            className="mt-2 block px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition-colors text-center"
                           >
                             Select Room
                           </Link>
@@ -236,7 +236,7 @@ export default async function HotelDetailsPage({
                     <input type="date" defaultValue="2026-07-06" className="w-full text-sm font-bold text-slate-800 mt-0.5 focus:outline-none" />
                   </div>
                   <div className="border border-slate-200 rounded-xl p-3 flex items-center gap-2">
-                    <Users size={16} className="text-blue-500" />
+                    <Users size={16} className="text-brand-500" />
                     <span className="text-sm font-bold text-slate-800">2 Guests · 1 Room</span>
                   </div>
                 </div>
@@ -252,13 +252,13 @@ export default async function HotelDetailsPage({
                   </div>
                   <div className="flex justify-between font-bold text-slate-900 border-t border-slate-100 pt-2">
                     <span>Total ({nights} nights)</span>
-                    <span className="text-blue-700">{formatCurrency(total, hotel.currency)}</span>
+                    <span className="text-brand-700">{formatCurrency(total, hotel.currency)}</span>
                   </div>
                 </div>
 
                 <Link
                   href={`/hotels/book/guests?hotelId=${hotel.id}`}
-                  className="block w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-center rounded-xl transition-colors"
+                  className="block w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-center rounded-xl transition-colors"
                 >
                   Reserve Now
                 </Link>

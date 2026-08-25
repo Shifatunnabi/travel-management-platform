@@ -120,11 +120,11 @@ export default function DatePicker({
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full h-full text-left border border-slate-200 hover:border-blue-400 rounded-xl px-3 py-2.5 transition-all"
+        className="w-full h-full text-left border border-slate-200 hover:border-brand-400 rounded-xl px-3 py-2.5 transition-all"
       >
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
         <div className="flex items-center gap-2">
-          <Calendar size={14} className="text-blue-500 shrink-0" />
+          <Calendar size={14} className="text-brand-500 shrink-0" />
           <span className={`text-sm font-bold truncate ${value ? "text-slate-800" : "text-slate-300"}`}>
             {value ? formatDisplay(value) : placeholder}
           </span>
@@ -142,7 +142,7 @@ export default function DatePicker({
               type="button"
               onClick={prevMonth}
               aria-label="Previous month"
-              className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-colors"
+              className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 transition-colors"
             >
               <ChevronLeft size={14} />
             </button>
@@ -153,7 +153,7 @@ export default function DatePicker({
               type="button"
               onClick={nextMonth}
               aria-label="Next month"
-              className="w-7 h-7 rounded-full border border-slate-300 hover:border-blue-500 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-colors"
+              className="w-7 h-7 rounded-full border border-slate-300 hover:border-brand-500 flex items-center justify-center text-slate-600 hover:text-brand-600 transition-colors"
             >
               <ChevronRight size={14} />
             </button>
@@ -179,10 +179,10 @@ export default function DatePicker({
                   onClick={() => selectDay(day)}
                   className={`w-8 h-8 rounded-full text-xs font-medium flex items-center justify-center transition-colors ${
                     isSelected(day)
-                      ? "bg-blue-600 text-white"
+                      ? "bg-brand-600 text-white"
                       : isDisabled(day)
                       ? "text-slate-300 cursor-not-allowed"
-                      : "text-slate-700 hover:bg-blue-50"
+                      : "text-slate-700 hover:bg-brand-50"
                   }`}
                 >
                   {day}

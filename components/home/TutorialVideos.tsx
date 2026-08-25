@@ -61,11 +61,11 @@ export default function TutorialVideos() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-2">
+            <p className="text-brand-600 text-sm font-semibold uppercase tracking-widest mb-2">
               Watch & Learn
             </p>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 flex items-center gap-2">
-              <PlayCircle size={30} className="text-blue-600" />
+              <PlayCircle size={30} className="text-brand-600" />
               Tofiza Tutorials
             </h2>
             <p className="text-slate-500 mt-2 text-base">
@@ -76,14 +76,14 @@ export default function TutorialVideos() {
             <div className="hidden sm:flex items-center gap-2">
               <button
                 onClick={prev}
-                className="w-10 h-10 rounded-full border border-slate-300 hover:border-blue-500 hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all"
+                className="w-10 h-10 rounded-full border border-slate-300 hover:border-brand-500 hover:bg-brand-50 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-all"
                 aria-label="Previous videos"
               >
                 <ChevronLeft size={18} />
               </button>
               <button
                 onClick={next}
-                className="w-10 h-10 rounded-full border border-slate-300 hover:border-blue-500 hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all"
+                className="w-10 h-10 rounded-full border border-slate-300 hover:border-brand-500 hover:bg-brand-50 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-all"
                 aria-label="Next videos"
               >
                 <ChevronRight size={18} />
@@ -122,14 +122,14 @@ export default function TutorialVideos() {
           <div className="flex sm:hidden items-center justify-center gap-3 mt-6">
             <button
               onClick={prev}
-              className="w-10 h-10 rounded-full border border-slate-300 hover:border-blue-500 hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all"
+              className="w-10 h-10 rounded-full border border-slate-300 hover:border-brand-500 hover:bg-brand-50 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-all"
               aria-label="Previous videos"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={next}
-              className="w-10 h-10 rounded-full border border-slate-300 hover:border-blue-500 hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all"
+              className="w-10 h-10 rounded-full border border-slate-300 hover:border-brand-500 hover:bg-brand-50 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-all"
               aria-label="Next videos"
             >
               <ChevronRight size={18} />

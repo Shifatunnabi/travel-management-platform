@@ -23,7 +23,7 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-2">
+            <p className="text-brand-600 text-sm font-semibold uppercase tracking-widest mb-2">
               Traveler Stories
             </p>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
@@ -36,14 +36,14 @@ export default function Testimonials() {
           <div className="hidden sm:flex items-center gap-2">
             <button
               onClick={prev}
-              className="w-10 h-10 rounded-full border border-slate-300 hover:border-blue-500 hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all"
+              className="w-10 h-10 rounded-full border border-slate-300 hover:border-brand-500 hover:bg-brand-50 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-all"
               aria-label="Previous"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={next}
-              className="w-10 h-10 rounded-full border border-slate-300 hover:border-blue-500 hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all"
+              className="w-10 h-10 rounded-full border border-slate-300 hover:border-brand-500 hover:bg-brand-50 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-all"
               aria-label="Next"
             >
               <ChevronRight size={18} />
@@ -57,10 +57,10 @@ export default function Testimonials() {
             <div
               key={`${t.id}-${idx}`}
               className={`bg-white rounded-2xl border border-slate-100 p-6 shadow-sm transition-all duration-300 ${
-                idx === 0 ? "ring-2 ring-blue-200" : "opacity-80"
+                idx === 0 ? "ring-2 ring-brand-200" : "opacity-80"
               }`}
             >
-              <Quote size={24} className="text-blue-200 mb-3" />
+              <Quote size={24} className="text-brand-200 mb-3" />
               <p className="text-slate-700 text-sm leading-relaxed mb-5 line-clamp-4">{t.review}</p>
               <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
                 <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
@@ -91,7 +91,7 @@ export default function Testimonials() {
               key={i}
               onClick={() => setCurrent(i)}
               className={`h-1.5 rounded-full transition-all ${
-                i === current ? "w-6 bg-blue-600" : "w-1.5 bg-slate-300"
+                i === current ? "w-6 bg-brand-600" : "w-1.5 bg-slate-300"
               }`}
               aria-label={`Go to ${i + 1}`}
             />

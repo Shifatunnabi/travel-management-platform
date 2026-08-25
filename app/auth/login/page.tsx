@@ -22,7 +22,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-700 via-brand-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -35,7 +35,7 @@ export default function LoginPage() {
               className="h-10 w-auto object-contain brightness-0 invert mx-auto"
             />
           </Link>
-          <p className="text-blue-200 text-sm mt-2">Sign in to your travel account</p>
+          <p className="text-brand-200 text-sm mt-2">Sign in to your travel account</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl p-8">
@@ -54,7 +54,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@email.com"
                   required
-                  className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
                 />
               </div>
             </div>
@@ -62,7 +62,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-semibold text-slate-600">Password</label>
-                <Link href="/auth/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                <Link href="/auth/forgot-password" className="text-xs text-brand-600 hover:text-brand-700 font-medium">
                   Forgot password?
                 </Link>
               </div>
@@ -74,7 +74,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full border border-slate-200 rounded-xl pl-9 pr-10 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  className="w-full border border-slate-200 rounded-xl pl-9 pr-10 py-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
                 />
                 <button
                   type="button"
@@ -87,7 +87,7 @@ export default function LoginPage() {
             </div>
 
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-blue-600" />
+              <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-brand-600" />
               <span className="text-sm text-slate-600">Remember me for 30 days</span>
             </label>
 
@@ -114,7 +114,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-slate-500">
             Don't have an account?{" "}
-            <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link href="/auth/register" className="text-brand-600 hover:text-brand-700 font-semibold">
               Sign up free
             </Link>
           </p>

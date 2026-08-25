@@ -31,9 +31,9 @@ export default async function FlightDetailsPage({
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Link href="/" className="hover:text-blue-600">Home</Link>
+              <Link href="/" className="hover:text-brand-600">Home</Link>
               <ChevronRight size={14} />
-              <Link href="/flights/search" className="hover:text-blue-600">Flights</Link>
+              <Link href="/flights/search" className="hover:text-brand-600">Flights</Link>
               <ChevronRight size={14} />
               <span className="text-slate-800 font-medium">Flight Details</span>
             </div>
@@ -46,7 +46,7 @@ export default async function FlightDetailsPage({
             <div className="flex-1 space-y-5">
               <Link
                 href="/flights/search"
-                className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 text-sm font-medium"
               >
                 <ArrowLeft size={15} />
                 Back to search results
@@ -83,7 +83,7 @@ export default async function FlightDetailsPage({
                 <div className="flex items-start gap-6">
                   <div className="text-center w-28 shrink-0">
                     <p className="text-3xl font-bold text-slate-900">{formatTime(flight.departure)}</p>
-                    <p className="text-lg font-bold text-blue-700 mt-1">{flight.from.code}</p>
+                    <p className="text-lg font-bold text-brand-700 mt-1">{flight.from.code}</p>
                     <p className="text-sm text-slate-600 mt-0.5">{flight.from.city}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{formatDate(flight.departure)}</p>
                     <p className="text-xs text-slate-500 mt-1 leading-tight">{flight.from.airport}</p>
@@ -92,10 +92,10 @@ export default async function FlightDetailsPage({
                   <div className="flex-1 flex flex-col items-center py-2">
                     <p className="text-sm text-slate-500 mb-2 font-medium">{flight.duration}</p>
                     <div className="w-full flex items-center">
-                      <div className="w-3 h-3 rounded-full bg-blue-500 shrink-0" />
-                      <div className="flex-1 h-0.5 bg-blue-200" />
-                      <Plane size={18} className="text-blue-500 shrink-0" />
-                      <div className="flex-1 h-0.5 bg-blue-200" />
+                      <div className="w-3 h-3 rounded-full bg-brand-500 shrink-0" />
+                      <div className="flex-1 h-0.5 bg-brand-200" />
+                      <Plane size={18} className="text-brand-500 shrink-0" />
+                      <div className="flex-1 h-0.5 bg-brand-200" />
                       <div className="w-3 h-3 rounded-full bg-slate-400 shrink-0" />
                     </div>
                     <p className="text-xs text-slate-400 mt-2">
@@ -105,7 +105,7 @@ export default async function FlightDetailsPage({
 
                   <div className="text-center w-28 shrink-0">
                     <p className="text-3xl font-bold text-slate-900">{formatTime(flight.arrival)}</p>
-                    <p className="text-lg font-bold text-blue-700 mt-1">{flight.to.code}</p>
+                    <p className="text-lg font-bold text-brand-700 mt-1">{flight.to.code}</p>
                     <p className="text-sm text-slate-600 mt-0.5">{flight.to.city}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{formatDate(flight.arrival)}</p>
                     <p className="text-xs text-slate-500 mt-1 leading-tight">{flight.to.airport}</p>
@@ -124,7 +124,7 @@ export default async function FlightDetailsPage({
                     { icon: Shield, label: "Fare Type", value: flight.fareType },
                   ].map(({ icon: Icon, label, value, color }) => (
                     <div key={label} className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl">
-                      <Icon size={18} className={color || "text-blue-500"} />
+                      <Icon size={18} className={color || "text-brand-500"} />
                       <div>
                         <p className="text-xs text-slate-500">{label}</p>
                         <p className={`font-semibold text-sm mt-0.5 ${color || "text-slate-800"}`}>{value}</p>
@@ -137,7 +137,7 @@ export default async function FlightDetailsPage({
               {/* Policies */}
               <div className="bg-white rounded-2xl border border-slate-200 p-6">
                 <h2 className="font-bold text-slate-900 text-lg mb-5 flex items-center gap-2">
-                  <Info size={18} className="text-blue-500" />
+                  <Info size={18} className="text-brand-500" />
                   Fare Rules & Policies
                 </h2>
                 <div className="space-y-4 text-sm text-slate-600">
@@ -145,8 +145,8 @@ export default async function FlightDetailsPage({
                     <p className="font-semibold text-amber-800 mb-1">Cancellation Policy</p>
                     <p>{flight.refundable ? "Free cancellation up to 24 hours before departure. Cancellation fee applies within 24 hours." : "This is a non-refundable ticket. No refund on cancellation."}</p>
                   </div>
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                    <p className="font-semibold text-blue-800 mb-1">Date Change Policy</p>
+                  <div className="p-4 bg-brand-50 border border-brand-200 rounded-xl">
+                    <p className="font-semibold text-brand-800 mb-1">Date Change Policy</p>
                     <p>Date changes are allowed subject to availability and applicable change fees. Contact our support team at least 48 hours before departure.</p>
                   </div>
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
@@ -177,7 +177,7 @@ export default async function FlightDetailsPage({
                   </div>
                   <div className="border-t border-slate-100 pt-3 flex justify-between">
                     <span className="font-bold text-slate-900">Total</span>
-                    <span className="font-bold text-blue-700 text-lg">{formatCurrency(total, flight.currency)}</span>
+                    <span className="font-bold text-brand-700 text-lg">{formatCurrency(total, flight.currency)}</span>
                   </div>
                 </div>
 
@@ -202,7 +202,7 @@ export default async function FlightDetailsPage({
 
                 <Link
                   href={`/flights/book/passengers?flightId=${flight.id}`}
-                  className="block w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-center rounded-xl transition-colors"
+                  className="block w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-center rounded-xl transition-colors"
                 >
                   Continue to Book
                 </Link>
