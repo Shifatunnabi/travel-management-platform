@@ -1,7 +1,7 @@
-"use client";
-
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import Image from "next/image";
+import NewsletterForm from "./NewsletterForm";
 import { Phone, Mail, MapPin } from "lucide-react";
 
 const footerLinks = {
@@ -14,7 +14,7 @@ const footerLinks = {
   support: [
     { label: "Help Center", href: "/help" },
     { label: "Contact Us", href: "/contact" },
-    { label: "Manage Booking", href: "/dashboard/bookings" },
+    { label: "Manage Booking", href: "/account/bookings" },
     { label: "Refunds", href: "/refunds" },
   ],
   legal: [
@@ -74,7 +74,12 @@ const socialLinks = [
   { name: "YouTube", href: "#", Icon: YoutubeIcon, bg: "bg-[#FF0000] hover:bg-[#FF0000]" },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  "use cache";
+  // Revalidates daily, so the year rolls over without a redeploy.
+  cacheLife("days");
+  const year = new Date().getFullYear();
+
   return (
     <footer className="bg-slate-900 text-slate-300">
       {/* Newsletter strip */}
@@ -87,23 +92,7 @@ export default function Footer() {
                 Subscribe and receive the best offers directly in your inbox
               </p>
             </div>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex w-full max-w-md gap-2"
-            >
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className="flex-1 px-4 py-2.5 rounded-xl bg-white text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-white"
-                aria-label="Email for newsletter"
-              />
-              <button
-                type="submit"
-                className="px-5 py-2.5 bg-white text-brand-700 font-semibold text-sm rounded-xl hover:bg-brand-50 transition-colors shrink-0"
-              >
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
       </div>
@@ -231,7 +220,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-slate-500 text-xs">
-              © {new Date().getFullYear()} Tofiza. All rights reserved. Registered in Bangladesh.
+              © {year} Tofiza. All rights reserved. Registered in Bangladesh.
             </p>
             {/* Payment methods */}
             <div className="flex items-center gap-2">

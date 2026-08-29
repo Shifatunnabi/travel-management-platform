@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Users, Search, ChevronDown, BedDouble } from "lucide-react";
 import DatePicker from "@/components/ui/DatePicker";
-
-const today = new Date().toISOString().split("T")[0];
+import { todayISO } from "@/lib/utils/formatters";
 
 export default function HotelSearchForm() {
+  const today = todayISO();
   const router = useRouter();
   const [destination, setDestination] = useState("");
   const [checkIn, setCheckIn] = useState("");

@@ -241,4 +241,3 @@ export const partners: Partner[] = [
 ];
 
 export { mockFlights } from "./flights";
-export { mockHotels } from "./hotels";

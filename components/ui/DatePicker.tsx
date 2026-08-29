@@ -26,6 +26,11 @@ function formatDisplay(iso: string) {
   return d.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 }
 
+function anchorMonth(anchor: string): { month: number; year: number } {
+  const d = anchor ? new Date(`${anchor}T00:00:00`) : new Date();
+  return { month: d.getMonth(), year: d.getFullYear() };
+}
+
 export default function DatePicker({
   label,
   value,
@@ -41,9 +46,29 @@ export default function DatePicker({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const base = value ? new Date(`${value}T00:00:00`) : min ? new Date(`${min}T00:00:00`) : new Date();
-  const [viewMonth, setViewMonth] = useState(base.getMonth());
-  const [viewYear, setViewYear] = useState(base.getFullYear());
+  // The calendar panel only renders after mount, so reading the clock here
+  // would be invisible work that still blocks prerendering under Cache
+  // Components. Anchor on the props when we can, and fall back to "now" only
+  // once we are actually on the client.
+  const anchor = value || min || "";
+  const [view, setView] = useState<{ month: number; year: number } | null>(() =>
+    anchor ? anchorMonth(anchor) : null,
+  );
+  // Resolved on the client the first time the panel is needed, so no clock is
+  // read during prerendering and no effect has to correct the state after.
+  const resolved = view ?? (mounted ? anchorMonth("") : { month: 0, year: 1970 });
+  const viewMonth = resolved.month;
+  const viewYear = resolved.year;
+  const setViewMonth = (next: number | ((m: number) => number)) =>
+    setView((v) => {
+      const base = v ?? resolved;
+      return { ...base, month: typeof next === "function" ? next(base.month) : next };
+    });
+  const setViewYear = (next: number | ((y: number) => number)) =>
+    setView((v) => {
+      const base = v ?? resolved;
+      return { ...base, year: typeof next === "function" ? next(base.year) : next };
+    });
 
   useEffect(() => setMounted(true), []);
 

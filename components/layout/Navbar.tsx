@@ -13,7 +13,14 @@ const navLinks = [
   { href: "/hotels/search", label: "Hotels" },
 ];
 
-export default function Navbar() {
+export default function Navbar({
+  account,
+  mobileAccount,
+}: {
+  /** Server-rendered account control, streamed in its own boundary. */
+  account?: React.ReactNode;
+  mobileAccount?: React.ReactNode;
+} = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -90,17 +97,21 @@ export default function Navbar() {
                 <Phone size={15} />
                 <span>Support</span>
               </a>
-              <Link href="/auth/login">
-                <Button variant="secondary" size="sm">
-                  <User size={15} />
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button size="sm" variant="primary">
-                  Get Started
-                </Button>
-              </Link>
+              {account ?? (
+                <>
+                  <Link href="/auth/login">
+                    <Button variant="secondary" size="sm">
+                      <User size={15} />
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/auth/register">
+                    <Button size="sm" variant="primary">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile menu button */}
@@ -167,17 +178,21 @@ export default function Navbar() {
         </nav>
 
         <div className="border-t border-slate-100 px-4 py-5 space-y-3">
-          <Link href="/auth/login" className="block">
-            <Button variant="outline" fullWidth size="md">
-              <User size={16} />
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/auth/register" className="block">
-            <Button variant="primary" fullWidth size="md">
-              Create Account
-            </Button>
-          </Link>
+          {mobileAccount ?? (
+            <>
+              <Link href="/auth/login" className="block">
+                <Button variant="outline" fullWidth size="md">
+                  <User size={16} />
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/auth/register" className="block">
+                <Button variant="primary" fullWidth size="md">
+                  Create Account
+                </Button>
+              </Link>
+            </>
+          )}
           <a
             href="tel:+8801700000000"
             className="flex items-center gap-2 text-sm text-slate-600 px-2 pt-2"

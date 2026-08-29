@@ -1,26 +1,33 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Wifi, Waves, ArrowRight, Star } from "lucide-react";
-import { mockHotels } from "@/lib/mock-data";
+import { cacheLife, cacheTag } from "next/cache";
+import { MapPin, ArrowRight, Star } from "lucide-react";
+import { getPopularHotels } from "@/lib/services/public-hotels";
+import { cdn } from "@/lib/services/cloudinary";
 import { formatCurrency } from "@/lib/utils/formatters";
-import Badge from "@/components/ui/Badge";
-import RatingStars from "@/components/ui/RatingStars";
+import { tags } from "@/lib/cache/tags";
 
-export default function PopularHotels() {
-  const hotels = mockHotels.slice(0, 4);
+/**
+ * Cached UI, not just cached data: the whole rail becomes part of the static
+ * shell, so the homepage paints it without waiting on the database.
+ */
+export default async function PopularHotels() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(tags.home(), tags.hotels());
+
+  const hotels = await getPopularHotels(4);
+  if (hotels.length === 0) return null;
 
   return (
     <section className="py-16 lg:py-24 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="flex items-end justify-between mb-10">
           <div>
             <p className="text-brand-600 text-sm font-semibold uppercase tracking-widest mb-2">
               Top Rated Hotels
             </p>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
-              Popular Hotels
-            </h2>
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">Popular Hotels</h2>
             <p className="text-slate-500 mt-2 text-base">
               Handpicked properties loved by our guests
             </p>
@@ -33,103 +40,59 @@ export default function PopularHotels() {
           </Link>
         </div>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           {hotels.map((hotel) => (
             <Link
               key={hotel.id}
-              href={`/hotels/${hotel.id}`}
-              className="group bg-white rounded-2xl border border-slate-100 hover:border-brand-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 block"
+              href={`/hotels/${citySlug(hotel.city)}/${hotel.slug}`}
+              className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-brand-300 hover:shadow-lg transition-all"
             >
-              {/* Image */}
-              <div className="relative h-48 overflow-hidden">
-                <Image
-                  src={hotel.images[0]}
-                  alt={hotel.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                />
-                {hotel.originalPrice && (
-                  <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                    SALE
-                  </div>
+              <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+                {hotel.image && (
+                  <Image
+                    src={cdn(hotel.image, 500, 375)}
+                    alt={hotel.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 )}
-                {hotel.freeCancellation && (
-                  <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-semibold px-2 py-1 rounded-lg">
-                    Free Cancel
-                  </div>
+                {hotel.displayReviewCount > 0 && (
+                  <span className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 text-slate-800 text-xs font-bold px-2 py-1 rounded-lg tabular-nums">
+                    <Star size={11} className="text-amber-500 fill-amber-500" aria-hidden="true" />
+                    {hotel.displayRating.toFixed(1)}
+                  </span>
                 )}
               </div>
 
-              {/* Content */}
               <div className="p-4">
-                {/* Star category */}
-                <div className="flex items-center gap-1 mb-1.5">
+                <div className="flex items-center gap-0.5 mb-1.5">
                   {Array.from({ length: hotel.starCategory }).map((_, i) => (
-                    <Star key={i} size={11} className="text-amber-400 fill-amber-400" />
+                    <Star key={i} size={10} className="text-amber-400 fill-amber-400" aria-hidden="true" />
                   ))}
                 </div>
-
-                <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 mb-1 group-hover:text-brand-700 transition-colors">
+                <h3 className="font-bold text-slate-900 truncate group-hover:text-brand-600 transition-colors">
                   {hotel.name}
                 </h3>
-
-                <div className="flex items-center gap-1 text-slate-500 text-xs mb-3">
-                  <MapPin size={11} />
+                <p className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                  <MapPin size={11} className="shrink-0" aria-hidden="true" />
                   <span className="truncate">{hotel.location}</span>
-                </div>
-
-                {/* Rating */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="bg-brand-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-md">
-                    {hotel.rating.toFixed(1)}
-                  </span>
-                  <RatingStars rating={hotel.rating} size="sm" />
-                  <span className="text-slate-400 text-xs">({hotel.reviewCount.toLocaleString()})</span>
-                </div>
-
-                {/* Amenities */}
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {hotel.amenities.slice(0, 3).map((amenity) => (
-                    <Badge key={amenity} variant="info" size="sm">
-                      {amenity}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* Price */}
-                <div className="flex items-end justify-between pt-3 border-t border-slate-100">
-                  <div>
-                    {hotel.originalPrice && (
-                      <p className="text-xs text-slate-400 line-through">
-                        {formatCurrency(hotel.originalPrice, hotel.currency)}
-                      </p>
-                    )}
-                    <p className="text-lg font-bold text-slate-900">
-                      {formatCurrency(hotel.pricePerNight, hotel.currency)}
-                    </p>
-                    <p className="text-xs text-slate-500">per night</p>
-                  </div>
-                  <span className="px-3 py-1.5 bg-brand-600 text-white text-xs font-semibold rounded-lg group-hover:bg-brand-700 transition-colors">
-                    Book Now
+                </p>
+                <div className="flex items-baseline justify-between mt-3 pt-3 border-t border-slate-100">
+                  <span className="text-xs text-slate-400">from</span>
+                  <span className="text-lg font-bold text-slate-900 tabular-nums">
+                    {formatCurrency(hotel.priceFrom, hotel.currency)}
                   </span>
                 </div>
               </div>
             </Link>
           ))}
         </div>
-
-        {/* Mobile view all */}
-        <div className="mt-6 flex justify-center sm:hidden">
-          <Link
-            href="/hotels/search"
-            className="flex items-center gap-1.5 text-brand-600 font-semibold text-sm"
-          >
-            View all hotels <ArrowRight size={16} />
-          </Link>
-        </div>
       </div>
     </section>
   );
+}
+
+function citySlug(city: string): string {
+  return city.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }

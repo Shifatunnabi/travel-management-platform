@@ -67,3 +67,16 @@ export function getRelativeTime(dateStr: string): string {
   if (days < 0) return `${Math.abs(days)} days ago`;
   return `In ${days} days`;
 }
+
+/**
+ * Today's date as YYYY-MM-DD, or "" during server prerendering.
+ *
+ * Cache Components treats `new Date()` as non-deterministic and refuses to
+ * prerender a component that calls it. These search forms only need "today" as
+ * a lower bound on a date picker, which is a client-side concern — so we skip
+ * it on the server and let the value arrive at hydration.
+ */
+export function todayISO(): string {
+  if (typeof window === "undefined") return "";
+  return new Date().toISOString().split("T")[0];
+}

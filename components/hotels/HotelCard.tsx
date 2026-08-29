@@ -1,117 +1,120 @@
-import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Star, Wifi, CheckCircle } from "lucide-react";
-import type { Hotel } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils/formatters";
-import Badge from "@/components/ui/Badge";
-import RatingStars from "@/components/ui/RatingStars";
+import Image from "next/image";
+import { MapPin, Star, Coffee, ShieldCheck } from "lucide-react";
+import { cdn } from "@/lib/services/cloudinary";
+import type { HotelCardData } from "@/lib/services/public-hotels";
+import type { Stay } from "@/lib/utils/stay";
 
-interface HotelCardProps {
-  hotel: Hotel;
-}
+export default function HotelCard({
+  hotel,
+  stay,
+  guests,
+  rooms,
+  price,
+}: {
+  hotel: HotelCardData;
+  stay: Stay;
+  guests: string;
+  rooms: string;
+  /** Streamed separately so the card paints before pricing resolves. */
+  price: React.ReactNode;
+}) {
+  const href = `/hotels/${slugCity(hotel.city)}/${hotel.slug}?checkIn=${stay.checkIn}&checkOut=${stay.checkOut}&guests=${guests}&rooms=${rooms}`;
 
-export default function HotelCard({ hotel }: HotelCardProps) {
   return (
-    <Link
-      href={`/hotels/${hotel.id}`}
-      className="group block bg-white rounded-2xl border border-slate-200 hover:border-brand-300 hover:shadow-xl overflow-hidden transition-all duration-300"
-    >
+    <article className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-brand-300 hover:shadow-sm transition-all">
       <div className="flex flex-col sm:flex-row">
-        {/* Image */}
-        <div className="relative sm:w-64 shrink-0 h-52 sm:h-auto overflow-hidden">
-          <Image
-            src={hotel.images[0]}
-            alt={hotel.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, 256px"
-          />
-          {hotel.originalPrice && (
-            <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-              SALE
-            </div>
+        <Link href={href} className="sm:w-64 shrink-0 relative aspect-[4/3] sm:aspect-auto sm:self-stretch sm:min-h-44 bg-slate-100">
+          {hotel.image ? (
+            <Image
+              src={cdn(hotel.image, 512, 384)}
+              alt={hotel.name}
+              fill
+              sizes="(max-width: 640px) 100vw, 256px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-slate-100" aria-hidden="true" />
           )}
-          {/* Star category overlay */}
-          <div className="absolute bottom-3 left-3 flex gap-0.5">
-            {Array.from({ length: hotel.starCategory }).map((_, i) => (
-              <Star key={i} size={10} className="text-amber-400 fill-amber-400" />
-            ))}
-          </div>
-        </div>
+          {hotel.tags[0] && (
+            <span className="absolute top-2.5 left-2.5 bg-white/95 text-slate-700 text-[11px] font-bold px-2 py-1 rounded-lg">
+              {hotel.tags[0]}
+            </span>
+          )}
+        </Link>
 
-        {/* Content */}
-        <div className="flex-1 p-5 flex flex-col">
-          <div className="flex-1">
-            {/* Tags */}
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {hotel.tags.slice(0, 2).map((tag) => (
-                <Badge key={tag} variant="info" size="sm">{tag}</Badge>
+        <div className="flex-1 p-4 sm:p-5 flex flex-col sm:flex-row gap-4 min-w-0">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              {Array.from({ length: hotel.starCategory }).map((_, i) => (
+                <Star key={i} size={11} className="text-amber-400 fill-amber-400" aria-hidden="true" />
               ))}
-              {hotel.freeCancellation && (
-                <Badge variant="success" size="sm">Free Cancel</Badge>
-              )}
-              {hotel.breakfast && (
-                <Badge variant="warning" size="sm">Breakfast Incl.</Badge>
-              )}
+              <span className="sr-only">{hotel.starCategory}-star property</span>
             </div>
 
-            <h3 className="font-bold text-slate-900 text-lg leading-tight mb-1.5 group-hover:text-brand-700 transition-colors">
-              {hotel.name}
-            </h3>
+            <h2 className="font-bold text-slate-900 truncate">
+              <Link href={href} className="hover:text-brand-600 transition-colors">
+                {hotel.name}
+              </Link>
+            </h2>
 
-            <div className="flex items-center gap-1.5 text-slate-500 text-sm mb-3">
-              <MapPin size={13} />
-              <span>{hotel.location}</span>
-              <span className="text-slate-300">·</span>
-              <span className="text-slate-400 text-xs">{hotel.distanceFromCenter} km from center</span>
-            </div>
-
-            {/* Rating */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="bg-brand-700 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                {hotel.rating.toFixed(1)}
+            <p className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+              <MapPin size={12} className="shrink-0" aria-hidden="true" />
+              <span className="truncate">
+                {hotel.location}
+                {hotel.distanceFromCenter != null && ` · ${hotel.distanceFromCenter} km from centre`}
               </span>
-              <RatingStars rating={hotel.rating} size="sm" />
-              <span className="text-slate-500 text-xs">
-                {hotel.reviewCount.toLocaleString()} reviews
-              </span>
-            </div>
+            </p>
 
-            {/* Amenities */}
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {hotel.amenities.slice(0, 4).map((amenity) => (
-                <span
-                  key={amenity}
-                  className="flex items-center gap-1 text-xs text-slate-600 bg-slate-50 border border-slate-100 rounded-full px-2 py-0.5"
-                >
-                  <CheckCircle size={10} className="text-brand-400" />
-                  {amenity}
+            <p className="text-sm text-slate-600 mt-2 line-clamp-2">{hotel.description}</p>
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5">
+              {hotel.displayReviewCount > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <span className="bg-brand-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded tabular-nums">
+                    {hotel.displayRating.toFixed(1)}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {hotel.displayReviewCount.toLocaleString("en-BD")} reviews
+                  </span>
+                </span>
+              )}
+              {hotel.amenities.slice(0, 3).map((a) => (
+                <span key={a} className="text-[11px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md">
+                  {a}
                 </span>
               ))}
             </div>
 
-            <p className="text-slate-500 text-sm line-clamp-2">{hotel.description}</p>
+            <div className="flex flex-wrap gap-3 mt-2.5">
+              {hotel.freeCancellation && (
+                <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                  <ShieldCheck size={12} aria-hidden="true" /> Free cancellation
+                </span>
+              )}
+              {hotel.amenities.some((a) => /breakfast/i.test(a)) && (
+                <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                  <Coffee size={12} aria-hidden="true" /> Breakfast available
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Price & CTA */}
-          <div className="flex items-end justify-between mt-4 pt-4 border-t border-slate-100">
-            <div>
-              {hotel.originalPrice && (
-                <p className="text-xs text-slate-400 line-through">
-                  {formatCurrency(hotel.originalPrice, hotel.currency)}
-                </p>
-              )}
-              <p className="text-2xl font-bold text-slate-900">
-                {formatCurrency(hotel.pricePerNight, hotel.currency)}
-              </p>
-              <p className="text-xs text-slate-500">per night · excl. taxes</p>
-            </div>
-            <span className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition-colors">
-              View Rooms
-            </span>
+          <div className="sm:w-40 shrink-0 flex sm:flex-col items-end justify-between gap-2">
+            {price}
+            <Link
+              href={href}
+              className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+            >
+              See rooms
+            </Link>
           </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
+}
+
+function slugCity(city: string): string {
+  return city.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }

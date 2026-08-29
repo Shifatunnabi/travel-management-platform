@@ -7,6 +7,7 @@ import {
   ChevronDown, Search, MapPin, Plus, X,
 } from "lucide-react";
 import DatePicker from "@/components/ui/DatePicker";
+import { todayISO } from "@/lib/utils/formatters";
 
 type TripType = "one-way" | "round-trip" | "multi-city";
 const cabinClasses = ["Economy", "Business"];
@@ -29,9 +30,8 @@ function newLeg(): Leg & { key: number } {
   return { key: legIdCounter, from: "", to: "", departure: "" };
 }
 
-const today = new Date().toISOString().split("T")[0];
-
 export default function FlightSearchForm() {
+  const today = todayISO();
   const router = useRouter();
   const [tripType, setTripType] = useState<TripType>("one-way");
 
