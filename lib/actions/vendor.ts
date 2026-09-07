@@ -14,6 +14,7 @@ import { User } from "@/lib/models/User";
 import { tags } from "@/lib/cache/tags";
 import { uniqueSlug } from "@/lib/services/slug";
 import { audit } from "@/lib/services/audit";
+import { resolveRoom } from "@/lib/services/room-pricing";
 import { deleteAsset } from "@/lib/services/cloudinary";
 import { toNight, toDateKey } from "@/lib/services/inventory";
 import {
@@ -282,10 +283,17 @@ export async function saveRoomAction(
     maxAdults: d.maxAdults,
     maxChildren: d.maxChildren,
     basePrice: d.basePrice,
+    pricingMode: d.pricingMode,
     totalUnits: d.totalUnits,
+    breakfast: d.breakfast,
+    refundable: d.refundable,
+    cancellationHours: d.refundable ? d.cancellationHours : 0,
     amenities: d.amenities,
     images: d.images,
-    ratePlans: d.ratePlans,
+    options: d.options,
+    // Saving through the new editor retires whatever legacy plans were folded
+    // into the base price and extras above.
+    ratePlans: [],
   };
 
   if (roomId) {
@@ -335,14 +343,16 @@ export async function deleteImageAction(publicId: string): Promise<void> {
   await deleteAsset(publicId);
 }
 
-/** Keeps the denormalized `priceFrom` that search cards and sorting read. */
+/**
+ * Keeps the denormalized `priceFrom` that search cards and sorting read. It is
+ * the base price alone — extras are opt-in, so they must never raise the number
+ * a property advertises.
+ */
 async function refreshPriceFrom(hotelId: string): Promise<void> {
-  const rooms = await Room.find({ hotelId, status: "active" }).select("basePrice ratePlans").lean();
-  const prices = rooms.flatMap((r) =>
-    r.ratePlans.length
-      ? r.ratePlans.map((p) => r.basePrice + p.priceDelta)
-      : [r.basePrice],
-  );
+  const rooms = await Room.find({ hotelId, status: "active" })
+    .select("basePrice pricingMode breakfast refundable cancellationHours options ratePlans")
+    .lean();
+  const prices = rooms.map((r) => resolveRoom(r).basePrice);
   await Hotel.updateOne(
     { _id: hotelId },
     { $set: { priceFrom: prices.length ? Math.min(...prices) : 0 } },

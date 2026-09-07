@@ -2,10 +2,20 @@ import { z } from "zod";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a valid date");
 
+/** Extras arrive as a comma-separated list in the URL, or repeated in a form. */
+const optionCodes = z
+  .union([z.string(), z.array(z.string())])
+  .optional()
+  .transform((v) => {
+    if (!v) return [] as string[];
+    const list = Array.isArray(v) ? v : v.split(",");
+    return [...new Set(list.map((c) => c.trim()).filter(Boolean))].slice(0, 12);
+  });
+
 export const startBookingSchema = z
   .object({
     roomId: z.string().min(1, "Choose a room"),
-    plan: z.string().min(1, "Choose a rate plan"),
+    options: optionCodes,
     checkIn: isoDate,
     checkOut: isoDate,
     guests: z.coerce.number().int().min(1).max(30).default(2),

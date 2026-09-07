@@ -1,6 +1,8 @@
 /**
- * Resolves the stay dates for a search. Falls back to tomorrow + 2 nights when
- * the URL has none, so a bare /hotels/search still shows real prices.
+ * Resolves the stay dates for a search. Falls back to a single night starting
+ * tomorrow when the URL has none, so a bare /hotels/search still shows real
+ * prices — and the total it quotes matches the nightly rate beside it, rather
+ * than silently doubling it.
  */
 export interface Stay {
   checkIn: string;
@@ -39,7 +41,7 @@ export function defaultStay(checkIn?: string, checkOut?: string): Stay {
   if (inDate < today) inDate = tomorrow;
 
   let outDate =
-    checkOut && ISO.test(checkOut) ? new Date(`${checkOut}T00:00:00.000Z`) : new Date(inDate.getTime() + 2 * DAY);
+    checkOut && ISO.test(checkOut) ? new Date(`${checkOut}T00:00:00.000Z`) : new Date(inDate.getTime() + DAY);
   if (outDate <= inDate) outDate = new Date(inDate.getTime() + DAY);
 
   const nights = Math.round((outDate.getTime() - inDate.getTime()) / DAY);

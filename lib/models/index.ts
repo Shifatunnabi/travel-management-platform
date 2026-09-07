@@ -13,3 +13,4 @@ export * from "./Coupon";
 export * from "./AuditLog";
 export * from "./EmailLog";
 export * from "./Settings";
+export * from "./HomeContent";

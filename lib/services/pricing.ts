@@ -1,11 +1,23 @@
 import { connectDB } from "@/lib/db/connect";
 import { Coupon } from "@/lib/models/Coupon";
 import { Booking } from "@/lib/models/Booking";
-import type { NightRate } from "./inventory";
+import type { IRoomOption } from "@/lib/models/Room";
+
+export interface SelectedOption {
+  code: string;
+  label: string;
+  price: number;
+  per: "night" | "stay";
+  /** What this extra added to the booking, once nights and rooms are counted. */
+  amount: number;
+}
 
 export interface PriceBreakdown {
   nightlyRates: { date: Date; price: number }[];
   roomTotal: number;
+  options: SelectedOption[];
+  extrasTotal: number;
+  subtotal: number;
   taxes: number;
   serviceFee: number;
   discount: number;
@@ -17,35 +29,61 @@ export interface PriceBreakdown {
   vendorEarning: number;
 }
 
-/**
- * The single place a booking total is computed. Called when the hold is created
- * and again at payment, so a tampered form cannot change what is charged.
- */
-export function priceBooking({
-  nights,
-  units,
-  priceDelta,
-  taxPct,
-  serviceFee,
-  commissionPct,
-  discount = 0,
-  couponCode = null,
-  currency = "BDT",
-}: {
-  nights: NightRate[];
+export interface PriceInput {
+  /** The room's own rate for each night, for one room, before occupancy. */
+  nights: { date: Date; price: number }[];
+  /** How many rooms of this type. */
   units: number;
-  priceDelta: number;
+  /**
+   * Multiplier on the nightly rate. Always 1 for a room sold per room — which
+   * is the default — and the guest count only when the vendor charges per head.
+   */
+  occupancy?: number;
+  /** Extras the guest ticked. Additive on top of the room, never instead of it. */
+  options?: Pick<IRoomOption, "code" | "label" | "price" | "per">[];
   taxPct: number;
   serviceFee: number;
   commissionPct: number;
   discount?: number;
   couponCode?: string | null;
   currency?: string;
-}): PriceBreakdown {
-  const nightlyRates = nights.map((n) => ({ date: n.date, price: n.price + priceDelta }));
+}
+
+/**
+ * The single place a booking total is computed. Called when the hold is created
+ * and again at payment, so a tampered form cannot change what is charged.
+ *
+ * The shape is deliberately flat: one room rate, multiplied by nights, rooms and
+ * — only if the vendor asked for it — guests, then the chosen extras added on.
+ */
+export function priceBooking({
+  nights,
+  units,
+  occupancy = 1,
+  options = [],
+  taxPct,
+  serviceFee,
+  commissionPct,
+  discount = 0,
+  couponCode = null,
+  currency = "BDT",
+}: PriceInput): PriceBreakdown {
+  const nightCount = nights.length;
+  const nightlyRates = nights.map((n) => ({ date: n.date, price: n.price * occupancy }));
   const roomTotal = nightlyRates.reduce((sum, n) => sum + n.price, 0) * units;
-  const cappedDiscount = Math.min(Math.max(0, Math.round(discount)), roomTotal);
-  const taxable = roomTotal - cappedDiscount;
+
+  const selected: SelectedOption[] = options.map((o) => ({
+    code: o.code,
+    label: o.label,
+    price: o.price,
+    per: o.per,
+    amount: o.price * (o.per === "night" ? nightCount : 1) * units,
+  }));
+  const extrasTotal = selected.reduce((sum, o) => sum + o.amount, 0);
+
+  const subtotal = roomTotal + extrasTotal;
+  const cappedDiscount = Math.min(Math.max(0, Math.round(discount)), subtotal);
+  const taxable = subtotal - cappedDiscount;
   const taxes = Math.round(taxable * (taxPct / 100));
   const grandTotal = taxable + taxes + serviceFee;
 
@@ -55,6 +93,9 @@ export function priceBooking({
   return {
     nightlyRates,
     roomTotal,
+    options: selected,
+    extrasTotal,
+    subtotal,
     taxes,
     serviceFee,
     discount: cappedDiscount,

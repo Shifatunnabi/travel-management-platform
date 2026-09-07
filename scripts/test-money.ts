@@ -105,19 +105,36 @@ async function main() {
     { date: new Date(), price: 10_000, unitsFree: 5, closed: false, minStay: 1 },
     { date: new Date(), price: 12_000, unitsFree: 5, closed: false, minStay: 1 },
   ];
+  const breakfast = {
+    code: "breakfast", label: "Breakfast", price: 500, per: "night" as const,
+    breakfast: true, refundable: false, cancellationHours: 0,
+  };
   const p = priceBooking({
-    nights, units: 1, priceDelta: 500, taxPct: 5, serviceFee: 0,
+    nights, units: 1, options: [breakfast], taxPct: 5, serviceFee: 0,
     commissionPct: 15, discount: 500, couponCode: "TOFIZA500",
   });
-  check("room total sums per-night rates plus delta", p.roomTotal === 23_000, String(p.roomTotal));
+  check("room total is the nightly rates alone", p.roomTotal === 22_000, String(p.roomTotal));
+  check("extras are added on top, not folded in", p.extrasTotal === 1_000, String(p.extrasTotal));
+  check("subtotal is room plus extras", p.subtotal === 23_000, String(p.subtotal));
   check("tax applies after the discount", p.taxes === Math.round((23_000 - 500) * 0.05), String(p.taxes));
   check("grand total is consistent",
     p.grandTotal === 23_000 - 500 + p.taxes, String(p.grandTotal));
   check("commission plus earning equals the total",
     p.commissionAmount + p.vendorEarning === p.grandTotal,
     `${p.commissionAmount} + ${p.vendorEarning}`);
-  const capped = priceBooking({ nights, units: 1, priceDelta: 0, taxPct: 5, serviceFee: 0, commissionPct: 15, discount: 999_999 });
-  check("a discount cannot exceed the room total", capped.discount === 22_000, String(capped.discount));
+
+  const perRoom = priceBooking({ nights, units: 1, taxPct: 0, serviceFee: 0, commissionPct: 15 });
+  const twoGuests = priceBooking({ nights, units: 1, occupancy: 2, taxPct: 0, serviceFee: 0, commissionPct: 15 });
+  check("a second guest does not change a per-room rate",
+    perRoom.roomTotal === 22_000, String(perRoom.roomTotal));
+  check("per-person pricing is opt-in, and then doubles for two",
+    twoGuests.roomTotal === 44_000, String(twoGuests.roomTotal));
+
+  const twoRooms = priceBooking({ nights, units: 2, taxPct: 0, serviceFee: 0, commissionPct: 15 });
+  check("two rooms cost twice one room", twoRooms.roomTotal === 44_000, String(twoRooms.roomTotal));
+
+  const capped = priceBooking({ nights, units: 1, taxPct: 5, serviceFee: 0, commissionPct: 15, discount: 999_999 });
+  check("a discount cannot exceed the booking value", capped.discount === 22_000, String(capped.discount));
 
   console.log("\nVendor isolation");
   const theirHotels = await Hotel.countDocuments({ vendorId: other!._id });

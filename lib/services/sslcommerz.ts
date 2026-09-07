@@ -7,6 +7,20 @@ function base(): string {
   return env.SSLCOMMERZ_IS_LIVE ? LIVE : SANDBOX;
 }
 
+/**
+ * SSLCommerz refuses a session on `product_profile: "travel-vertical"` unless
+ * the stay is described too — it answers "Invalid Information! 'hotel_name' is
+ * missing." Every field in here is mandatory once that profile is used.
+ */
+export interface StayDetails {
+  hotelName: string;
+  hotelCity: string;
+  /** Nights booked. */
+  lengthOfStay: number;
+  /** Free text; the gateway only checks that it is present. */
+  checkInTime: string;
+}
+
 export interface SessionInput {
   tranId: string;
   amount: number;
@@ -16,6 +30,8 @@ export interface SessionInput {
   customerEmail: string;
   customerPhone: string;
   productName: string;
+  /** Omit for anything that is not a stay — the session then goes as "general". */
+  stay?: StayDetails;
 }
 
 export interface SessionResult {
@@ -56,10 +72,17 @@ export async function createSession(input: SessionInput): Promise<SessionResult>
     cus_country: "Bangladesh",
     shipping_method: "NO",
     product_name: input.productName,
-    product_category: "Accommodation",
-    product_profile: "travel-vertical",
+    product_category: input.stay ? "Accommodation" : "General",
+    product_profile: input.stay ? "travel-vertical" : "general",
     value_a: input.bookingRef,
   });
+
+  if (input.stay) {
+    body.set("hotel_name", input.stay.hotelName);
+    body.set("hotel_city", input.stay.hotelCity);
+    body.set("length_of_stay", String(input.stay.lengthOfStay));
+    body.set("check_in_time", input.stay.checkInTime);
+  }
 
   try {
     const res = await fetch(`${base()}/gwprocess/v4/api.php`, {

@@ -5,6 +5,7 @@ import { CalendarRange, Pencil } from "lucide-react";
 import { PageHeader, Card, StatusPill } from "@/components/admin/Shell";
 import { requireVendor } from "@/lib/auth/guards";
 import { getVendorHotel, listHotelRooms } from "@/lib/services/vendor-data";
+import { resolveRoom } from "@/lib/services/room-pricing";
 import RoomManager from "@/components/vendor/RoomManager";
 
 export default function HotelRoomsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -73,14 +74,18 @@ async function RoomsBody({ params }: { params: Promise<{ id: string }> }) {
           sizeSqm: r.sizeSqm,
           maxAdults: r.maxAdults,
           maxChildren: r.maxChildren,
-          basePrice: r.basePrice,
           totalUnits: r.totalUnits,
           amenities: r.amenities,
           status: r.status,
           images: r.images.map((i) => ({
             publicId: i.publicId, url: i.url, width: i.width, height: i.height, alt: i.alt,
           })),
-          ratePlans: r.ratePlans.map((p) => ({ ...p })),
+          // Rooms still on the old rate-plan shape are folded down to one base
+          // price plus extras, so the editor never shows two competing models.
+          ...(({ basePrice, pricingMode, breakfast, refundable, cancellationHours, options }) => ({
+            basePrice, pricingMode, breakfast, refundable, cancellationHours,
+            options: options.map((o) => ({ ...o })),
+          }))(resolveRoom(r)),
         }))}
       />
     </>

@@ -9,12 +9,15 @@ import { Review } from "@/lib/models/Review";
 import { Vendor } from "@/lib/models/Vendor";
 import { User } from "@/lib/models/User";
 import { Settings } from "@/lib/models/Settings";
+import { Destination, Offer } from "@/lib/models/HomeContent";
 import { tags } from "@/lib/cache/tags";
 import { audit } from "@/lib/services/audit";
 import { readSettings } from "@/lib/services/settings";
 import { sendMail } from "@/lib/services/mailer";
 import { vendorStatusTemplate } from "@/lib/services/email-templates";
 import {
+  destinationSchema,
+  offerSchema,
   hotelModerationSchema,
   ratingAdjustmentSchema,
   reviewModerationSchema,
@@ -389,4 +392,91 @@ export async function setUserStatusAction(
   });
   revalidatePath("/admin/users");
   return succeed(suspended ? "Account suspended." : "Account reinstated.");
+}
+
+// ─── Homepage content ────────────────────────────────────────────────────────
+
+/**
+ * Popular destinations and special offers are curated here rather than shipped
+ * as fixtures, so marketing can change a price or pull an expired promo without
+ * a deploy. Both rails are cached under the `home` tag and updated on save.
+ */
+export async function saveDestinationAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const admin = await requirePlatform(["super_admin", "ops"]);
+  const parsed = parseForm(destinationSchema, formData);
+  if (!parsed.ok) return parsed.state;
+
+  const { id, images, ...d } = parsed.data;
+  await connectDB();
+  const fields = { ...d, image: images[0] };
+
+  if (id) {
+    const updated = await Destination.findByIdAndUpdate(id, { $set: fields }, { new: true });
+    if (!updated) return fail("That destination no longer exists.");
+    await audit({ actor: admin, action: "destination.update", entity: "Destination", entityId: id });
+  } else {
+    const created = await Destination.create(fields);
+    await audit({ actor: admin, action: "destination.create", entity: "Destination", entityId: String(created._id) });
+  }
+
+  updateTag(tags.home());
+  revalidatePath("/admin/content");
+  revalidatePath("/");
+  return succeed(id ? "Destination saved." : "Destination added.");
+}
+
+export async function deleteDestinationAction(id: string): Promise<ActionState> {
+  const admin = await requirePlatform(["super_admin", "ops"]);
+  await connectDB();
+  const removed = await Destination.findByIdAndDelete(id);
+  if (!removed) return fail("That destination no longer exists.");
+
+  await audit({ actor: admin, action: "destination.delete", entity: "Destination", entityId: id });
+  updateTag(tags.home());
+  revalidatePath("/admin/content");
+  revalidatePath("/");
+  return succeed("Destination removed.");
+}
+
+export async function saveOfferAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const admin = await requirePlatform(["super_admin", "ops"]);
+  const parsed = parseForm(offerSchema, formData);
+  if (!parsed.ok) return parsed.state;
+
+  const { id, images, expiresAt, ...d } = parsed.data;
+  await connectDB();
+  const fields = { ...d, image: images[0], expiresAt: new Date(`${expiresAt}T23:59:59.000Z`) };
+
+  if (id) {
+    const updated = await Offer.findByIdAndUpdate(id, { $set: fields }, { new: true });
+    if (!updated) return fail("That offer no longer exists.");
+    await audit({ actor: admin, action: "offer.update", entity: "Offer", entityId: id });
+  } else {
+    const created = await Offer.create(fields);
+    await audit({ actor: admin, action: "offer.create", entity: "Offer", entityId: String(created._id) });
+  }
+
+  updateTag(tags.home());
+  revalidatePath("/admin/content");
+  revalidatePath("/");
+  return succeed(id ? "Offer saved." : "Offer added.");
+}
+
+export async function deleteOfferAction(id: string): Promise<ActionState> {
+  const admin = await requirePlatform(["super_admin", "ops"]);
+  await connectDB();
+  const removed = await Offer.findByIdAndDelete(id);
+  if (!removed) return fail("That offer no longer exists.");
+
+  await audit({ actor: admin, action: "offer.delete", entity: "Offer", entityId: id });
+  updateTag(tags.home());
+  revalidatePath("/admin/content");
+  revalidatePath("/");
+  return succeed("Offer removed.");
 }

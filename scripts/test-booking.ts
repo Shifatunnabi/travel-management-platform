@@ -35,15 +35,20 @@ async function main() {
   const hotel = await Hotel.findOne({ name: /Peninsula/ }).lean();
   const room = await Room.findOne({ hotelId: hotel!._id, name: /Superior/ }).lean();
   const roomId = String(room!._id);
-  const checkIn = day(20);
-  const checkOut = day(22);
+  // Anchored to a Friday so the window always straddles the seeded weekend
+  // uplift — otherwise this run passes or fails depending on the day it runs.
+  const firstFriday = [20, 21, 22, 23, 24, 25, 26].find(
+    (n) => new Date(`${day(n)}T00:00:00.000Z`).getUTCDay() === 5,
+  )!;
+  const checkIn = day(firstFriday);
+  const checkOut = day(firstFriday + 2);
 
   console.log(`\nRoom: ${room!.name} (${room!.totalUnits} units) · ${checkIn} → ${checkOut}`);
 
   // clean slate for this window
   await Booking.deleteMany({ roomId: room!._id, checkIn: { $gte: toNight(checkIn) } });
   await RoomInventory.updateMany(
-    { roomId: room!._id, date: { $gte: toNight(checkIn), $lt: toNight(day(23)) } },
+    { roomId: room!._id, date: { $gte: toNight(checkIn), $lt: toNight(day(firstFriday + 3)) } },
     { $set: { unitsHeld: 0, unitsBooked: 0, closed: false } },
   );
 
@@ -52,7 +57,7 @@ async function main() {
 
   console.log("Holding");
   const ref = await startBooking({
-    roomId, ratePlanCode: "breakfast", checkIn, checkOut,
+    roomId, optionCodes: ["breakfast"], checkIn, checkOut,
     units: 1, adults: 2, children: 0,
   });
   check("startBooking returns a reference", /^TFZ[A-Z0-9]{6}$/.test(ref), ref);
@@ -72,10 +77,21 @@ async function main() {
     roomId: room!._id,
     date: { $gte: toNight(checkIn), $lt: toNight(checkOut) },
   }).sort({ date: 1 }).lean();
-  const expected = rows.reduce((sum, r) => sum + (r.priceOverride ?? room!.basePrice) + 900, 0);
-  check("price follows per-night rates plus the plan delta",
-    booking!.pricing.roomTotal === expected,
-    `${booking!.pricing.roomTotal} = ${rows.map((r) => (r.priceOverride ?? room!.basePrice) + 900).join(" + ")}`);
+  const expectedRoom = rows.reduce((sum, r) => sum + (r.priceOverride ?? room!.basePrice), 0);
+  check("room total follows per-night rates, and nothing else",
+    booking!.pricing.roomTotal === expectedRoom,
+    `${booking!.pricing.roomTotal} = ${rows.map((r) => r.priceOverride ?? room!.basePrice).join(" + ")}`);
+
+  const breakfast = room!.options.find((o) => o.code === "breakfast")!;
+  check("the chosen extra is added on top, not folded into the rate",
+    booking!.pricing.extrasTotal === breakfast.price * rows.length,
+    `${booking!.pricing.extrasTotal} = ${breakfast.price} x ${rows.length} nights`);
+  check("subtotal is the room plus its extras",
+    booking!.pricing.subtotal === expectedRoom + booking!.pricing.extrasTotal,
+    String(booking!.pricing.subtotal));
+  check("a room is never priced per head",
+    booking!.pricing.roomTotal === expectedRoom && booking!.guests.adults === 2,
+    "2 guests, one room rate");
   check("weekend uplift is actually applied",
     rows.some((r) => r.priceOverride != null),
     rows.map((r) => `${toDateKey(r.date)}:${r.priceOverride ?? "base"}`).join(" "));
@@ -90,7 +106,7 @@ async function main() {
   );
   let blocked = false;
   try {
-    await startBooking({ roomId, ratePlanCode: "room-only", checkIn, checkOut, units: 1, adults: 2, children: 0 });
+    await startBooking({ roomId, checkIn, checkOut, units: 1, adults: 2, children: 0 });
   } catch (e) {
     blocked = e instanceof BookingError || e instanceof InventoryConflictError;
   }
@@ -131,7 +147,7 @@ async function main() {
   const offers = await getRoomOffers(String(hotel!._id), checkIn, checkOut, 1);
   const thisRoom = offers[roomId];
   check("the sold-out room is offered as unavailable",
-    thisRoom.every((o) => !o.available), thisRoom[0]?.reason ?? "");
+    !thisRoom.available, thisRoom.reason ?? "");
 
   console.log("\nCancelling");
   await cancelBooking(String(booking!._id), { id: null, role: "test" }, "automated test");
@@ -147,7 +163,7 @@ async function main() {
 
   console.log("\nHold expiry");
   const ref2 = await startBooking({
-    roomId, ratePlanCode: "room-only", checkIn, checkOut, units: 1, adults: 2, children: 0,
+    roomId, checkIn, checkOut, units: 1, adults: 2, children: 0,
   });
   await Booking.updateOne({ ref: ref2 }, { $set: { holdExpiresAt: new Date(Date.now() - 1000) } });
   const released = await releaseExpiredHolds();
@@ -162,7 +178,7 @@ async function main() {
   await Payment.deleteMany({ tranId: `TEST-${ref}` });
   await LedgerEntry.deleteMany({ bookingId: booking!._id });
   await RoomInventory.updateMany(
-    { roomId: room!._id, date: { $gte: toNight(checkIn), $lt: toNight(day(23)) } },
+    { roomId: room!._id, date: { $gte: toNight(checkIn), $lt: toNight(day(firstFriday + 3)) } },
     { $set: { unitsTotal: room!.totalUnits, unitsHeld: 0, unitsBooked: 0 } },
   );
 

@@ -8,6 +8,7 @@ import { Coupon } from "@/lib/models/Coupon";
 import { LedgerEntry } from "@/lib/models/Ledger";
 import { readSettings } from "./settings";
 import { priceBooking } from "./pricing";
+import { describeSelection, occupancyFor, pickOptions, policyWith, resolveRoom } from "./room-pricing";
 import {
   checkAvailability, commitHold, countNights, holdUnits,
   InventoryConflictError, releaseBooked, releaseHold, toNight,
@@ -20,7 +21,8 @@ export class BookingError extends Error {}
 
 export interface StartBookingInput {
   roomId: string;
-  ratePlanCode: string;
+  /** Codes of the extras the guest ticked. Empty means the room on its own. */
+  optionCodes?: string[];
   checkIn: string;
   checkOut: string;
   units: number;
@@ -44,8 +46,13 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
   const hotel = await Hotel.findOne({ _id: room.hotelId, status: "published" }).lean();
   if (!hotel) throw new BookingError("That property is not accepting bookings.");
 
-  const plan = room.ratePlans.find((p) => p.code === input.ratePlanCode);
-  if (!plan) throw new BookingError("That rate plan is no longer offered.");
+  const resolved = resolveRoom(room);
+  const options = pickOptions(resolved, input.optionCodes ?? []);
+  const unknown = (input.optionCodes ?? []).filter(
+    (code) => !options.some((o) => o.code === code),
+  );
+  if (unknown.length) throw new BookingError("One of those extras is no longer offered.");
+  const policy = policyWith(resolved, options);
 
   const checkIn = toNight(input.checkIn);
   const checkOut = toNight(input.checkOut);
@@ -71,7 +78,8 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
   const pricing = priceBooking({
     nights: availability.nights,
     units: input.units,
-    priceDelta: plan.priceDelta,
+    occupancy: occupancyFor(resolved.pricingMode, input.adults + input.children),
+    options,
     taxPct: settings.taxPct,
     serviceFee: settings.serviceFee,
     commissionPct: vendor.commissionPct ?? settings.defaultCommissionPct,
@@ -92,7 +100,7 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
           hotelId: hotel._id,
           vendorId: hotel.vendorId,
           roomId: room._id,
-          ratePlanCode: plan.code,
+          ratePlanCode: "base",
           snapshot: {
             hotelName: hotel.name,
             hotelSlug: hotel.slug,
@@ -100,10 +108,10 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
             hotelAddress: hotel.address,
             hotelImage: hotel.images[0]?.url,
             roomName: room.name,
-            ratePlanName: plan.name,
-            breakfast: plan.breakfast,
-            refundable: plan.refundable,
-            cancellationHours: plan.cancellationHours,
+            ratePlanName: describeSelection(resolved, options),
+            breakfast: policy.breakfast,
+            refundable: policy.refundable,
+            cancellationHours: policy.cancellationHours,
           },
           checkIn,
           checkOut,

@@ -8,9 +8,22 @@ export interface IBookingTimelineEntry {
   note?: string;
 }
 
+export interface IBookingSelectedOption {
+  code: string;
+  label: string;
+  price: number;
+  per: "night" | "stay";
+  /** What it added once nights and rooms were counted. */
+  amount: number;
+}
+
 export interface IBookingPricing {
   nightlyRates: { date: Date; price: number }[];
   roomTotal: number;
+  /** The extras the guest ticked, frozen with what each one cost. */
+  options: IBookingSelectedOption[];
+  extrasTotal: number;
+  subtotal: number;
   taxes: number;
   serviceFee: number;
   discount: number;
@@ -30,6 +43,7 @@ export interface IBooking {
   hotelId: Types.ObjectId;
   vendorId: Types.ObjectId;
   roomId: Types.ObjectId;
+  /** @deprecated Legacy bookings only — extras now live in `pricing.options`. */
   ratePlanCode: string;
   /** Snapshot so a renamed room or hotel does not rewrite an old voucher. */
   snapshot: {
@@ -79,7 +93,7 @@ const bookingSchema = new Schema<IBooking>(
     hotelId: { type: Schema.Types.ObjectId, ref: "Hotel", required: true, index: true },
     vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true, index: true },
     roomId: { type: Schema.Types.ObjectId, ref: "Room", required: true },
-    ratePlanCode: { type: String, required: true },
+    ratePlanCode: { type: String, default: "base" },
     snapshot: {
       hotelName: { type: String, required: true },
       hotelSlug: { type: String, required: true },
@@ -111,6 +125,23 @@ const bookingSchema = new Schema<IBooking>(
         new Schema({ date: Date, price: Number }, { _id: false }),
       ],
       roomTotal: { type: Number, required: true },
+      options: {
+        type: [
+          new Schema<IBookingSelectedOption>(
+            {
+              code: String,
+              label: String,
+              price: Number,
+              per: { type: String, enum: ["night", "stay"], default: "night" },
+              amount: Number,
+            },
+            { _id: false },
+          ),
+        ],
+        default: [],
+      },
+      extrasTotal: { type: Number, default: 0 },
+      subtotal: { type: Number, default: 0 },
       taxes: { type: Number, default: 0 },
       serviceFee: { type: Number, default: 0 },
       discount: { type: Number, default: 0 },

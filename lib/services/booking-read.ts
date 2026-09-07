@@ -24,6 +24,10 @@ export interface CheckoutBooking {
   guestDetails: { fullName: string; email: string; phone: string; specialRequests?: string };
   pricing: {
     roomTotal: number;
+    /** Per room, per night — what roomTotal divides back into. */
+    nightlyRate: number;
+    options: { code: string; label: string; amount: number }[];
+    extrasTotal: number;
     taxes: number;
     serviceFee: number;
     discount: number;
@@ -76,6 +80,18 @@ export async function getCheckoutBooking(ref: string): Promise<CheckoutBooking |
     guestDetails: booking.guestDetails,
     pricing: {
       roomTotal: booking.pricing.roomTotal,
+      nightlyRate: booking.pricing.nightlyRates.length
+        ? Math.round(
+            booking.pricing.nightlyRates.reduce((sum, n) => sum + n.price, 0) /
+              booking.pricing.nightlyRates.length,
+          )
+        : 0,
+      options: (booking.pricing.options ?? []).map((o) => ({
+        code: o.code,
+        label: o.label,
+        amount: o.amount,
+      })),
+      extrasTotal: booking.pricing.extrasTotal ?? 0,
       taxes: booking.pricing.taxes,
       serviceFee: booking.pricing.serviceFee,
       discount: booking.pricing.discount,

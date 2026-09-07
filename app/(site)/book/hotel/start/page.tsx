@@ -43,7 +43,7 @@ async function Hold({
   try {
     ref = await startBooking({
       roomId: d.roomId,
-      ratePlanCode: d.plan,
+      optionCodes: d.options,
       checkIn: d.checkIn,
       checkOut: d.checkOut,
       units: d.rooms,

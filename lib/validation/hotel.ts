@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PROPERTY_TYPES } from "@/lib/models/types";
+import { PRICING_MODES } from "@/lib/models/Room";
 
 export const imageSchema = z.object({
   publicId: z.string().min(1),
@@ -58,26 +59,34 @@ export const hotelSchema = z.object({
   extraNotes: z.string().max(1000).optional(),
 });
 
-export const ratePlanSchema = z.object({
+/** One tickable extra on top of the room's base price. */
+export const roomOptionSchema = z.object({
   code: z.string().regex(/^[a-z0-9-]{2,30}$/, "Lowercase letters, numbers and dashes"),
-  name: z.string().min(2).max(60),
+  label: z.string().min(2).max(60),
+  description: z.string().max(200).optional(),
+  price: z.number().int().min(0, "An extra cannot be negative").max(1_000_000),
+  per: z.enum(["night", "stay"]),
   breakfast: z.boolean(),
   refundable: z.boolean(),
-  priceDelta: z.number().int().min(-100000).max(100000),
   cancellationHours: z.number().int().min(0).max(720),
 });
 
-export const ratePlansField = z
+export const roomOptionsField = z
   .string()
+  .default("[]")
   .transform((raw, ctx) => {
     try {
       return JSON.parse(raw || "[]");
     } catch {
-      ctx.addIssue({ code: "custom", message: "Could not read the rate plans." });
+      ctx.addIssue({ code: "custom", message: "Could not read the extras." });
       return z.NEVER;
     }
   })
-  .pipe(z.array(ratePlanSchema).min(1, "Add at least one rate plan").max(8));
+  .pipe(z.array(roomOptionSchema).max(10, "Up to 10 extras per room"))
+  .refine(
+    (list) => new Set(list.map((o) => o.code)).size === list.length,
+    "Two extras cannot share the same code",
+  );
 
 export const roomSchema = z.object({
   name: z.string().min(2, "Room name is required").max(90),
@@ -87,10 +96,14 @@ export const roomSchema = z.object({
   maxAdults: z.coerce.number().int().min(1).max(20),
   maxChildren: z.coerce.number().int().min(0).max(20),
   basePrice: z.coerce.number().int().min(100, "Minimum ৳100 per night").max(1_000_000),
+  pricingMode: z.enum(PRICING_MODES).default("per_room"),
   totalUnits: z.coerce.number().int().min(1, "At least one room").max(500),
+  breakfast: z.stringbool().default(false),
+  refundable: z.stringbool().default(false),
+  cancellationHours: z.coerce.number().int().min(0).max(720).default(24),
   amenities: csv(30, "amenities"),
   images: imagesField,
-  ratePlans: ratePlansField,
+  options: roomOptionsField,
 });
 
 export const inventoryBulkSchema = z

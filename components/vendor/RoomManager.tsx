@@ -118,13 +118,22 @@ export default function RoomManager({ hotelId, rooms }: { hotelId: string; rooms
                       </span>
                     </p>
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {room.ratePlans.map((p) => (
+                      <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                        {room.breakfast ? "Bed & breakfast" : "Room only"}
+                      </span>
+                      <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                        {room.refundable
+                          ? `Free cancellation ${room.cancellationHours}h before`
+                          : "Non-refundable"}
+                      </span>
+                      {room.options.map((o) => (
                         <span
-                          key={p.code}
-                          className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md"
-                          title={p.refundable ? `Free cancellation up to ${p.cancellationHours}h before` : "Non-refundable"}
+                          key={o.code}
+                          className="text-[11px] bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md"
+                          title={o.description}
                         >
-                          {p.name} · {formatCurrency(room.basePrice + p.priceDelta)}
+                          + {o.label} · {formatCurrency(o.price)}
+                          {o.per === "night" ? " / night" : ""}
                         </span>
                       ))}
                     </div>
@@ -133,6 +142,9 @@ export default function RoomManager({ hotelId, rooms }: { hotelId: string; rooms
                   <div className="text-right shrink-0">
                     <p className="font-bold text-slate-900 tabular-nums">
                       {formatCurrency(room.basePrice)}
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      per night / {room.pricingMode === "per_person" ? "guest" : "room"}
                     </p>
                     <p className="text-[11px] text-slate-400">
                       {room.totalUnits} room{room.totalUnits === 1 ? "" : "s"}
