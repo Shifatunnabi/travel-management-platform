@@ -62,20 +62,5 @@ export async function deleteAsset(publicId: string): Promise<boolean> {
   }
 }
 
-/**
- * Rewrites a Cloudinary delivery URL with sizing and automatic format/quality.
- * Non-Cloudinary URLs (seeded Unsplash images) pass through untouched.
- */
-export function cdn(url: string, width: number, height?: number): string {
-  if (!url.includes("/res.cloudinary.com/") || !url.includes("/upload/")) return url;
-  const transform = [
-    `w_${width}`,
-    height ? `h_${height}` : null,
-    height ? "c_fill" : "c_limit",
-    "f_auto",
-    "q_auto",
-  ]
-    .filter(Boolean)
-    .join(",");
-  return url.replace("/upload/", `/upload/${transform}/`);
-}
+/** Re-exported so existing server callers keep their import path. */
+export { cdn } from "@/lib/utils/cdn";

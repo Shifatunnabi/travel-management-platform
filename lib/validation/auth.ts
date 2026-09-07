@@ -5,6 +5,16 @@ export const credentialsSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+/**
+ * A form checkbox arrives as the string "true"/"on", or is missing entirely
+ * when unticked — never as a boolean. Coerce before asserting it was accepted.
+ */
+const acceptedCheckbox = (message: string) =>
+  z.preprocess(
+    (v) => v === true || v === "true" || v === "on" || v === "1",
+    z.literal(true, { error: message }),
+  );
+
 export const passwordSchema = z
   .string()
   .min(8, "Use at least 8 characters")
@@ -23,7 +33,7 @@ export const registerSchema = z
       .regex(/^[+0-9\s-()]+$/, "Enter a valid phone number"),
     password: passwordSchema,
     confirmPassword: z.string(),
-    acceptTerms: z.literal(true, { error: "Please accept the terms to continue" }),
+    acceptTerms: acceptedCheckbox("Please accept the terms to continue"),
   })
   .refine((d) => d.password === d.confirmPassword, {
     message: "Passwords do not match",

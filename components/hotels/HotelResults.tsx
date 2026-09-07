@@ -17,6 +17,7 @@ export default function HotelResults({
 }) {
   const stay = defaultStay(params.checkIn, params.checkOut);
   const units = Number(params.rooms ?? "1") || 1;
+  const headcount = Number(params.guests ?? "2") || 1;
 
   return (
     <div className="flex gap-6">
@@ -49,7 +50,13 @@ export default function HotelResults({
            * nesting a boundary inside streamed PPR content breaks hydration.
            */
           <Suspense fallback={<CardList hotels={hotels} stay={stay} params={params} />}>
-            <PricedCardList hotels={hotels} stay={stay} params={params} units={units} />
+            <PricedCardList
+              hotels={hotels}
+              stay={stay}
+              params={params}
+              units={units}
+              guests={headcount}
+            />
           </Suspense>
         )}
       </div>
@@ -91,12 +98,14 @@ async function PricedCardList({
   stay,
   params,
   units,
-}: ListProps & { units: number }) {
+  guests,
+}: ListProps & { units: number; guests: number }) {
   const pricing = await getLivePricing(
     hotels.map((h) => h.id),
     stay.checkIn,
     stay.checkOut,
     units,
+    guests,
   );
   return <CardList hotels={hotels} stay={stay} params={params} pricing={pricing} />;
 }

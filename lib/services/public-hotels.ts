@@ -5,7 +5,9 @@ import { Hotel } from "@/lib/models/Hotel";
 import { Room } from "@/lib/models/Room";
 import { Review } from "@/lib/models/Review";
 import { tags } from "@/lib/cache/tags";
+import type { PricingMode } from "@/lib/models/Room";
 import { checkAvailability, countNights, toNight } from "./inventory";
+import { occupancyFor, resolveRoom } from "./room-pricing";
 
 export interface HotelCardData {
   id: string;
@@ -180,20 +182,23 @@ export async function getHotelBySlug(slug: string) {
     displayReviewCount: hotel.displayReviewCount,
     priceFrom: hotel.priceFrom,
     currency: hotel.currency,
-    rooms: rooms.map((r) => ({
-      id: String(r._id),
-      name: r.name,
-      description: r.description,
-      bedType: r.bedType,
-      sizeSqm: r.sizeSqm,
-      maxAdults: r.maxAdults,
-      maxChildren: r.maxChildren,
-      basePrice: r.basePrice,
-      totalUnits: r.totalUnits,
-      images: r.images.map((i) => i.url),
-      amenities: r.amenities,
-      ratePlans: r.ratePlans.map((p) => ({ ...p })),
-    })),
+    rooms: rooms.map((r) => {
+      const resolved = resolveRoom(r);
+      return {
+        id: String(r._id),
+        name: r.name,
+        description: r.description,
+        bedType: r.bedType,
+        sizeSqm: r.sizeSqm,
+        maxAdults: r.maxAdults,
+        maxChildren: r.maxChildren,
+        basePrice: resolved.basePrice,
+        pricingMode: resolved.pricingMode,
+        totalUnits: r.totalUnits,
+        images: r.images.map((i) => i.url),
+        amenities: r.amenities,
+      };
+    }),
   };
 }
 
@@ -238,22 +243,45 @@ export async function getRatingBreakdown(hotelId: string) {
   return [5, 4, 3, 2, 1].map((star) => ({ star, count: map.get(star) ?? 0 }));
 }
 
-export interface RoomOffer {
-  roomId: string;
-  ratePlanCode: string;
-  ratePlanName: string;
+/** One extra a guest can tick, priced for the dates actually being booked. */
+export interface RoomOptionOffer {
+  code: string;
+  label: string;
+  description?: string;
+  price: number;
+  per: "night" | "stay";
+  /** What ticking it adds to this stay, across all rooms booked. */
+  amount: number;
   breakfast: boolean;
   refundable: boolean;
   cancellationHours: number;
+}
+
+/**
+ * A room has exactly one price. Everything else a guest might want is an extra
+ * they add on top of it, one by one.
+ */
+export interface RoomOffer {
+  roomId: string;
+  pricingMode: PricingMode;
+  /** Per night, per room, with per-person occupancy already applied. */
   nightlyAverage: number;
+  /** The room itself for the whole stay: nightly x nights x rooms. */
   total: number;
+  nights: number;
+  units: number;
+  guests: number;
+  breakfast: boolean;
+  refundable: boolean;
+  cancellationHours: number;
+  options: RoomOptionOffer[];
   available: boolean;
   reason?: string;
   unitsLeft: number;
 }
 
 /**
- * Live pricing and availability for every room and rate plan over a date range.
+ * Live pricing and availability for every room over a date range.
  * Never cached — a stale price here is a support ticket.
  */
 export async function getRoomOffers(
@@ -261,39 +289,52 @@ export async function getRoomOffers(
   checkIn: string,
   checkOut: string,
   units = 1,
-): Promise<Record<string, RoomOffer[]>> {
+  guests = 1,
+): Promise<Record<string, RoomOffer>> {
   await connectDB();
   const rooms = await Room.find({ hotelId, status: "active" }).lean();
   const from = toNight(checkIn);
   const to = toNight(checkOut);
   const nights = countNights(from, to);
-  const result: Record<string, RoomOffer[]> = {};
+  const result: Record<string, RoomOffer> = {};
 
   for (const room of rooms) {
+    const resolved = resolveRoom(room);
+    const occupancy = occupancyFor(resolved.pricingMode, guests);
     const availability = await checkAvailability(room, from, to, units);
     const unitsLeft = availability.nights.length
       ? Math.min(...availability.nights.map((n) => n.unitsFree))
       : room.totalUnits;
 
-    result[String(room._id)] = room.ratePlans.map((plan) => {
-      const total = availability.nights.reduce(
-        (sum, n) => sum + (n.price + plan.priceDelta) * units,
-        0,
-      );
-      return {
-        roomId: String(room._id),
-        ratePlanCode: plan.code,
-        ratePlanName: plan.name,
-        breakfast: plan.breakfast,
-        refundable: plan.refundable,
-        cancellationHours: plan.cancellationHours,
-        nightlyAverage: nights > 0 ? Math.round(total / nights / units) : room.basePrice + plan.priceDelta,
-        total,
-        available: availability.available,
-        reason: availability.reason,
-        unitsLeft,
-      };
-    });
+    const total = availability.nights.reduce((sum, n) => sum + n.price * occupancy * units, 0);
+
+    result[String(room._id)] = {
+      roomId: String(room._id),
+      pricingMode: resolved.pricingMode,
+      nightlyAverage:
+        nights > 0 ? Math.round(total / nights / units) : resolved.basePrice * occupancy,
+      total,
+      nights,
+      units,
+      guests,
+      breakfast: resolved.breakfast,
+      refundable: resolved.refundable,
+      cancellationHours: resolved.cancellationHours,
+      options: resolved.options.map((o) => ({
+        code: o.code,
+        label: o.label,
+        description: o.description,
+        price: o.price,
+        per: o.per,
+        amount: o.price * (o.per === "night" ? Math.max(1, nights) : 1) * units,
+        breakfast: o.breakfast,
+        refundable: o.refundable,
+        cancellationHours: o.cancellationHours,
+      })),
+      available: availability.available,
+      reason: availability.reason,
+      unitsLeft,
+    };
   }
 
   return result;
@@ -305,6 +346,7 @@ export async function getLivePricing(
   checkIn: string,
   checkOut: string,
   units = 1,
+  guests = 1,
 ): Promise<Record<string, { from: number; soldOut: boolean }>> {
   await connectDB();
   const rooms = await Room.find({ hotelId: { $in: hotelIds }, status: "active" }).lean();
@@ -316,13 +358,15 @@ export async function getLivePricing(
 
   for (const room of rooms) {
     const hotelId = String(room.hotelId);
+    const occupancy = occupancyFor(resolveRoom(room).pricingMode, guests);
     const availability = await checkAvailability(room, from, to, units);
     if (!availability.available) {
       out[hotelId] ??= { from: Number.POSITIVE_INFINITY, soldOut: true };
       continue;
     }
-    const cheapestPlan = Math.min(...room.ratePlans.map((p) => p.priceDelta), 0);
-    const nightly = Math.round(availability.total / nights / units) + cheapestPlan;
+    // The headline price is the room on its own — extras are opt-in, so they
+    // must never inflate what search advertises.
+    const nightly = Math.round((availability.total / nights / units) * occupancy);
     const existing = out[hotelId];
     if (!existing || nightly < existing.from) {
       out[hotelId] = { from: nightly, soldOut: false };

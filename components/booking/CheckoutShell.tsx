@@ -103,7 +103,19 @@ export function BookingSummary({ booking }: { booking: CheckoutBooking }) {
         </dl>
 
         <dl className="mt-4 space-y-2 text-sm border-t border-slate-100 pt-4">
-          <Row label={`Rooms · ${booking.nights} nights`} value={formatCurrency(p.roomTotal, p.currency)} />
+          {/*
+           * Spelled out, because "why is this twice the nightly rate?" is the
+           * single most common thing a guest asks at this step.
+           */}
+          <Row
+            label={`${formatCurrency(p.nightlyRate, p.currency)} × ${booking.nights} night${
+              booking.nights === 1 ? "" : "s"
+            }${booking.units > 1 ? ` × ${booking.units} rooms` : ""}`}
+            value={formatCurrency(p.roomTotal, p.currency)}
+          />
+          {p.options.map((o) => (
+            <Row key={o.code} label={o.label} value={formatCurrency(o.amount, p.currency)} />
+          ))}
           {p.discount > 0 && (
             <Row
               label={`Discount${p.couponCode ? ` (${p.couponCode})` : ""}`}

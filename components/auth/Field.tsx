@@ -11,6 +11,7 @@ export function Field({
   placeholder,
   errors,
   defaultValue,
+  value,
   required = true,
   autoComplete,
   labelAction,
@@ -23,6 +24,12 @@ export function Field({
   placeholder?: string;
   errors?: string[];
   defaultValue?: string;
+  /**
+   * Pass this to run the input controlled. React 19 resets an uncontrolled form
+   * once its action settles, which would wipe everything the guest typed the
+   * moment the server rejects one field.
+   */
+  value?: string;
   required?: boolean;
   autoComplete?: string;
   labelAction?: React.ReactNode;
@@ -55,10 +62,11 @@ export function Field({
           name={name}
           type={isPassword && reveal ? "text" : type}
           placeholder={placeholder}
-          defaultValue={defaultValue}
+          {...(value === undefined ? { defaultValue } : { value })}
           required={required}
           autoComplete={autoComplete}
           onChange={onValueChange ? (e) => onValueChange(e.target.value) : undefined}
+          readOnly={value !== undefined && !onValueChange}
           aria-invalid={invalid}
           aria-describedby={invalid ? `${id}-error` : undefined}
           className={`w-full border rounded-xl py-3 text-sm outline-none transition-all ${

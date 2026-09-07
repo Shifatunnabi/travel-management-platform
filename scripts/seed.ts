@@ -16,14 +16,14 @@ import {
   type IVendor,
   AuditLog, Booking, Coupon, EmailLog, Hotel, LedgerEntry, Payment, Payout,
   Review, Room, RoomInventory, Settings, User, Vendor, VendorMember,
+  Destination, Offer,
   generateBookingRef, deriveDisplayRating, SETTINGS_DEFAULTS,
 } from "@/lib/models";
+import { featuredDestinations, promoOffers } from "@/lib/mock-data";
 import { slugify } from "@/lib/cache/tags";
 import { v2 as cloudinary } from "cloudinary";
 
 const ROUNDS = 10;
-/** Price delta on the cheapest seeded rate plan. */
-const SAVER_DELTA = -800;
 
 /** Absolute URLs where a property supplied its own photos, Unsplash otherwise. */
 function hotelImages(spec: { imageUrls?: string[]; images: string[] }): string[] {
@@ -235,7 +235,7 @@ async function main() {
   // Heterogeneous models: only deleteMany is called, so a structural shape
   // avoids fighting Mongoose's deeply generic Model type.
   type Clearable = { deleteMany(filter: Record<string, never>): { exec(): Promise<unknown> } };
-  const collections = [Hotel, Room, RoomInventory, Booking, Payment, Review, LedgerEntry, Payout, Coupon, AuditLog, EmailLog, Vendor, VendorMember, Settings];
+  const collections = [Hotel, Room, RoomInventory, Booking, Payment, Review, LedgerEntry, Payout, Coupon, AuditLog, EmailLog, Vendor, VendorMember, Settings, Destination, Offer];
   for (const model of collections as unknown as Clearable[]) await model.deleteMany({}).exec();
   if (!keepUsers) await User.deleteMany({});
   console.log("→ cleared collections");
@@ -340,8 +340,8 @@ async function main() {
         ? { policies: { checkInTime: spec.checkIn, checkOutTime: spec.checkOut, cancellationHours: 24, childrenAllowed: true, petsAllowed: false } }
         : {}),
       moderation: { reviewedBy: staff[1]._id, note: "Approved.", at: new Date() },
-      // Matches refreshPriceFrom(): the cheapest rate plan, not the base price.
-      priceFrom: Math.min(...spec.rooms.map((r) => r.price)) + SAVER_DELTA,
+      // Matches refreshPriceFrom(): the base price, before any extras.
+      priceFrom: Math.min(...spec.rooms.map((r) => r.price)),
     });
 
     for (const r of spec.rooms) {
@@ -362,11 +362,27 @@ async function main() {
             };
           }),
         ),
-        ratePlans: [
-          { code: "room-only", name: "Room Only", breakfast: false, refundable: true, priceDelta: 0, cancellationHours: 24 },
-          { code: "breakfast", name: "Bed & Breakfast", breakfast: true, refundable: true, priceDelta: 900, cancellationHours: 24 },
-          { code: "saver", name: "Non-refundable Saver", breakfast: false, refundable: false, priceDelta: -800, cancellationHours: 0 },
+        // One base price for the room; everything else is an extra the guest
+        // adds on top of it.
+        pricingMode: "per_room",
+        breakfast: false,
+        refundable: true,
+        cancellationHours: 24,
+        options: [
+          {
+            code: "breakfast", label: "Breakfast",
+            description: "Breakfast for the room, every morning of the stay.",
+            price: 900, per: "night",
+            breakfast: true, refundable: false, cancellationHours: 0,
+          },
+          {
+            code: "airport-return-transfer", label: "Airport return transfer",
+            description: "Pick-up on arrival and drop-off on departure.",
+            price: 2500, per: "stay",
+            breakfast: false, refundable: false, cancellationHours: 0,
+          },
         ],
+        ratePlans: [],
       });
 
       // 60 nights of inventory, with weekend uplift
@@ -404,30 +420,40 @@ async function main() {
       const nights = 2 + (i % 2);
       const checkIn = day(-30 + i * 5);
       const checkOut = day(-30 + i * 5 + nights);
-      const plan = room.ratePlans[i % room.ratePlans.length];
-      const nightly = room.basePrice + plan.priceDelta;
+      // Every other seeded stay took the breakfast extra, so the history shows
+      // both shapes of booking.
+      const extra = i % 2 === 0 ? room.options[0] : undefined;
+      const nightly = room.basePrice;
       const roomTotal = nightly * nights;
-      const taxes = Math.round(roomTotal * (settings.taxPct / 100));
-      const grandTotal = roomTotal + taxes;
+      const extrasTotal = extra ? extra.price * nights : 0;
+      const subtotal = roomTotal + extrasTotal;
+      const taxes = Math.round(subtotal * (settings.taxPct / 100));
+      const grandTotal = subtotal + taxes;
       const commissionAmount = Math.round((grandTotal * commissionPct) / 100);
 
       const booking = await Booking.create({
         ref: generateBookingRef(),
         customerId: customer._id, hotelId: hotel._id, vendorId: vendor._id,
-        roomId: room._id, ratePlanCode: plan.code,
+        roomId: room._id, ratePlanCode: "base",
         snapshot: {
           hotelName: hotel.name, hotelSlug: hotel.slug, hotelCity: hotel.city,
           hotelAddress: hotel.address, hotelImage: hotel.images[0]?.url,
-          roomName: room.name, ratePlanName: plan.name,
-          breakfast: plan.breakfast, refundable: plan.refundable,
-          cancellationHours: plan.cancellationHours,
+          roomName: room.name,
+          ratePlanName: extra ? `Room only · ${extra.label}` : "Room only",
+          breakfast: Boolean(extra?.breakfast), refundable: room.refundable,
+          cancellationHours: room.cancellationHours,
         },
         checkIn, checkOut, nights, units: 1,
         guests: { adults: 2, children: 0 },
         guestDetails: { fullName: customer.name, email: customer.email, phone: customer.phone ?? "" },
         pricing: {
           nightlyRates: Array.from({ length: nights }, (_, n) => ({ date: day(-30 + i * 5 + n), price: nightly })),
-          roomTotal, taxes, serviceFee: 0, discount: 0, couponCode: null,
+          roomTotal,
+          options: extra
+            ? [{ code: extra.code, label: extra.label, price: extra.price, per: extra.per, amount: extrasTotal }]
+            : [],
+          extrasTotal, subtotal,
+          taxes, serviceFee: 0, discount: 0, couponCode: null,
           grandTotal, currency: "BDT",
           commissionPct, commissionAmount, vendorEarning: grandTotal - commissionAmount,
         },
@@ -478,6 +504,39 @@ async function main() {
     await hotel.save();
   }
   console.log(`→ bookings: ${bookingCount}, reviews: ${reviewCount}`);
+
+  // ── homepage carousels, now editable under Admin → Content ───────────────
+  // Seeded from the old hard-coded fixtures so the homepage is not blank on a
+  // fresh database; everything here is editable in the admin afterwards.
+  await Destination.insertMany(
+    featuredDestinations.map((d, i) => ({
+      city: d.city,
+      country: d.country,
+      description: d.description,
+      image: { publicId: `seed/destination-${slugify(d.city)}`, url: d.image, width: 1200, height: 600, alt: d.city },
+      startingPrice: d.startingPrice,
+      currency: d.currency,
+      flightDuration: d.flightDuration,
+      order: i,
+      status: "published",
+    })),
+  );
+
+  await Offer.insertMany(
+    promoOffers.map((o, i) => ({
+      title: o.title,
+      description: o.description,
+      image: { publicId: `seed/offer-${slugify(o.title)}`, url: o.image, width: 1200, height: 600, alt: o.title },
+      discount: o.discount,
+      code: o.code,
+      type: o.type,
+      // The fixture dates are in the past; give every seeded promo a live window.
+      expiresAt: day(30 + i * 15),
+      order: i,
+      status: "published",
+    })),
+  );
+  console.log(`→ homepage: ${featuredDestinations.length} destinations, ${promoOffers.length} offers`);
 
   // ── a coupon and a pending payout, so the admin queues are not empty ──────
   await Coupon.create({

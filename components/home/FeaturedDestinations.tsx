@@ -1,14 +1,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Plane, ArrowRight } from "lucide-react";
-import { featuredDestinations } from "@/lib/mock-data";
+import { getFeaturedDestinations } from "@/lib/services/home-content";
+import { cacheLife, cacheTag } from "next/cache";
+import { cdn } from "@/lib/services/cloudinary";
+import { tags } from "@/lib/cache/tags";
 import { formatCurrency } from "@/lib/utils/formatters";
+import Carousel from "./Carousel";
 
-export default function FeaturedDestinations() {
+/**
+ * Curated in the admin under Content — nothing here is hard-coded. The section
+ * disappears entirely rather than showing an empty rail when nothing is live.
+ */
+export default async function FeaturedDestinations() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(tags.home());
+
+  const destinations = await getFeaturedDestinations();
+  if (destinations.length === 0) return null;
+
   return (
     <section className="py-16 lg:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10">
           <div>
             <p className="text-brand-600 text-sm font-semibold uppercase tracking-widest mb-2">
@@ -29,70 +43,62 @@ export default function FeaturedDestinations() {
           </Link>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {featuredDestinations.map((dest, idx) => (
+        <Carousel label="destination" count={destinations.length}>
+          {destinations.map((dest, i) => (
             <Link
               key={dest.id}
-              href={`/flights/search?to=${dest.city}`}
-              className={`group relative overflow-hidden rounded-2xl cursor-pointer block ${
-                idx === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-              }`}
+              href={dest.href}
+              tabIndex={i === 0 ? undefined : -1}
+              className="group relative block overflow-hidden rounded-2xl"
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
+              <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden bg-slate-100">
                 <Image
-                  src={dest.image}
+                  src={cdn(dest.image, 1400, 700)}
                   alt={dest.city}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  priority={i === 0}
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 1024px) 100vw, 1100px"
                 />
-                {/* Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
 
-                {/* Duration badge */}
                 {dest.flightDuration && (
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
                     <Plane size={11} />
                     {dest.flightDuration}
                   </div>
                 )}
 
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <div className="flex items-start justify-between">
-                    <div>
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                  <div className="flex flex-wrap items-end justify-between gap-4">
+                    <div className="min-w-0">
                       <div className="flex items-center gap-1.5 text-white/80 text-xs mb-1">
-                        <MapPin size={11} />
+                        <MapPin size={12} />
                         {dest.country}
                       </div>
-                      <h3 className="text-white text-xl font-bold leading-tight">
+                      <h3 className="text-white text-2xl sm:text-3xl font-bold leading-tight">
                         {dest.city}
                       </h3>
-                      <p className="text-white/70 text-xs mt-0.5 line-clamp-1">
-                        {dest.description}
-                      </p>
+                      {dest.description && (
+                        <p className="text-white/75 text-sm mt-1 line-clamp-1">{dest.description}</p>
+                      )}
                     </div>
-                    <div className="text-right shrink-0 ml-3">
+                    <div className="text-right shrink-0">
                       <p className="text-white/70 text-xs">From</p>
-                      <p className="text-white text-base font-bold">
+                      <p className="text-white text-xl font-bold">
                         {formatCurrency(dest.startingPrice, dest.currency)}
                       </p>
+                      <span className="mt-2 inline-flex items-center gap-1.5 text-white text-sm font-semibold">
+                        Book now <ArrowRight size={14} />
+                      </span>
                     </div>
-                  </div>
-                  {/* CTA hover */}
-                  <div className="mt-3 h-0 overflow-hidden group-hover:h-9 transition-all duration-300">
-                    <span className="flex items-center gap-1.5 text-white text-sm font-semibold">
-                      Book now <ArrowRight size={14} />
-                    </span>
                   </div>
                 </div>
               </div>
             </Link>
           ))}
-        </div>
+        </Carousel>
 
-        {/* Mobile view all */}
         <div className="mt-6 flex justify-center sm:hidden">
           <Link
             href="/flights/search"

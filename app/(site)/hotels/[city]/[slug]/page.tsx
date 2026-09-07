@@ -314,7 +314,8 @@ async function LiveRooms({
   rooms: string;
 }) {
   const units = Number(rooms) || 1;
-  const offers = await getRoomOffers(hotel.id, stay.checkIn, stay.checkOut, units);
+  const headcount = Number(guests) || 1;
+  const offers = await getRoomOffers(hotel.id, stay.checkIn, stay.checkOut, units, headcount);
 
   return (
     <RoomOfferList
@@ -337,7 +338,7 @@ async function LiveRooms({
           image: room.images[0],
           amenities: room.amenities,
         },
-        offers: offers[room.id] ?? [],
+        offer: offers[room.id],
       }))}
     />
   );

@@ -4,13 +4,12 @@ import { redirect } from "next/navigation";
 import { updateTag, revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/db/connect";
 import { getSessionUser, requireUser } from "@/lib/auth/guards";
-import { Booking } from "@/lib/models/Booking";
+import { Booking, type IBookingPricing } from "@/lib/models/Booking";
 import { Payment } from "@/lib/models/Payment";
 import { readSettings } from "@/lib/services/settings";
 import { evaluateCoupon, priceBooking } from "@/lib/services/pricing";
 import { BookingError, cancelBooking, startBooking } from "@/lib/services/booking-flow";
 import { InventoryConflictError } from "@/lib/services/inventory";
-import { Room } from "@/lib/models/Room";
 import { createSession, makeTranId } from "@/lib/services/sslcommerz";
 import { isPaymentConfigured } from "@/lib/env";
 import { audit } from "@/lib/services/audit";
@@ -34,7 +33,7 @@ export async function startBookingAction(
   try {
     ref = await startBooking({
       roomId: d.roomId,
-      ratePlanCode: d.plan,
+      optionCodes: d.options,
       checkIn: d.checkIn,
       checkOut: d.checkOut,
       units: d.rooms,
@@ -96,6 +95,31 @@ export async function saveGuestDetailsAction(
   redirect(`/book/hotel/${booking.ref}/review`);
 }
 
+/**
+ * Recomputes a booking's totals from what is already stored on it — the frozen
+ * nightly rates and the extras that were chosen. Nothing is read back from the
+ * room, so a later price change cannot rewrite a held booking, and nothing is
+ * read from the client, so a tampered form cannot either.
+ */
+function reprice(
+  booking: { pricing: IBookingPricing; units: number },
+  settings: { taxPct: number; serviceFee: number },
+  discount: number,
+  couponCode: string | null,
+) {
+  return priceBooking({
+    nights: booking.pricing.nightlyRates.map((n) => ({ date: n.date, price: n.price })),
+    units: booking.units,
+    options: booking.pricing.options ?? [],
+    taxPct: settings.taxPct,
+    serviceFee: settings.serviceFee,
+    commissionPct: booking.pricing.commissionPct,
+    discount,
+    couponCode,
+    currency: booking.pricing.currency,
+  });
+}
+
 export async function applyCouponAction(
   _prev: ActionState,
   formData: FormData,
@@ -109,7 +133,7 @@ export async function applyCouponAction(
 
   const settings = await readSettings();
   const result = await evaluateCoupon(parsed.data.code, {
-    roomTotal: booking.pricing.roomTotal,
+    roomTotal: booking.pricing.subtotal || booking.pricing.roomTotal,
     hotelId: String(booking.hotelId),
     vendorId: String(booking.vendorId),
     city: booking.snapshot.hotelCity,
@@ -118,28 +142,7 @@ export async function applyCouponAction(
 
   if (!result.ok) return fail(result.message);
 
-  // Re-price from the stored nightly rates so the discount can never be
-  // applied to a total the client supplied.
-  const room = await Room.findById(booking.roomId).lean();
-  const plan = room?.ratePlans.find((p) => p.code === booking.ratePlanCode);
-
-  booking.pricing = priceBooking({
-    nights: booking.pricing.nightlyRates.map((n) => ({
-      date: n.date,
-      price: n.price - (plan?.priceDelta ?? 0),
-      unitsFree: 0,
-      closed: false,
-      minStay: 1,
-    })),
-    units: booking.units,
-    priceDelta: plan?.priceDelta ?? 0,
-    taxPct: settings.taxPct,
-    serviceFee: settings.serviceFee,
-    commissionPct: booking.pricing.commissionPct,
-    discount: result.discount,
-    couponCode: result.code ?? null,
-    currency: booking.pricing.currency,
-  });
+  booking.pricing = reprice(booking, settings, result.discount, result.code ?? null);
   await booking.save();
 
   revalidatePath(`/book/hotel/${booking.ref}/review`);
@@ -152,24 +155,8 @@ export async function removeCouponAction(ref: string): Promise<ActionState> {
   if (booking.status !== "pending_payment") return fail("This booking can no longer be changed.");
 
   const settings = await readSettings();
-  const room = await Room.findById(booking.roomId).lean();
-  const plan = room?.ratePlans.find((p) => p.code === booking.ratePlanCode);
 
-  booking.pricing = priceBooking({
-    nights: booking.pricing.nightlyRates.map((n) => ({
-      date: n.date,
-      price: n.price - (plan?.priceDelta ?? 0),
-      unitsFree: 0,
-      closed: false,
-      minStay: 1,
-    })),
-    units: booking.units,
-    priceDelta: plan?.priceDelta ?? 0,
-    taxPct: settings.taxPct,
-    serviceFee: settings.serviceFee,
-    commissionPct: booking.pricing.commissionPct,
-    currency: booking.pricing.currency,
-  });
+  booking.pricing = reprice(booking, settings, 0, null);
   await booking.save();
 
   revalidatePath(`/book/hotel/${booking.ref}/review`);
@@ -218,6 +205,12 @@ export async function payBookingAction(
     customerEmail: booking.guestDetails.email,
     customerPhone: booking.guestDetails.phone,
     productName: `${booking.snapshot.hotelName} — ${booking.snapshot.roomName}`,
+    stay: {
+      hotelName: booking.snapshot.hotelName,
+      hotelCity: booking.snapshot.hotelCity,
+      lengthOfStay: booking.nights,
+      checkInTime: booking.checkIn.toISOString().slice(0, 10),
+    },
   });
 
   if (!session.ok || !session.gatewayUrl) {

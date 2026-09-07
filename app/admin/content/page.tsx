@@ -7,6 +7,8 @@ import { requirePlatform } from "@/lib/auth/guards";
 import { connectDB } from "@/lib/db/connect";
 import { Hotel } from "@/lib/models/Hotel";
 import { getDestinationCities } from "@/lib/services/public-hotels";
+import { Destination, Offer } from "@/lib/models/HomeContent";
+import { DestinationManager, OfferManager } from "@/components/admin/HomeContentManager";
 import { cdn } from "@/lib/services/cloudinary";
 import { formatCurrency } from "@/lib/utils/formatters";
 import FeatureToggle from "@/components/admin/FeatureToggle";
@@ -16,7 +18,7 @@ export default function AdminContentPage() {
     <>
       <PageHeader
         title="Content"
-        subtitle="What the homepage shows: which properties are featured, and where people can search."
+        subtitle="What the homepage shows: the destination and offer carousels, which properties are featured, and where people can search."
       />
       <Suspense fallback={<div className="h-64 bg-white rounded-2xl border border-slate-200 animate-pulse" />}>
         <Body />
@@ -29,7 +31,7 @@ async function Body() {
   await requirePlatform(["super_admin", "ops"]);
   await connectDB();
 
-  const [featured, candidates, cities] = await Promise.all([
+  const [featured, candidates, cities, destinations, offers] = await Promise.all([
     Hotel.find({ status: "published", featured: true })
       .select("name city images displayRating priceFrom featured")
       .lean(),
@@ -39,10 +41,50 @@ async function Body() {
       .limit(20)
       .lean(),
     getDestinationCities(),
+    Destination.find().sort({ order: 1, createdAt: 1 }).lean(),
+    Offer.find().sort({ order: 1, expiresAt: 1 }).lean(),
   ]);
 
   return (
     <div className="space-y-6">
+      <DestinationManager
+        rows={destinations.map((d) => ({
+          id: String(d._id),
+          city: d.city,
+          country: d.country,
+          description: d.description,
+          image: {
+            publicId: d.image.publicId, url: d.image.url,
+            width: d.image.width, height: d.image.height, alt: d.image.alt,
+          },
+          startingPrice: d.startingPrice,
+          currency: d.currency,
+          flightDuration: d.flightDuration,
+          href: d.href,
+          order: d.order,
+          status: d.status,
+        }))}
+      />
+
+      <OfferManager
+        rows={offers.map((o) => ({
+          id: String(o._id),
+          title: o.title,
+          description: o.description,
+          image: {
+            publicId: o.image.publicId, url: o.image.url,
+            width: o.image.width, height: o.image.height, alt: o.image.alt,
+          },
+          discount: o.discount,
+          code: o.code,
+          type: o.type,
+          href: o.href,
+          expiresAt: o.expiresAt.toISOString().slice(0, 10),
+          order: o.order,
+          status: o.status,
+        }))}
+      />
+
       <Card
         title="Featured on the homepage"
         description="Featured properties lead the Popular Hotels rail; the rest are ordered by rating."

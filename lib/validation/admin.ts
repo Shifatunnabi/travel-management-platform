@@ -1,5 +1,42 @@
 import { z } from "zod";
 import { PLATFORM_ROLES, RATING_ADJUSTMENT_MODES } from "@/lib/models/types";
+import { OFFER_TYPES } from "@/lib/models/HomeContent";
+import { imagesField } from "./hotel";
+
+/** Both homepage rails need exactly one image, uploaded the usual way. */
+const singleImage = imagesField.refine((list) => list.length === 1, "Add one image");
+
+export const destinationSchema = z.object({
+  id: z.string().optional(),
+  city: z.string().min(2, "City is required").max(80),
+  country: z.string().min(2, "Country is required").max(80),
+  description: z.string().max(160, "Keep it to one line").default(""),
+  images: singleImage,
+  startingPrice: z.coerce.number().int().min(0).max(10_000_000),
+  currency: z.string().min(3).max(3).default("BDT"),
+  flightDuration: z.string().max(20).optional(),
+  href: z.string().max(300).optional(),
+  order: z.coerce.number().int().min(0).max(999).default(0),
+  status: z.enum(["published", "hidden"]).default("published"),
+});
+
+export const offerSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(3, "Give the offer a title").max(90),
+  description: z.string().max(200).default(""),
+  images: singleImage,
+  discount: z.string().min(1, "e.g. 25% OFF").max(20),
+  code: z
+    .string()
+    .max(20)
+    .optional()
+    .transform((v) => (v ? v.trim().toUpperCase() : undefined)),
+  type: z.enum(OFFER_TYPES).default("hotel"),
+  href: z.string().max(300).optional(),
+  expiresAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick an expiry date"),
+  order: z.coerce.number().int().min(0).max(999).default(0),
+  status: z.enum(["published", "hidden"]).default("published"),
+});
 
 export const vendorDecisionSchema = z.object({
   vendorId: z.string().min(1),
