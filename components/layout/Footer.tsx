@@ -25,14 +25,6 @@ const footerLinks = {
   ],
 };
 
-const paymentMethods = [
-  { name: "Visa", bg: "bg-brand-600", text: "Visa" },
-  { name: "Mastercard", bg: "bg-red-500", text: "MC" },
-  { name: "bKash", bg: "bg-pink-600", text: "bKash" },
-  { name: "Nagad", bg: "bg-orange-500", text: "Nagad" },
-  { name: "DBBL", bg: "bg-purple-600", text: "DBBL" },
-];
-
 function FacebookIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -223,18 +215,13 @@ export default async function Footer() {
               © {year} Tofiza. All rights reserved. Registered in Bangladesh.
             </p>
             {/* Payment methods */}
-            <div className="flex items-center gap-2">
-              <span className="text-slate-600 text-xs mr-1">We accept:</span>
-              {paymentMethods.map((pm) => (
-                <span
-                  key={pm.name}
-                  className={`${pm.bg} text-white text-xs font-bold px-2 py-1 rounded`}
-                  title={pm.name}
-                >
-                  {pm.text}
-                </span>
-              ))}
-            </div>
+            <Image
+              src="/asset/ssl_banner.png"
+              alt="Accepted payment methods — SSLCommerz verified"
+              width={1600}
+              height={52}
+              className="h-auto w-full max-w-md lg:max-w-lg object-contain"
+            />
           </div>
         </div>
       </div>
