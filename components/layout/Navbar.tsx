@@ -97,6 +97,12 @@ export default function Navbar({
                 <Phone size={15} />
                 <span>Support</span>
               </a>
+              <Link
+                href="/auth/register/partner"
+                className="text-sm font-medium text-slate-800 hover:text-brand-600 transition-colors whitespace-nowrap"
+              >
+                List your property
+              </Link>
               {account ?? (
                 <>
                   <Link href="/auth/login">
@@ -175,6 +181,12 @@ export default function Navbar({
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/auth/register/partner"
+            className="flex items-center px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            List your property
+          </Link>
         </nav>
 
         <div className="border-t border-slate-100 px-4 py-5 space-y-3">

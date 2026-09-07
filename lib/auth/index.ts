@@ -7,7 +7,18 @@ import { User } from "@/lib/models/User";
 import { Vendor, VendorMember } from "@/lib/models/Vendor";
 import { credentialsSchema } from "@/lib/validation/auth";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+/**
+ * `unstable_update` is re-exported as `updateSession`: the session is a JWT, so
+ * a role change written to the database is invisible until the token is
+ * rewritten. Server actions that change what a user *is* must call it.
+ */
+export const {
+  handlers,
+  signIn,
+  signOut,
+  auth,
+  unstable_update: updateSession,
+} = NextAuth({
   ...authConfig,
   providers: [
     Credentials({

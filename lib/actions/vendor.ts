@@ -34,6 +34,14 @@ async function ownHotel(hotelId: string, vendorId: string) {
 
 // ─── Onboarding ──────────────────────────────────────────────────────────────
 
+/** Writes the freshly created vendor identity into the signed-in user's token. */
+async function syncVendorSession(vendorId: string, status: string): Promise<void> {
+  const { updateSession } = await import("@/lib/auth");
+  await updateSession({
+    user: { role: "vendor", vendorId, vendorRole: "owner", vendorStatus: status },
+  });
+}
+
 export async function saveOnboardingAction(
   _prev: ActionState,
   formData: FormData,
@@ -48,7 +56,10 @@ export async function saveOnboardingAction(
 
   await connectDB();
 
-  const existing = user.vendorId ? await Vendor.findById(user.vendorId) : null;
+  // Looked up by owner, not by the session's `vendorId`: a token issued before
+  // the business existed still has none, and trusting it would file a second
+  // application instead of updating the first.
+  const existing = await Vendor.findOne({ ownerUserId: user.id });
 
   if (existing) {
     if (existing.status === "approved") {
@@ -70,6 +81,7 @@ export async function saveOnboardingAction(
     }
     existing.set({ ...d, kycDocuments: d.kycDocuments, status: "pending" });
     await existing.save();
+    await syncVendorSession(String(existing._id), "pending");
     await audit({ actor: user, action: "vendor.onboarding.resubmit", entity: "Vendor", entityId: String(existing._id) });
     return succeed("Application resubmitted. We will review it shortly.");
   }
@@ -90,11 +102,46 @@ export async function saveOnboardingAction(
 
   await VendorMember.create({ vendorId: vendor._id, userId: user.id, role: "owner" });
   await User.updateOne({ _id: user.id }, { $set: { role: "vendor" } });
+  // The token was minted before any of this existed, so push it in — otherwise
+  // the vendor area stays shut until the applicant signs out and back in.
+  await syncVendorSession(String(vendor._id), "pending");
   await audit({ actor: user, action: "vendor.onboarding.submit", entity: "Vendor", entityId: String(vendor._id) });
 
   return succeed(
     "Application submitted. You can start drafting properties while we review it.",
   );
+}
+
+/**
+ * Re-reads the caller's partner identity from the database and writes it into
+ * their session token.
+ *
+ * A platform admin approving an application changes a row the applicant's
+ * already-issued JWT knows nothing about, and the middleware gates `/vendor` on
+ * that token — so without this an approved partner stays pinned to onboarding
+ * until they happen to sign out and back in.
+ */
+export async function refreshPartnerSessionAction(): Promise<void> {
+  const { getSessionUser } = await import("@/lib/auth/guards");
+  const { updateSession } = await import("@/lib/auth");
+  const user = await getSessionUser();
+  if (!user) redirect("/auth/login");
+
+  await connectDB();
+  const membership = await VendorMember.findOne({ userId: user.id }).lean();
+  if (!membership) redirect("/vendor/onboarding");
+
+  const vendor = await Vendor.findById(membership.vendorId).select("status").lean();
+  await updateSession({
+    user: {
+      role: "vendor",
+      vendorId: String(membership.vendorId),
+      vendorRole: membership.role,
+      vendorStatus: vendor?.status,
+    },
+  });
+
+  redirect(vendor?.status === "approved" ? "/vendor" : "/vendor/onboarding");
 }
 
 export async function saveBankDetailsAction(

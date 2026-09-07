@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { PageHeader, Card } from "@/components/admin/Shell";
 import { getSessionUser } from "@/lib/auth/guards";
 import { getVendor } from "@/lib/services/vendor-data";
 import OnboardingForm from "@/components/vendor/OnboardingForm";
+import { refreshPartnerSessionAction } from "@/lib/actions/vendor";
 
 export default function OnboardingPage() {
   return (
@@ -61,6 +62,20 @@ function StatusBanner({ status, note }: { status: string; note?: string }) {
               You can publish properties and take bookings. Edits below update your business
               profile without affecting your listings.
             </p>
+            {/*
+              Approval happens in the admin's session, so this account's token
+              can still be carrying the old status. Going through the action
+              rewrites it before landing on the dashboard.
+            */}
+            <form action={refreshPartnerSessionAction} className="mt-3">
+              <button
+                type="submit"
+                className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+              >
+                Go to your dashboard
+                <ArrowRight size={15} />
+              </button>
+            </form>
           </div>
         </div>
       </Card>

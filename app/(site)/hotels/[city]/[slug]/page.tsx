@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import {
-  MapPin, Star, ChevronRight, Users, Bed, Maximize,
-  Coffee, ShieldCheck, XCircle, Clock, Baby, Dog,
-} from "lucide-react";
+import { MapPin, Star, ChevronRight, ShieldCheck, Clock, Baby, Dog } from "lucide-react";
 import {
   getHotelBySlug, getHotelReviews, getRatingBreakdown, getRoomOffers,
 } from "@/lib/services/public-hotels";

@@ -6,6 +6,7 @@ import { Phone, Mail, MapPin } from "lucide-react";
 
 const footerLinks = {
   company: [
+    { label: "List your property", href: "/auth/register/partner" },
     { label: "About Us", href: "/about" },
     { label: "Careers", href: "/careers" },
     { label: "Press", href: "/press" },

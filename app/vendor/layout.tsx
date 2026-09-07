@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import AdminSidebar, { type NavGroup, type NavItem } from "@/components/admin/AdminSidebar";
-import { requireVendor } from "@/lib/auth/guards";
+import { getSessionUser } from "@/lib/auth/guards";
 import { getVendor, getVendorSummary } from "@/lib/services/vendor-data";
 
 
@@ -20,7 +20,18 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 }
 
 async function VendorNav() {
-  const user = await requireVendor();
+  /*
+   * No sidebar until there is a business to navigate. An applicant on their way
+   * through onboarding has the vendor role but no vendor record yet, and once
+   * they have applied the middleware pins them to onboarding until approval —
+   * so every link here would only bounce them back.
+   *
+   * This is presentation, not protection: the middleware gates `/vendor`, and
+   * every page under it calls `requireVendor` for itself.
+   */
+  const user = await getSessionUser();
+  if (!user?.vendorId || user.vendorStatus !== "approved") return null;
+
   const [vendor, summary] = await Promise.all([
     getVendor(user.vendorId),
     getVendorSummary(user.vendorId),

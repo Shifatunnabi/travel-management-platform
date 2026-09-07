@@ -16,10 +16,21 @@ export default function RegisterPage() {
       subtitle="Join thousands of travellers who trust Tofiza"
       footer={
         <>
-          Already have an account?{" "}
-          <Link href="/auth/login" className="text-brand-600 hover:text-brand-700 font-semibold">
-            Sign in
-          </Link>
+          <p>
+            Already have an account?{" "}
+            <Link href="/auth/login" className="text-brand-600 hover:text-brand-700 font-semibold">
+              Sign in
+            </Link>
+          </p>
+          <p className="mt-2 pt-3 border-t border-slate-100">
+            Own a hotel or resort?{" "}
+            <Link
+              href="/auth/register/partner"
+              className="text-brand-600 hover:text-brand-700 font-semibold"
+            >
+              List your property
+            </Link>
+          </p>
         </>
       }
     >

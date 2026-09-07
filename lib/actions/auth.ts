@@ -4,8 +4,9 @@ import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
-import { signIn, signOut } from "@/lib/auth";
+import { signIn, signOut, updateSession } from "@/lib/auth";
 import { connectDB } from "@/lib/db/connect";
+import { getSessionUser } from "@/lib/auth/guards";
 import { User } from "@/lib/models/User";
 import { Vendor, VendorMember } from "@/lib/models/Vendor";
 import { sendMail } from "@/lib/services/mailer";
@@ -66,6 +67,82 @@ export async function registerAction(
 
   await signIn("credentials", { email, password, redirect: false });
   redirect("/account");
+}
+
+/**
+ * Partner signup. Identical to `registerAction` except the account starts life
+ * as a vendor, which is what lets the middleware admit them to
+ * `/vendor/onboarding` to describe their business and upload KYC.
+ *
+ * No `Vendor` record exists yet — that is created by the onboarding step, and
+ * only then does the application reach the platform's approval queue.
+ */
+export async function registerVendorAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = parseForm(registerSchema, formData);
+  if (!parsed.ok) return parsed.state;
+
+  const { firstName, lastName, email, phone, password } = parsed.data;
+  await connectDB();
+
+  const existing = await User.findOne({ email: email.toLowerCase() }).select("_id").lean();
+  if (existing) {
+    return fail(
+      "An account with that email already exists. Sign in, then open the partner page again to add a business to it.",
+      { email: ["An account with that email already exists."] },
+    );
+  }
+
+  const verificationToken = token();
+  const name = `${firstName} ${lastName}`.trim();
+
+  await User.create({
+    name,
+    email: email.toLowerCase(),
+    passwordHash: await bcrypt.hash(password, BCRYPT_ROUNDS),
+    phone,
+    role: "vendor",
+    verificationToken,
+    verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  });
+
+  const mail = verifyEmailTemplate(name, verificationToken);
+  void sendMail({
+    to: email,
+    subject: mail.subject,
+    html: mail.html,
+    template: "verify-email",
+  });
+
+  await signIn("credentials", { email, password, redirect: false });
+  redirect("/vendor/onboarding");
+}
+
+/**
+ * Turns the signed-in traveller's existing account into a partner one, so
+ * somebody who already books with Tofiza does not need a second login to list a
+ * property. The session is a JWT, so the new role has to be pushed into the
+ * token too or the middleware keeps bouncing them out of `/vendor`.
+ */
+export async function becomePartnerAction(
+  _prev: ActionState,
+  _formData: FormData,
+): Promise<ActionState> {
+  const user = await getSessionUser();
+  if (!user) return fail("Sign in first.");
+  if (user.role === "platform") {
+    return fail("Platform staff accounts cannot list properties. Use a separate account.");
+  }
+
+  if (user.role !== "vendor") {
+    await connectDB();
+    await User.updateOne({ _id: user.id }, { $set: { role: "vendor" } });
+    await updateSession({ user: { role: "vendor" } });
+  }
+
+  redirect("/vendor/onboarding");
 }
 
 export async function loginAction(

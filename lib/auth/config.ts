@@ -23,9 +23,12 @@ export const authConfig = {
         token.vendorStatus = user.vendorStatus;
         token.isEmailVerified = user.isEmailVerified;
       }
-      // `update()` from the client after e.g. finishing vendor onboarding.
+      // A role or vendor change written to the database does not reach an
+      // already-issued token on its own; `updateSession` pushes it here.
+      // Callers may pass either a flat patch or one nested under `user`.
       if (trigger === "update" && session) {
-        Object.assign(token, session);
+        const patch = (session as { user?: Record<string, unknown> }).user ?? session;
+        Object.assign(token, patch);
       }
       return token;
     },
