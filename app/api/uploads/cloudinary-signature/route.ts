@@ -30,9 +30,16 @@ export async function POST(request: Request) {
   if (folder === "avatars" && scopeId !== user.id) {
     return NextResponse.json({ error: "Not allowed." }, { status: 403 });
   }
-  // A vendor may only sign uploads scoped to their own vendor id.
-  if (user.role === "vendor" && folder === "kyc" && scopeId !== user.vendorId) {
-    return NextResponse.json({ error: "Not allowed." }, { status: 403 });
+  // A vendor may only sign uploads scoped to something they own. A first-time
+  // applicant has no Vendor document yet — they have to upload KYC in order to
+  // file the application that creates it — so their own user id is a valid
+  // scope alongside `vendorId`, and is what `/vendor/onboarding` sends until
+  // the business exists.
+  if (user.role === "vendor" && folder === "kyc") {
+    const ownScopes = [user.id, user.vendorId].filter(Boolean);
+    if (!ownScopes.includes(scopeId)) {
+      return NextResponse.json({ error: "Not allowed." }, { status: 403 });
+    }
   }
 
   return NextResponse.json(signUpload(folder as UploadFolder, scopeId));

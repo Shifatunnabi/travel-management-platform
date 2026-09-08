@@ -70,19 +70,26 @@ export default function ImageUploader({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ folder, scopeId }),
           });
-          if (!signRes.ok) throw new Error("Could not authorise the upload.");
+          if (!signRes.ok) {
+            const reason = await signRes.json().catch(() => null);
+            throw new Error(reason?.error ?? "Could not authorise the upload.");
+          }
           const sign = await signRes.json();
 
           const body = new FormData();
           body.append("file", file);
           body.append("api_key", sign.apiKey);
-          body.append("timestamp", String(sign.timestamp));
           body.append("signature", sign.signature);
-          body.append("folder", sign.folder);
+          // Forwarded verbatim — these are the parameters the signature covers.
+          for (const [key, value] of Object.entries(sign.params as Record<string, string>)) {
+            body.append(key, value);
+          }
 
           const res = await fetch(sign.uploadUrl, { method: "POST", body });
-          if (!res.ok) throw new Error("Cloudinary rejected the upload.");
-          const data = await res.json();
+          const data = await res.json().catch(() => null);
+          if (!res.ok) {
+            throw new Error(data?.error?.message ?? "Cloudinary rejected the upload.");
+          }
 
           setImages((prev) => [
             ...prev,

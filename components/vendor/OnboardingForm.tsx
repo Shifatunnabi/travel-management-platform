@@ -27,6 +27,15 @@ export interface OnboardingValues {
 
 const DOC_TYPES = ["Trade licence", "TIN certificate", "Owner NID", "Bank statement"];
 
+/**
+ * Photos only. Cloudinary enforces the same list from the signed upload, so
+ * this is here to fail fast with a readable message rather than round-trip to
+ * the gateway for a rejection.
+ */
+const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPT_ATTR = ACCEPTED.join(",");
+const MAX_BYTES = 8 * 1024 * 1024;
+
 export default function OnboardingForm({
   vendorId,
   initial,
@@ -42,6 +51,18 @@ export default function OnboardingForm({
 
   const upload = async (label: string, file: File) => {
     setUploadError(null);
+
+    if (!ACCEPTED.includes(file.type)) {
+      setUploadError(
+        `${file.name} is not a photo. Upload a JPEG, PNG or WebP image of the document — PDFs are not accepted.`,
+      );
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setUploadError(`${file.name} is larger than 8 MB.`);
+      return;
+    }
+
     setUploading(label);
     try {
       const signRes = await fetch("/api/uploads/cloudinary-signature", {
@@ -49,19 +70,24 @@ export default function OnboardingForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ folder: "kyc", scopeId: vendorId }),
       });
-      if (!signRes.ok) throw new Error("Could not authorise the upload.");
+      if (!signRes.ok) {
+        const reason = await signRes.json().catch(() => null);
+        throw new Error(reason?.error ?? "Could not authorise the upload.");
+      }
       const sign = await signRes.json();
 
       const body = new FormData();
       body.append("file", file);
       body.append("api_key", sign.apiKey);
-      body.append("timestamp", String(sign.timestamp));
       body.append("signature", sign.signature);
-      body.append("folder", sign.folder);
+      // Forwarded verbatim — these are the parameters the signature covers.
+      for (const [key, value] of Object.entries(sign.params as Record<string, string>)) {
+        body.append(key, value);
+      }
 
       const res = await fetch(sign.uploadUrl, { method: "POST", body });
-      if (!res.ok) throw new Error("Upload failed.");
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error?.message ?? "Upload failed.");
 
       setDocs((prev) => [
         ...prev.filter((d) => d.label !== label),
@@ -97,7 +123,7 @@ export default function OnboardingForm({
 
       <Card
         title="Verification documents"
-        description="Only Tofiza's platform team can see these. They are never shown publicly."
+        description="Clear photos of each document — JPEG, PNG or WebP, up to 8 MB. Only Tofiza's platform team can see these. They are never shown publicly."
       >
         <div className="space-y-2">
           {DOC_TYPES.map((label) => {
@@ -139,7 +165,7 @@ export default function OnboardingForm({
                     {uploading === label ? "Uploading" : "Upload"}
                     <input
                       type="file"
-                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      accept={ACCEPT_ATTR}
                       className="sr-only"
                       onChange={(ev) => {
                         const file = ev.target.files?.[0];
