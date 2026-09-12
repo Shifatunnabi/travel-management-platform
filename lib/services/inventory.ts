@@ -37,8 +37,24 @@ export interface NightRate {
   date: Date;
   price: number;
   unitsFree: number;
+  /**
+   * Units inside somebody else's unfinished checkout. They are not sold — they
+   * come back on their own when the hold expires — so they have to be told
+   * apart from `unitsBooked` when explaining why a night cannot be taken.
+   */
+  unitsHeld: number;
   closed: boolean;
   minStay: number;
+}
+
+/** "15 Sep 2026" — read in UTC, because a night is a day and not an instant. */
+function nightLabel(date: Date): string {
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 /**
@@ -69,6 +85,7 @@ export async function getNightRates(
         date,
         price: room.basePrice,
         unitsFree: room.totalUnits,
+        unitsHeld: 0,
         closed: false,
         minStay: 1,
       };
@@ -77,6 +94,7 @@ export async function getNightRates(
       date,
       price: row.priceOverride ?? room.basePrice,
       unitsFree: Math.max(0, row.unitsTotal - row.unitsBooked - row.unitsHeld),
+      unitsHeld: row.unitsHeld,
       closed: row.closed,
       minStay: row.minStay,
     };
@@ -86,6 +104,12 @@ export async function getNightRates(
 export interface Availability {
   available: boolean;
   reason?: string;
+  /**
+   * The room is not sold out — it is only inside someone else's unpaid
+   * checkout, and comes back when that hold expires. Callers use this to say
+   * "try again shortly" instead of "sold out".
+   */
+  heldOnly: boolean;
   nights: NightRate[];
   total: number;
 }
@@ -96,27 +120,36 @@ export async function checkAvailability(
   checkIn: Date,
   checkOut: Date,
   units = 1,
+  holdMinutes = 15,
 ): Promise<Availability> {
   const nights = await getNightRates(room, checkIn, checkOut);
   const total = nights.reduce((sum, n) => sum + n.price, 0) * units;
 
   if (nights.length === 0) {
-    return { available: false, reason: "Choose at least one night.", nights, total: 0 };
+    return { available: false, reason: "Choose at least one night.", heldOnly: false, nights, total: 0 };
   }
   const closed = nights.find((n) => n.closed);
   if (closed) {
     return {
       available: false,
-      reason: `Not open on ${toDateKey(closed.date)}.`,
+      reason: `Not open on ${nightLabel(closed.date)}.`,
+      heldOnly: false,
       nights,
       total,
     };
   }
   const short = nights.find((n) => n.unitsFree < units);
   if (short) {
+    // A night blocked only by holds is not sold out. Saying "sold out" there —
+    // which is what a guest saw after their own payment failed — makes a room
+    // that is about to free itself look permanently gone.
+    const heldOnly = short.unitsFree + short.unitsHeld >= units;
     return {
       available: false,
-      reason: `Sold out on ${toDateKey(short.date)}.`,
+      heldOnly,
+      reason: heldOnly
+        ? `Someone is part-way through checkout for ${nightLabel(short.date)}. If they do not pay, the room is released within ${holdMinutes} minutes — please try again shortly.`
+        : `Sold out on ${nightLabel(short.date)}.`,
       nights,
       total,
     };
@@ -126,11 +159,12 @@ export async function checkAvailability(
     return {
       available: false,
       reason: `These dates need a minimum stay of ${minStay} nights.`,
+      heldOnly: false,
       nights,
       total,
     };
   }
-  return { available: true, nights, total };
+  return { available: true, heldOnly: false, nights, total };
 }
 
 /**
@@ -184,7 +218,7 @@ export async function holdUnits(
 
     if (result.matchedCount === 0) {
       throw new InventoryConflictError(
-        `That room was taken for ${toDateKey(date)} while you were checking out.`,
+        `That room was taken for ${nightLabel(date)} while you were checking out. If the other guest does not pay it will free up again shortly.`,
       );
     }
   }

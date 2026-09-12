@@ -2,6 +2,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { connectDB } from "@/lib/db/connect";
 import { Destination, Offer } from "@/lib/models/HomeContent";
 import { tags } from "@/lib/cache/tags";
+import { FEATURES } from "@/lib/config/features";
 
 export interface DestinationCard {
   id: string;
@@ -48,8 +49,21 @@ export async function getFeaturedDestinations(): Promise<DestinationCard[]> {
     startingPrice: d.startingPrice,
     currency: d.currency,
     flightDuration: d.flightDuration,
-    href: d.href || `/flights/search?to=${encodeURIComponent(d.city)}`,
+    href: destinationHref(d.href, d.city),
   }));
+}
+
+/**
+ * Destination cards pointed at flight search — both the fallback here and the
+ * hrefs already saved by the content admin. Flights are not on sale, so while
+ * that is true these route to a hotel search for the same city instead of into
+ * a coming-soon notice.
+ */
+function destinationHref(stored: string | undefined, city: string): string {
+  if (!FEATURES.flights && (!stored || stored.startsWith("/flights"))) {
+    return `/hotels/search?destination=${encodeURIComponent(city)}`;
+  }
+  return stored || `/flights/search?to=${encodeURIComponent(city)}`;
 }
 
 /** Live promotions. Anything already expired is dropped rather than shown stale. */

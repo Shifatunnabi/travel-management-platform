@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { toISODate } from "@/lib/utils/formatters";
 
 interface DatePickerProps {
   label: string;
@@ -17,9 +18,12 @@ interface DatePickerProps {
 const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const PANEL_WIDTH = 288;
 
-function toISO(date: Date) {
-  return date.toISOString().split("T")[0];
-}
+/**
+ * The grid builds `new Date(year, month, day)`, which is local midnight. Going
+ * through `toISOString()` from there converts to UTC and lands on the previous
+ * day everywhere east of Greenwich — Dhaka included. Read the local fields.
+ */
+const toISO = toISODate;
 
 function formatDisplay(iso: string) {
   const d = new Date(`${iso}T00:00:00`);

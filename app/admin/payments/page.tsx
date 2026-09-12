@@ -5,7 +5,7 @@ import { requirePlatform } from "@/lib/auth/guards";
 import { connectDB } from "@/lib/db/connect";
 import { Payment } from "@/lib/models/Payment";
 import { Booking } from "@/lib/models/Booking";
-import { formatCurrency, formatDate } from "@/lib/utils/formatters";
+import { formatCurrency, formatDateTime } from "@/lib/utils/formatters";
 import type { PaymentStatus } from "@/lib/models/types";
 import FilterTabs from "@/components/admin/FilterTabs";
 
@@ -152,7 +152,7 @@ async function Body({ searchParams }: { searchParams: Promise<{ status?: string 
                     )}
                   </Td>
                   <Td align="right" className="text-xs text-slate-500 whitespace-nowrap">
-                    {formatDate(p.createdAt.toISOString())}
+                    {formatDateTime(p.createdAt.toISOString())}
                   </Td>
                 </tr>
               ))}

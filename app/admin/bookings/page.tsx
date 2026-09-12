@@ -5,7 +5,7 @@ import { PageHeader, Card, EmptyState, StatusPill, TableWrap, Th, Td } from "@/c
 import { requirePlatform } from "@/lib/auth/guards";
 import { connectDB } from "@/lib/db/connect";
 import { Booking } from "@/lib/models/Booking";
-import { formatCurrency, formatDate } from "@/lib/utils/formatters";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils/formatters";
 import type { BookingStatus } from "@/lib/models/types";
 import FilterTabs from "@/components/admin/FilterTabs";
 
@@ -103,7 +103,7 @@ async function Body({ searchParams }: { searchParams: Promise<{ status?: string;
                   <Td>
                     <span className="font-mono text-xs font-semibold text-slate-900">{b.ref}</span>
                     <span className="block text-[11px] text-slate-400">
-                      {formatDate(b.createdAt.toISOString())}
+                      {formatDateTime(b.createdAt.toISOString())}
                     </span>
                   </Td>
                   <Td>

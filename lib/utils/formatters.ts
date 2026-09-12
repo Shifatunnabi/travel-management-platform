@@ -5,12 +5,43 @@ export function formatCurrency(amount: number, currency = "BDT"): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
 }
 
+/**
+ * The timezone the business runs in. Timestamps are instants, so they have to
+ * be read somewhere — reading them wherever the server happens to sit puts a
+ * Dhaka evening booking on the previous day.
+ */
+const TZ = "Asia/Dhaka";
+
+/**
+ * A calendar date — a check-in, a check-out, a coupon window. These are stored
+ * at midnight UTC and mean a day, not an instant, so they are read back in UTC.
+ * Reading them in a local zone is what shifts a stay a day either way.
+ */
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/**
+ * A real instant — when a payment was taken, when a booking was made. Shown in
+ * Bangladesh time, with the clock time, because "which day" on its own is not
+ * enough to reconcile a payment against a gateway statement.
+ */
+export function formatDateTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: TZ,
   });
 }
 
@@ -78,5 +109,20 @@ export function getRelativeTime(dateStr: string): string {
  */
 export function todayISO(): string {
   if (typeof window === "undefined") return "";
-  return new Date().toISOString().split("T")[0];
+  return toISODate(new Date());
+}
+
+/**
+ * A Date's calendar day as YYYY-MM-DD, read from its *local* fields.
+ *
+ * `toISOString()` converts to UTC first, so a date built from a calendar cell —
+ * which is local midnight — lands on the previous day for every zone ahead of
+ * UTC. In Dhaka (UTC+6) that turned every date a guest picked into the day
+ * before, both on screen and in the database.
+ */
+export function toISODate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }

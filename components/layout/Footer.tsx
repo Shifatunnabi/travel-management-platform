@@ -3,18 +3,22 @@ import Link from "next/link";
 import Image from "next/image";
 import NewsletterForm from "./NewsletterForm";
 import { Phone, Mail, MapPin } from "lucide-react";
+import { CONTACT, SOCIAL_LINKS } from "@/lib/config/contact";
 
+/**
+ * Every href here must resolve to a real route. Careers, Press and Blog used to
+ * sit in this list with no pages behind them, so all three 404'd — and because
+ * Next.js prefetches footer links, they 404'd on every page load. Add a link
+ * here only once its page exists.
+ */
 const footerLinks = {
   company: [
     { label: "List your property", href: "/auth/register/partner" },
     { label: "About Us", href: "/about" },
-    { label: "Careers", href: "/careers" },
-    { label: "Press", href: "/press" },
-    { label: "Blog", href: "/blog" },
+    { label: "Contact Us", href: "/contact" },
   ],
   support: [
-    { label: "Help Center", href: "/help" },
-    { label: "Contact Us", href: "/contact" },
+    { label: "Help Centre", href: "/help" },
     { label: "Manage Booking", href: "/account/bookings" },
     { label: "Refunds", href: "/refunds" },
   ],
@@ -22,7 +26,7 @@ const footerLinks = {
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
     { label: "Cookie Policy", href: "/cookies" },
-    { label: "Fare Rules", href: "/fare-rules" },
+    { label: "Rate Rules", href: "/fare-rules" },
   ],
 };
 
@@ -60,12 +64,18 @@ function YoutubeIcon() {
   );
 }
 
-const socialLinks = [
-  { name: "Facebook", href: "#", Icon: FacebookIcon, bg: "bg-[#1877F2] hover:bg-[#1877F2]" },
-  { name: "Instagram", href: "#", Icon: InstagramIcon, bg: "bg-gradient-to-br from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888]" },
-  { name: "TikTok", href: "#", Icon: TikTokIcon, bg: "bg-black hover:bg-black" },
-  { name: "YouTube", href: "#", Icon: YoutubeIcon, bg: "bg-[#FF0000] hover:bg-[#FF0000]" },
-];
+// Only platforms with a real URL in SOCIAL_LINKS are rendered — see
+// lib/config/contact.ts. These used to ship as href="#".
+const socialLinks = (
+  [
+    { name: "Facebook", Icon: FacebookIcon, bg: "bg-[#1877F2] hover:bg-[#1877F2]" },
+    { name: "Instagram", Icon: InstagramIcon, bg: "bg-gradient-to-br from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888]" },
+    { name: "TikTok", Icon: TikTokIcon, bg: "bg-black hover:bg-black" },
+    { name: "YouTube", Icon: YoutubeIcon, bg: "bg-[#FF0000] hover:bg-[#FF0000]" },
+  ] as const
+)
+  .map((s) => ({ ...s, href: SOCIAL_LINKS[s.name] }))
+  .filter((s): s is typeof s & { href: string } => Boolean(s.href));
 
 export default async function Footer() {
   "use cache";
@@ -103,31 +113,41 @@ export default async function Footer() {
               className="h-9 w-auto object-contain brightness-0 invert"
             />
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-              Tofiza is your premium travel companion for booking flights and
-              hotels across Bangladesh and beyond. Experience travel the way it
-              should be — simple, affordable, and memorable.
+              Tofiza is your premium travel companion for booking hotels across
+              Bangladesh and beyond, with flights on the way. Experience travel
+              the way it should be — simple, affordable, and memorable.
             </p>
             <div className="space-y-2">
               <a
-                href="tel:+8801700000000"
+                href={`tel:${CONTACT.phoneE164}`}
                 className="flex items-center gap-2 text-sm hover:text-white transition-colors"
               >
                 <Phone size={14} className="text-brand-400 shrink-0" />
-                +880 1700-000000 (24/7)
+                {CONTACT.phone} (24/7)
               </a>
               <a
-                href="mailto:support@tofiza.com"
+                href={`mailto:${CONTACT.supportEmail}`}
                 className="flex items-center gap-2 text-sm hover:text-white transition-colors"
               >
                 <Mail size={14} className="text-brand-400 shrink-0" />
-                support@tofiza.com
+                {CONTACT.supportEmail}
+                <span className="text-slate-500 text-xs">· support</span>
+              </a>
+              <a
+                href={`mailto:${CONTACT.bookingEmail}?subject=Booking%20enquiry`}
+                className="flex items-center gap-2 text-sm hover:text-white transition-colors"
+              >
+                <Mail size={14} className="text-brand-400 shrink-0" />
+                {CONTACT.bookingEmail}
+                <span className="text-slate-500 text-xs">· bookings</span>
               </a>
               <span className="flex items-center gap-2 text-sm">
                 <MapPin size={14} className="text-brand-400 shrink-0" />
-                Gulshan, Dhaka 1212, Bangladesh
+                {CONTACT.address}
               </span>
             </div>
-            {/* Social links */}
+            {/* Social links — absent entirely until a real URL is configured */}
+            {socialLinks.length > 0 && (
             <div className="flex items-center gap-3 pt-1">
               {socialLinks.map(({ name, href, Icon, bg }) => (
                 <a
@@ -140,6 +160,7 @@ export default async function Footer() {
                 </a>
               ))}
             </div>
+            )}
           </div>
 
           {/* Company */}
@@ -191,19 +212,8 @@ export default async function Footer() {
                 </li>
               ))}
             </ul>
-            {/* App download */}
-            <div className="mt-6 space-y-2">
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Download App</p>
-              {["App Store", "Google Play"].map((store) => (
-                <a
-                  key={store}
-                  href="#"
-                  className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-colors"
-                >
-                  <span>📱</span> {store}
-                </a>
-              ))}
-            </div>
+            {/* App-store buttons removed: there is no Tofiza app, and both
+                links pointed at "#". Restore this block when one ships. */}
           </div>
         </div>
       </div>

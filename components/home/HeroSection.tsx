@@ -4,8 +4,12 @@ import { useState } from "react";
 import { Plane, Building2, FileText, TreePalm, Clock } from "lucide-react";
 import FlightSearchForm from "./FlightSearchForm";
 import HotelSearchForm from "./HotelSearchForm";
+import { FEATURES } from "@/lib/config/features";
 
 type Tab = "flight" | "hotel" | "visa" | "tours";
+
+/** Tabs that can actually take a booking today. Everything else is a placeholder. */
+const LIVE: Tab[] = FEATURES.flights ? ["hotel", "flight"] : ["hotel"];
 
 const tabs: { id: Tab; label: string; icon: typeof Plane }[] = [
   { id: "hotel", label: "Hotel", icon: Building2 },
@@ -14,8 +18,9 @@ const tabs: { id: Tab; label: string; icon: typeof Plane }[] = [
   { id: "tours", label: "Tours", icon: TreePalm },
 ];
 
-export default function HeroSection() {
-  const [activeTab, setActiveTab] = useState<Tab>("flight");
+export default function HeroSection({ cities = [] }: { cities?: string[] }) {
+  // Hotels are the live, bookable product — open on them.
+  const [activeTab, setActiveTab] = useState<Tab>("hotel");
   const activeMeta = tabs.find((t) => t.id === activeTab)!;
 
   return (
@@ -68,9 +73,9 @@ export default function HeroSection() {
 
         {/* Search / coming-soon card */}
         <div className="w-full bg-white rounded-2xl shadow-2xl overflow-visible">
-          {activeTab === "flight" && <FlightSearchForm />}
-          {activeTab === "hotel" && <HotelSearchForm />}
-          {(activeTab === "visa" || activeTab === "tours") && (
+          {activeTab === "hotel" && <HotelSearchForm cities={cities} />}
+          {activeTab === "flight" && FEATURES.flights && <FlightSearchForm />}
+          {!LIVE.includes(activeTab) && (
             <div className="flex flex-col items-center justify-center text-center py-16 px-6">
               <div className="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mb-4">
                 <Clock size={26} className="text-brand-500" />
@@ -79,8 +84,16 @@ export default function HeroSection() {
                 {activeMeta.label} booking is coming soon
               </h3>
               <p className="text-slate-500 text-sm max-w-sm">
-                This feature is coming soon. In the meantime, book your flights and hotels with Tofiza.
+                We are still building this one. In the meantime, book your stay with Tofiza — hotels
+                are live across Bangladesh and beyond.
               </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab("hotel")}
+                className="mt-5 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors"
+              >
+                Search hotels instead
+              </button>
             </div>
           )}
         </div>

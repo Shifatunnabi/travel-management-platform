@@ -135,7 +135,16 @@ export default function RoomForm({
           ]}
           hint="Per room unless your property genuinely sells by the head."
         />
-        <TextInput label="How many of this room" name="totalUnits" type="number" min={1} required defaultValue={initial?.totalUnits ?? 1} hint="Physical rooms of this type." errors={e?.totalUnits} />
+        <TextInput
+          label="How many rooms of this type"
+          name="totalUnits"
+          type="number"
+          min={1}
+          required
+          defaultValue={initial?.totalUnits ?? 2}
+          hint="Total physical rooms of this exact type — this is how many can be sold on any one night."
+          errors={e?.totalUnits}
+        />
       </FormGrid>
 
       <FormGrid cols={3}>

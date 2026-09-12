@@ -190,42 +190,53 @@ export const trustFeatures = [
   },
 ];
 
+/**
+ * Guest-facing answers. Keep these true to what the platform actually does —
+ * hotels are live, flights are not — and route every enquiry to the single
+ * support address in lib/config/contact.ts rather than inventing new ones.
+ */
 export const faqs: FAQ[] = [
   {
     id: "faq-001",
-    question: "How do I book a flight on Tofiza?",
+    question: "How do I book a hotel on Tofiza?",
     answer:
-      "Booking a flight is simple! Select 'Book a Flight' on our homepage, enter your departure city, destination, travel dates, and number of passengers. Browse the available flights, select your preferred option, fill in passenger details, and complete payment. You'll receive instant confirmation via email.",
+      "Search by city and your dates, then compare properties and pick a room. Choosing a room holds it for 15 minutes while you enter guest details and pay on our gateway's secure page. As soon as the payment clears, your booking is confirmed, the property is notified, and your invoice arrives by email with a booking reference starting TFZ — show that at check-in.",
   },
   {
     id: "faq-002",
-    question: "Can I cancel or modify my booking?",
+    question: "Can I cancel or change my booking?",
     answer:
-      "Yes! You can cancel or modify bookings through your dashboard under 'My Bookings'. Cancellation policies vary by airline and hotel. Refundable tickets can be cancelled anytime for a full refund. For non-refundable tickets, airline change fees may apply. Hotel cancellations depend on the property's policy.",
+      "Cancel any time from My Bookings. What comes back depends on the rate you booked: refundable rates are refunded in full if you cancel before the cut-off shown on the room, commonly 24 hours before check-in, and non-refundable rates are not refunded. The page tells you the exact refund amount before you confirm. To change dates, cancel and rebook if your rate allows it, or call us and we will help.",
   },
   {
     id: "faq-003",
     question: "What payment methods do you accept?",
     answer:
-      "We accept all major credit/debit cards (Visa, Mastercard, American Express), bKash, Nagad, Rocket, DBBL Nexus, and all major bank transfers. All transactions are secured with 256-bit SSL encryption.",
+      "Credit and debit cards including Visa and Mastercard, the mobile wallets bKash, Nagad and Rocket, and internet banking — all handled by SSLCommerz. You enter your payment details on their secure page, never on ours, so we never see or store your card number.",
   },
   {
     id: "faq-004",
-    question: "How will I receive my flight ticket?",
+    question: "How do I get my confirmation and invoice?",
     answer:
-      "After successful payment, your e-ticket and booking confirmation will be sent immediately to your registered email address. You can also download your ticket anytime from your Tofiza dashboard under 'My Bookings'.",
+      "Both are emailed to you the moment your payment is confirmed, with a full breakdown of the room, any extras, taxes and fees. You can also open the booking any time under My Bookings. If nothing has arrived within a few minutes, check your spam folder, then contact us with the name and dates you booked under.",
   },
   {
     id: "faq-005",
     question: "Is it safe to book hotels through Tofiza?",
     answer:
-      "Absolutely. All hotels listed on Tofiza are verified by our quality assurance team. We partner only with reputable properties and display real guest reviews. Your payment is secured, and if a hotel fails to meet our standards, we'll arrange alternative accommodation at no extra cost.",
+      "Every property is checked by our team before it goes live, and the reviews you see are written by guests who actually stayed. Payment is taken through SSLCommerz rather than by us directly. If a property cannot honour a booking we have confirmed, you are refunded in full regardless of the rate, and we will help you find a comparable alternative for the same dates.",
   },
   {
     id: "faq-006",
-    question: "Do you offer group bookings?",
+    question: "Can I book flights on Tofiza?",
     answer:
-      "Yes, we specialize in group bookings! For groups of 10 or more passengers, contact our group travel desk at groups@tofiza.com or call our 24/7 helpline. We offer special group rates, dedicated seating, and personalized service for corporate and leisure group travel.",
+      "Not yet. Hotel booking is live across Bangladesh and beyond, and flights are in progress — the Flight tab on the homepage will open for bookings once airline fares and ticketing are in place. Nothing on the site can currently be booked as a flight.",
+  },
+  {
+    id: "faq-007",
+    question: "Do you handle group bookings?",
+    answer:
+      "Yes. For several rooms, a long stay, or a corporate or event booking, call us or email support@tofiza.com with your dates, city and room count, and we will put rates together for you rather than having you book room by room.",
   },
 ];
 

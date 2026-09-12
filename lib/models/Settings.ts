@@ -1,4 +1,5 @@
 import { Schema, model, models, type Model, type Types } from "mongoose";
+import { CONTACT } from "@/lib/config/contact";
 
 /** Singleton — always read and written with `key: "global"`. */
 export interface ISettings {
@@ -31,8 +32,8 @@ const settingsSchema = new Schema<ISettings>(
     holdMinutes: { type: Number, default: 15, min: 1 },
     maxRatingOffset: { type: Number, default: 1, min: 0, max: 5 },
     minPayoutAmount: { type: Number, default: 1000, min: 0 },
-    supportEmail: { type: String, default: "support@tofiza.com" },
-    supportPhone: { type: String, default: "+880 1700-000000" },
+    supportEmail: { type: String, default: CONTACT.supportEmail },
+    supportPhone: { type: String, default: CONTACT.phone },
   },
   { timestamps: true },
 );
@@ -49,6 +50,6 @@ export const SETTINGS_DEFAULTS = {
   holdMinutes: 15,
   maxRatingOffset: 1,
   minPayoutAmount: 1000,
-  supportEmail: "support@tofiza.com",
-  supportPhone: "+880 1700-000000",
+  supportEmail: CONTACT.supportEmail,
+  supportPhone: CONTACT.phone,
 } as const;

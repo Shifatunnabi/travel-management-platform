@@ -36,7 +36,7 @@ export default async function FeaturedDestinations() {
             </p>
           </div>
           <Link
-            href="/flights/search"
+            href="/hotels/search"
             className="hidden sm:flex items-center gap-1.5 text-brand-600 font-semibold text-sm hover:text-brand-700 transition-colors"
           >
             View all <ArrowRight size={16} />
@@ -101,7 +101,7 @@ export default async function FeaturedDestinations() {
 
         <div className="mt-6 flex justify-center sm:hidden">
           <Link
-            href="/flights/search"
+            href="/hotels/search"
             className="flex items-center gap-1.5 text-brand-600 font-semibold text-sm"
           >
             View all destinations <ArrowRight size={16} />

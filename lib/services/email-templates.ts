@@ -1,4 +1,5 @@
 import { publicEnv } from "@/lib/env";
+import { CONTACT } from "@/lib/config/contact";
 
 const BRAND = "#0b1878";
 const BRAND_LIGHT = "#f0f1fc";
@@ -24,7 +25,11 @@ function layout(heading: string, body: string, cta?: { label: string; href: stri
           }
         </td></tr>
         <tr><td style="background:${BRAND_LIGHT};padding:20px 32px;font-size:12px;color:#64748b;">
-          You are receiving this because you have an account with Tofiza Tours &amp; Travels.
+          <p style="margin:0 0 8px;">
+            Need help? Call <a href="tel:${CONTACT.phoneE164}" style="color:${BRAND};text-decoration:none;font-weight:600;">${CONTACT.phone}</a>
+            or email <a href="mailto:${CONTACT.supportEmail}" style="color:${BRAND};text-decoration:none;font-weight:600;">${CONTACT.supportEmail}</a>.
+          </p>
+          <p style="margin:0;">You are receiving this because you have an account with Tofiza Tours &amp; Travels.</p>
         </td></tr>
       </table>
     </td></tr>
@@ -70,6 +75,10 @@ export interface BookingEmailData {
   nights: number;
   guests: string;
   total: string;
+  /** Invoice lines — room, extras, tax, fees, discount. Label / amount. */
+  charges?: [string, string][];
+  /** When the payment was taken, in Bangladesh time. */
+  paidAt?: string;
 }
 
 export function bookingConfirmedTemplate(d: BookingEmailData) {
@@ -82,18 +91,40 @@ export function bookingConfirmedTemplate(d: BookingEmailData) {
     ["Check-out", d.checkOut],
     ["Nights", String(d.nights)],
     ["Guests", d.guests],
-    ["Total paid", d.total],
   ];
   return {
-    subject: `Booking confirmed — ${d.ref}`,
+    subject: `Booking confirmed — invoice ${d.ref}`,
     html: layout(
       "Your stay is confirmed",
-      `<p style="margin:0 0 20px;">Thank you, ${escapeHtml(d.guestName)}. Your reservation is confirmed and the property has been notified.</p>
+      `<p style="margin:0 0 20px;">Thank you, ${escapeHtml(d.guestName)}. Your reservation is confirmed and the property has been notified. Your invoice is below.</p>
        ${table(rows)}
+       ${invoice(d)}
        <p style="margin:20px 0 0;">Present this reference at check-in. You can view or cancel this booking any time from your account.</p>`,
       { label: "View booking", href: `${publicEnv.appUrl}/account/bookings` },
     ),
   };
+}
+
+/** The money half of the voucher — what was charged, and what it was made of. */
+function invoice(d: BookingEmailData): string {
+  const lines = (d.charges ?? [])
+    .map(
+      ([label, amount]) =>
+        `<tr><td style="padding:7px 0;color:#64748b;">${escapeHtml(label)}</td>
+             <td style="padding:7px 0;color:#0f172a;text-align:right;font-variant-numeric:tabular-nums;">${escapeHtml(amount)}</td></tr>`,
+    )
+    .join("");
+
+  return `<div style="margin:24px 0 0;padding:18px 20px;background:#f8fafc;border-radius:12px;">
+    <p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;">
+      Invoice ${escapeHtml(d.ref)}${d.paidAt ? ` · paid ${escapeHtml(d.paidAt)}` : ""}
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;">
+      ${lines}
+      <tr><td style="padding:12px 0 0;border-top:2px solid #e2e8f0;font-weight:700;color:#0f172a;">Total paid</td>
+          <td style="padding:12px 0 0;border-top:2px solid #e2e8f0;font-weight:700;color:#0f172a;text-align:right;font-variant-numeric:tabular-nums;">${escapeHtml(d.total)}</td></tr>
+    </table>
+  </div>`;
 }
 
 export function bookingCancelledTemplate(ref: string, name: string, refundAmount: string) {

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Users, Search, ChevronDown, BedDouble } from "lucide-react";
+import { Users, Search, ChevronDown, BedDouble } from "lucide-react";
 import DatePicker from "@/components/ui/DatePicker";
+import CityInput from "@/components/ui/CityInput";
 import { todayISO } from "@/lib/utils/formatters";
 
-export default function HotelSearchForm() {
+export default function HotelSearchForm({ cities = [] }: { cities?: string[] }) {
   const today = todayISO();
   const router = useRouter();
   const [destination, setDestination] = useState("");
@@ -30,22 +31,13 @@ export default function HotelSearchForm() {
   return (
     <div className="p-5 sm:p-6 flex flex-col gap-2">
       {/* ── Row 1: Destination (full width) ─────────────── */}
-      <div className="border border-slate-200 hover:border-brand-400 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 rounded-xl px-3 py-2.5 transition-all">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Destination</p>
-        <div className="flex items-center gap-2">
-          <MapPin size={14} className="text-brand-500 shrink-0" />
-          <input
-            type="text"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            placeholder="City, hotel name, or area"
-            className="w-full text-sm font-bold text-slate-800 bg-transparent focus:outline-none placeholder-slate-300"
-          />
-        </div>
-        <p className="text-[11px] text-slate-400 mt-0.5 pl-5">
-          e.g. Cox&apos;s Bazar, Dhaka, Dubai
-        </p>
-      </div>
+      <CityInput
+        value={destination}
+        onChange={setDestination}
+        cities={cities}
+        onSubmit={handleSearch}
+        hint="e.g. Cox's Bazar, Dhaka, Dubai"
+      />
 
       {/* ── Row 2: Check-in | Check-out ──────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">

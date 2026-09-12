@@ -8,6 +8,7 @@ import { tags } from "@/lib/cache/tags";
 import type { PricingMode } from "@/lib/models/Room";
 import { checkAvailability, countNights, toNight } from "./inventory";
 import { occupancyFor, resolveRoom } from "./room-pricing";
+import { readSettings } from "./settings";
 
 export interface HotelCardData {
   id: string;
@@ -277,6 +278,8 @@ export interface RoomOffer {
   options: RoomOptionOffer[];
   available: boolean;
   reason?: string;
+  /** Blocked only by another guest's unfinished checkout, not actually sold. */
+  heldOnly: boolean;
   unitsLeft: number;
 }
 
@@ -293,6 +296,7 @@ export async function getRoomOffers(
 ): Promise<Record<string, RoomOffer>> {
   await connectDB();
   const rooms = await Room.find({ hotelId, status: "active" }).lean();
+  const settings = await readSettings();
   const from = toNight(checkIn);
   const to = toNight(checkOut);
   const nights = countNights(from, to);
@@ -301,7 +305,7 @@ export async function getRoomOffers(
   for (const room of rooms) {
     const resolved = resolveRoom(room);
     const occupancy = occupancyFor(resolved.pricingMode, guests);
-    const availability = await checkAvailability(room, from, to, units);
+    const availability = await checkAvailability(room, from, to, units, settings.holdMinutes);
     const unitsLeft = availability.nights.length
       ? Math.min(...availability.nights.map((n) => n.unitsFree))
       : room.totalUnits;
@@ -333,6 +337,7 @@ export async function getRoomOffers(
       })),
       available: availability.available,
       reason: availability.reason,
+      heldOnly: availability.heldOnly,
       unitsLeft,
     };
   }

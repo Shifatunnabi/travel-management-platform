@@ -30,7 +30,19 @@ export async function getVendorBalance(vendorId: string): Promise<VendorBalance>
 
   const [buckets, lifetime, locked] = await Promise.all([
     LedgerEntry.aggregate<{ _id: boolean; total: number }>([
-      { $match: { vendorId: vid, settledAt: null, type: { $ne: "payout" } } },
+      // `earning` is already net of commission (`grandTotal − commissionAmount`,
+      // see priceBooking), and `refund` is net the same way. The `commission`
+      // and `commission_reversal` rows exist to show the vendor what the
+      // platform took — summing them into a balance subtracts the same
+      // commission a second time, which is why settlement pending read ~15%
+      // short of lifetime earned. Payouts are handled separately below.
+      {
+        $match: {
+          vendorId: vid,
+          settledAt: null,
+          type: { $nin: ["payout", "commission", "commission_reversal"] },
+        },
+      },
       {
         $group: {
           _id: {

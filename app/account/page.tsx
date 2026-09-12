@@ -9,6 +9,7 @@ import { listCustomerBookings, getCustomerStats } from "@/lib/services/customer-
 import { cdn } from "@/lib/services/cloudinary";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import { StatCard, StatusPill } from "@/components/admin/Shell";
+import { FEATURES } from "@/lib/config/features";
 
 export default function AccountPage() {
   return (
@@ -45,12 +46,14 @@ async function Body() {
           >
             <Building2 size={15} /> Book a hotel
           </Link>
-          <Link
-            href="/flights/search"
-            className="flex items-center gap-2 px-4 py-2 bg-brand-800/60 text-white rounded-xl text-sm font-semibold hover:bg-brand-800 transition-colors"
-          >
-            <Plane size={15} /> Book a flight
-          </Link>
+          {FEATURES.flights && (
+            <Link
+              href="/flights/search"
+              className="flex items-center gap-2 px-4 py-2 bg-brand-800/60 text-white rounded-xl text-sm font-semibold hover:bg-brand-800 transition-colors"
+            >
+              <Plane size={15} /> Book a flight
+            </Link>
+          )}
         </div>
       </div>
 

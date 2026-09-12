@@ -1,8 +1,12 @@
-import Link from "next/link";
-import { ArrowLeft, MapPin, Calendar, Users } from "lucide-react";
 import { defaultStay } from "@/lib/utils/stay";
+import { getDestinationCities } from "@/lib/services/public-hotels";
+import HotelSearchBar from "./HotelSearchBar";
 import type { HotelSearchParams } from "@/app/(site)/hotels/search/page";
 
+/**
+ * Reads the search from the URL and hands it to the editable bar. The city list
+ * is cached, so adding suggestions here costs the page nothing per request.
+ */
 export default async function HotelSearchChrome({
   searchParams,
 }: {
@@ -10,42 +14,27 @@ export default async function HotelSearchChrome({
 }) {
   const params = await searchParams;
   const stay = defaultStay(params.checkIn, params.checkOut);
-  const destination = params.destination?.trim() || "All destinations";
-  const guests = params.guests ?? "2";
-  const rooms = params.rooms ?? "1";
+
+  // Suggestions are a convenience — losing them must not cost the visitor the
+  // ability to change their dates. Same reasoning as the homepage hero.
+  let cities: string[] = [];
+  try {
+    cities = (await getDestinationCities()).map((c) => c.city);
+  } catch (error) {
+    console.error("[search] could not load destination cities:", error);
+  }
 
   return (
-    <div className="bg-brand-700 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <Link href="/" className="flex items-center gap-1.5 text-brand-200 hover:text-white text-sm transition-colors">
-            <ArrowLeft size={15} />
-            Back
-          </Link>
-          <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
-            <div className="flex items-center gap-2 bg-brand-800 rounded-xl px-4 py-2">
-              <MapPin size={14} />
-              <span className="font-bold">{destination}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-brand-200">
-              <Calendar size={14} />
-              <span>
-                {stay.checkInLabel} → {stay.checkOutLabel} · {stay.nights} night
-                {stay.nights === 1 ? "" : "s"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 text-brand-200">
-              <Users size={14} />
-              <span>
-                {guests} guest{guests === "1" ? "" : "s"} · {rooms} room{rooms === "1" ? "" : "s"}
-              </span>
-            </div>
-            <Link href="/" className="ml-auto text-xs text-brand-300 hover:text-white underline">
-              Modify search
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+    <HotelSearchBar
+      destination={params.destination?.trim() ?? ""}
+      checkIn={stay.checkIn}
+      checkOut={stay.checkOut}
+      guests={params.guests ?? "2"}
+      rooms={params.rooms ?? "1"}
+      nights={stay.nights}
+      checkInLabel={stay.checkInLabel}
+      checkOutLabel={stay.checkOutLabel}
+      cities={cities}
+    />
   );
 }

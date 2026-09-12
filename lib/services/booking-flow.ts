@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import type { ClientSession } from "mongoose";
 import { connectDB, withTransaction } from "@/lib/db/connect";
 import { Booking, generateBookingRef, type IBooking } from "@/lib/models/Booking";
@@ -15,9 +16,33 @@ import {
 } from "./inventory";
 import { sendMail } from "./mailer";
 import { bookingConfirmedTemplate, bookingCancelledTemplate, vendorNewBookingTemplate } from "./email-templates";
-import { formatCurrency, formatDate } from "@/lib/utils/formatters";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils/formatters";
 
 export class BookingError extends Error {}
+
+/**
+ * Runs background work without the response killing it.
+ *
+ * A bare `void somePromise()` is dropped the moment the invocation ends, and
+ * the invocation ends with the redirect to the confirmation page — which is
+ * why confirmation emails were being logged as "never sent". `after` keeps the
+ * request alive until the work settles. Outside a request context — the seed
+ * and test scripts — there is nothing to extend, so just run it.
+ */
+function afterResponse(work: () => Promise<void>): void {
+  const guarded = async () => {
+    try {
+      await work();
+    } catch (error) {
+      console.error("[booking] background work failed:", error);
+    }
+  };
+  try {
+    after(guarded);
+  } catch {
+    void guarded();
+  }
+}
 
 export interface StartBookingInput {
   roomId: string;
@@ -67,7 +92,32 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
     );
   }
 
-  const availability = await checkAvailability(room, checkIn, checkOut, input.units);
+  // A guest whose payment failed — or who simply closed the gateway tab — and
+  // then tried the same room again used to be turned away by their *own* hold,
+  // which reads as "you already booked this". The room is genuinely taken, just
+  // by them, so give them the booking they already have instead of a dead end.
+  if (input.customerId) {
+    const mine = await Booking.findOne({
+      customerId: input.customerId,
+      roomId: room._id,
+      checkIn,
+      checkOut,
+      units: input.units,
+      status: "pending_payment",
+      holdExpiresAt: { $gt: new Date() },
+    })
+      .select("ref")
+      .lean();
+    if (mine) return mine.ref;
+  }
+
+  const availability = await checkAvailability(
+    room,
+    checkIn,
+    checkOut,
+    input.units,
+    settings.holdMinutes,
+  );
   if (!availability.available) throw new BookingError(availability.reason ?? "Those dates are not available.");
 
   const vendor = await Vendor.findById(hotel.vendorId).select("commissionPct status").lean();
@@ -208,7 +258,7 @@ export async function confirmBooking(
   });
 
   if (outcome.confirmed && !outcome.alreadyDone) {
-    void sendConfirmationEmails(bookingId);
+    afterResponse(() => sendConfirmationEmails(bookingId));
   }
   return outcome;
 }
@@ -216,6 +266,25 @@ export async function confirmBooking(
 async function sendConfirmationEmails(bookingId: string): Promise<void> {
   const booking = await Booking.findById(bookingId).lean();
   if (!booking) return;
+
+  const p = booking.pricing;
+  const money = (n: number) => formatCurrency(n, p.currency);
+  const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+  // The invoice lines, in the order a guest reads them: what the room cost,
+  // what they added, what came off, what was added on top.
+  const charges: [string, string][] = [
+    [
+      `${booking.snapshot.roomName} — ${plural(booking.nights, "night")} × ${plural(booking.units, "room")}`,
+      money(p.roomTotal),
+    ],
+    ...(p.options ?? []).map((o): [string, string] => [o.label, money(o.amount)]),
+  ];
+  if (p.discount > 0) {
+    charges.push([`Discount${p.couponCode ? ` (${p.couponCode})` : ""}`, `− ${money(p.discount)}`]);
+  }
+  if (p.taxes > 0) charges.push(["Taxes & VAT", money(p.taxes)]);
+  if (p.serviceFee > 0) charges.push(["Service fee", money(p.serviceFee)]);
 
   const data = {
     ref: booking.ref,
@@ -228,7 +297,9 @@ async function sendConfirmationEmails(bookingId: string): Promise<void> {
     checkOut: formatDate(booking.checkOut.toISOString()),
     nights: booking.nights,
     guests: `${booking.guests.adults} adults${booking.guests.children ? `, ${booking.guests.children} children` : ""}`,
-    total: formatCurrency(booking.pricing.grandTotal, booking.pricing.currency),
+    total: money(p.grandTotal),
+    charges,
+    paidAt: formatDateTime(new Date().toISOString()),
   };
 
   if (booking.guestDetails.email) {
@@ -372,12 +443,16 @@ export async function cancelBooking(
         booking.guestDetails.fullName || "Guest",
         formatCurrency(refundAmount, booking.pricing.currency),
       );
-      void sendMail({
-        to: booking.guestDetails.email,
-        subject: mail.subject,
-        html: mail.html,
-        template: "booking-cancelled",
-        relatedTo: { entity: "Booking", id: String(booking._id) },
+      const to = booking.guestDetails.email;
+      const id = String(booking._id);
+      afterResponse(async () => {
+        await sendMail({
+          to,
+          subject: mail.subject,
+          html: mail.html,
+          template: "booking-cancelled",
+          relatedTo: { entity: "Booking", id },
+        });
       });
     }
 

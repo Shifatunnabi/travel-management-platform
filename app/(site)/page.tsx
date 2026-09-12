@@ -1,4 +1,4 @@
-import HeroSection from "@/components/home/HeroSection";
+import Hero from "@/components/home/Hero";
 import FeaturedDestinations from "@/components/home/FeaturedDestinations";
 import PopularHotels from "@/components/home/PopularHotels";
 import PromoSection from "@/components/home/PromoSection";
@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <>
       <main>
-        <HeroSection />
+        <Hero />
         <TravelPartners />
         <FeaturedDestinations />
         <PromoSection />

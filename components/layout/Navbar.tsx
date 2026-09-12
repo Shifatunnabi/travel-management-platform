@@ -6,10 +6,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { X, Phone, User } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { CONTACT } from "@/lib/config/contact";
+import { FEATURES } from "@/lib/config/features";
 
+// Flights stay out of the nav until FEATURES.flights is on — see
+// lib/config/features.ts for why that switch exists.
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/flights/search", label: "Flights" },
+  ...(FEATURES.flights ? [{ href: "/flights/search", label: "Flights" }] : []),
   { href: "/hotels/search", label: "Hotels" },
 ];
 
@@ -91,7 +95,7 @@ export default function Navbar({
             {/* Right side */}
             <div className="hidden lg:flex items-center gap-3">
               <a
-                href="tel:+8801700000000"
+                href={`tel:${CONTACT.phoneE164}`}
                 className="flex items-center gap-1.5 text-sm font-medium text-slate-800 hover:text-brand-600 transition-colors"
               >
                 <Phone size={15} />
@@ -206,11 +210,11 @@ export default function Navbar({
             </>
           )}
           <a
-            href="tel:+8801700000000"
+            href={`tel:${CONTACT.phoneE164}`}
             className="flex items-center gap-2 text-sm text-slate-600 px-2 pt-2"
           >
             <Phone size={15} className="text-brand-600" />
-            <span>+880 1700-000000 (24/7)</span>
+            <span>{CONTACT.phone} (24/7)</span>
           </a>
         </div>
       </div>

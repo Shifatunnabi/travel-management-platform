@@ -162,7 +162,7 @@ function DestinationForm({
       </FormGrid>
 
       <FormGrid>
-        <TextInput label="Link" name="href" defaultValue={initial?.href} placeholder="/flights/search?to=Dubai" hint="Defaults to a flight search for the city." errors={e?.href} />
+        <TextInput label="Link" name="href" defaultValue={initial?.href} placeholder="/hotels/search?destination=Dubai" hint="Defaults to a hotel search for the city." errors={e?.href} />
         <Select label="Status" name="status" defaultValue={initial?.status ?? "published"} options={STATUS_OPTIONS} />
       </FormGrid>
 

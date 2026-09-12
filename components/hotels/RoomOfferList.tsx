@@ -279,9 +279,11 @@ function RoomRow({
               ) : (
                 <span
                   title={offer.reason}
-                  className="block text-center bg-slate-100 text-slate-400 text-sm font-semibold px-5 py-2.5 rounded-xl cursor-not-allowed whitespace-nowrap"
+                  className={`block text-center text-sm font-semibold px-5 py-2.5 rounded-xl cursor-not-allowed whitespace-nowrap ${
+                    offer.heldOnly ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-400"
+                  }`}
                 >
-                  Unavailable
+                  {offer.heldOnly ? "Held — try again shortly" : "Unavailable"}
                 </span>
               )}
             </div>
