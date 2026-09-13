@@ -85,18 +85,11 @@ export function AuthButtons({ variant = "desktop" }: { variant?: "desktop" | "mo
   }
 
   return (
-    <>
-      <Link href="/auth/login">
-        <Button variant="secondary" size="sm">
-          <User size={15} />
-          Sign In
-        </Button>
-      </Link>
-      <Link href="/auth/register">
-        <Button size="sm" variant="primary">
-          Get Started
-        </Button>
-      </Link>
-    </>
+    <Link href="/auth/login">
+      <Button variant="primary" size="sm">
+        <User size={15} />
+        Sign In
+      </Button>
+    </Link>
   );
 }

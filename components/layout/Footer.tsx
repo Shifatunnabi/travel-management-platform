@@ -1,8 +1,7 @@
 import { cacheLife } from "next/cache";
 import Link from "next/link";
 import Image from "next/image";
-import NewsletterForm from "./NewsletterForm";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin, ArrowRight } from "lucide-react";
 import { CONTACT, SOCIAL_LINKS } from "@/lib/config/contact";
 
 /**
@@ -85,26 +84,34 @@ export default async function Footer() {
 
   return (
     <footer className="bg-slate-900 text-slate-300">
-      {/* Newsletter strip */}
-      <div className="bg-brand-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-white text-xl font-bold">Get exclusive travel deals</h3>
-              <p className="text-brand-200 text-sm mt-1">
-                Subscribe and receive the best offers directly in your inbox
-              </p>
-            </div>
-            <NewsletterForm />
+      {/* Property owner CTA — a floating card, not a full-bleed strip, so it
+          reads as its own moment rather than another footer band. */}
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+          <div className="rounded-2xl sm:rounded-3xl bg-brand-700 px-6 py-10 sm:px-12 sm:py-14 text-center">
+            <h3 className="text-2xl sm:text-4xl font-bold text-white text-balance">
+              Own a property? List it here
+            </h3>
+            <p className="mt-3 text-brand-200 text-sm sm:text-base max-w-xl mx-auto">
+              Reach thousands of travellers searching Tofiza every day — listing takes
+              minutes and there is no upfront cost.
+            </p>
+            <Link
+              href="/auth/register/partner"
+              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-brand-700 shadow-sm transition-colors hover:bg-white/90"
+            >
+              List Your Property
+              <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Main footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 sm:gap-10">
           {/* Brand col */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="col-span-2 space-y-5">
             <Image
               src="/asset/tofiza.png"
               alt="Tofiza Tours & Travels"
@@ -163,76 +170,106 @@ export default async function Footer() {
             )}
           </div>
 
-          {/* Company */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
-            <ul className="space-y-2.5">
-              {footerLinks.company.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Link columns — grouped so the payment banner can sit under just
+              these three on desktop, in the space Brand's taller content
+              leaves free, instead of spanning the whole footer width. */}
+          <div className="col-span-2 lg:col-span-3">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 sm:gap-10">
+              {/* Company */}
+              <div>
+                <h4 className="text-white font-semibold mb-4">Company</h4>
+                <ul className="space-y-2.5">
+                  {footerLinks.company.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-sm hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          {/* Support */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Support</h4>
-            <ul className="space-y-2.5">
-              {footerLinks.support.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+              {/* Support */}
+              <div>
+                <h4 className="text-white font-semibold mb-4">Support</h4>
+                <ul className="space-y-2.5">
+                  {footerLinks.support.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-sm hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          {/* Legal */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2.5">
-              {footerLinks.legal.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            {/* App-store buttons removed: there is no Tofiza app, and both
-                links pointed at "#". Restore this block when one ships. */}
+              {/* Legal */}
+              <div className="col-span-2 lg:col-span-1">
+                <h4 className="text-white font-semibold mb-4">Legal</h4>
+                <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5 lg:block lg:space-y-2.5">
+                  {footerLinks.legal.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-sm hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                {/* App-store buttons removed: there is no Tofiza app, and both
+                    links pointed at "#". Restore this block when one ships. */}
+              </div>
+            </div>
+
+            {/* Payment methods (desktop) — sits under the link columns only,
+                in the space Brand's longer content leaves free. */}
+            <div className="hidden lg:flex mt-10 justify-center rounded-xl bg-white px-6 py-5">
+              <Image
+                src="/asset/ssl_banner.png"
+                alt="Accepted payment methods — SSLCommerz verified"
+                width={2048}
+                height={330}
+                className="h-auto w-full object-contain"
+              />
+            </div>
           </div>
+        </div>
+
+        {/* Payment methods (mobile/tablet) — full width below everything */}
+        <div className="lg:hidden mt-12 flex justify-center rounded-xl bg-white px-4 py-4 sm:px-6 sm:py-5">
+          <Image
+            src="/asset/ssl_banner.png"
+            alt="Accepted payment methods — SSLCommerz verified"
+            width={2048}
+            height={330}
+            className="h-auto w-full max-w-xl sm:max-w-2xl object-contain"
+          />
         </div>
       </div>
 
       {/* Bottom bar */}
       <div className="border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             <p className="text-slate-500 text-xs">
               © {year} Tofiza. All rights reserved. Registered in Bangladesh.
             </p>
-            {/* Payment methods */}
-            <Image
-              src="/asset/ssl_banner.png"
-              alt="Accepted payment methods — SSLCommerz verified"
-              width={1600}
-              height={52}
-              className="h-auto w-full max-w-md lg:max-w-lg object-contain"
-            />
+            <a
+              href="https://seltiv.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-500 text-xs hover:text-white transition-colors"
+            >
+              Developed by <span className="font-semibold">SELTIV</span>
+            </a>
           </div>
         </div>
       </div>

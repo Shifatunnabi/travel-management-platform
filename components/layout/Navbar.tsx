@@ -7,14 +7,13 @@ import { usePathname } from "next/navigation";
 import { X, Phone, User } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { CONTACT } from "@/lib/config/contact";
-import { FEATURES } from "@/lib/config/features";
 
-// Flights stay out of the nav until FEATURES.flights is on — see
-// lib/config/features.ts for why that switch exists.
+// Flights points at a route with no page behind it — see
+// lib/config/features.ts — so it 404s until the real booking flow ships.
 const navLinks = [
   { href: "/", label: "Home" },
-  ...(FEATURES.flights ? [{ href: "/flights/search", label: "Flights" }] : []),
   { href: "/hotels/search", label: "Hotels" },
+  { href: "/flights", label: "Flights" },
 ];
 
 export default function Navbar({
@@ -62,7 +61,7 @@ export default function Navbar({
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-18">
+          <div className="relative flex items-center justify-between h-16 lg:h-18">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0">
               <Image
@@ -75,8 +74,9 @@ export default function Navbar({
               />
             </Link>
 
-            {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-1">
+            {/* Desktop nav — centered on the bar itself, independent of how
+                wide the logo or right-side content are. */}
+            <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -101,26 +101,13 @@ export default function Navbar({
                 <Phone size={15} />
                 <span>Support</span>
               </a>
-              <Link
-                href="/auth/register/partner"
-                className="text-sm font-medium text-slate-800 hover:text-brand-600 transition-colors whitespace-nowrap"
-              >
-                List your property
-              </Link>
               {account ?? (
-                <>
-                  <Link href="/auth/login">
-                    <Button variant="secondary" size="sm">
-                      <User size={15} />
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/auth/register">
-                    <Button size="sm" variant="primary">
-                      Get Started
-                    </Button>
-                  </Link>
-                </>
+                <Link href="/auth/login">
+                  <Button size="sm" variant="primary">
+                    <User size={15} />
+                    Sign In
+                  </Button>
+                </Link>
               )}
             </div>
 

@@ -1,96 +1,82 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, LifeBuoy, Home, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
+import NavbarFallback from "@/components/layout/NavbarFallback";
+import AccountMenu, { AuthButtons } from "@/components/layout/AccountMenu";
+import Footer from "@/components/layout/Footer";
 import { CONTACT } from "@/lib/config/contact";
 
 /**
- * Shown for any URL that matches no route. This renders inside the root layout
- * rather than the public site layout, so it carries its own header and links —
- * without them a mistyped URL was a dead end with no way back into the site.
+ * Shown for any URL that matches no route. The root `app/not-found.tsx` is
+ * rendered inside the root layout, not the (site) route group, so the shared
+ * chrome has to be pulled in here directly rather than inherited.
  */
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-white flex flex-col">
-      <div className="border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <Link href="/" aria-label="Tofiza Tours & Travels — home" className="inline-block">
-            <Image
-              src="/asset/tofiza.png"
-              alt="Tofiza Tours &amp; Travels"
-              width={306}
-              height={90}
-              className="h-9 w-auto object-contain"
-              priority
-            />
-          </Link>
-        </div>
-      </div>
+    <>
+      <Suspense fallback={<NavbarFallback />}>
+        <Navbar
+          account={
+            <Suspense fallback={<AuthButtons />}>
+              <AccountMenu />
+            </Suspense>
+          }
+          mobileAccount={
+            <Suspense fallback={<AuthButtons variant="mobile" />}>
+              <AccountMenu variant="mobile" />
+            </Suspense>
+          }
+        />
+      </Suspense>
 
-      <div className="flex-1 flex items-center">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 w-full">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-400">
-            Error 404
-          </p>
-          <h1 className="mt-3 text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight text-balance">
-            We cannot find that page
+      <main className="pt-16">
+        <section className="relative isolate flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden px-4 sm:px-6 py-20 text-center">
+          <Image
+            src="/asset/404.jpg"
+            alt=""
+            fill
+            priority
+            className="-z-20 origin-top scale-125 object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(5,12,58,0.75) 0%, rgba(5,12,58,0.5) 45%, rgba(5,12,58,0.8) 100%)",
+            }}
+          />
+
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Oops..!</p>
+          <h1 className="mt-1 text-[6rem] sm:text-[9rem] lg:text-[15rem] font-extrabold leading-none tracking-tight text-white/25">
+            404
           </h1>
-          <p className="mt-3 text-slate-500 text-base leading-relaxed max-w-lg">
-            The link may be out of date, or the address may have a typo in it. Your bookings are
-            safe — nothing has been lost.
+
+          <p className="mt-6 lg:mt-4 text-sm sm:text-base lg:text-xl font-medium text-white/80">
+            It seems that this page does not exist
           </p>
 
-          <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
-            {[
-              {
-                href: "/hotels/search",
-                Icon: Search,
-                title: "Find a hotel",
-                copy: "Search live rates by city and dates.",
-              },
-              {
-                href: "/account/bookings",
-                Icon: LifeBuoy,
-                title: "Manage a booking",
-                copy: "View or cancel a stay you booked.",
-              },
-              {
-                href: "/help",
-                Icon: Home,
-                title: "Help centre",
-                copy: "Answers to the common questions.",
-              },
-            ].map(({ href, Icon, title, copy }) => (
-              <Link
-                key={href}
-                href={href}
-                className="group rounded-2xl border border-slate-200 hover:border-brand-400 p-5 transition-colors flex flex-col gap-2"
-              >
-                <Icon size={17} className="text-brand-500" />
-                <p className="font-bold text-slate-900 text-[15px] group-hover:text-brand-700 transition-colors">
-                  {title}
-                </p>
-                <p className="text-sm text-slate-500 leading-relaxed">{copy}</p>
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <div className="mt-4 lg:mt-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 lg:gap-6">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
+              className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3 lg:px-10 lg:py-4 text-sm lg:text-lg font-semibold text-brand-700 shadow-lg transition-colors hover:bg-white/90"
             >
-              Back to Tofiza
+              Back to Home
             </Link>
             <a
               href={`tel:${CONTACT.phoneE164}`}
-              className="inline-flex items-center gap-2 text-slate-500 hover:text-brand-700 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 px-8 py-3 lg:px-10 lg:py-4 text-sm lg:text-lg font-semibold text-white transition-colors hover:bg-white/10"
             >
-              <Phone size={14} />
-              {CONTACT.phone}
+              <Phone size={16} className="lg:size-5" />
+              Contact Support
             </a>
           </div>
-        </div>
-      </div>
-    </main>
+        </section>
+      </main>
+
+      <Footer />
+    </>
   );
 }
