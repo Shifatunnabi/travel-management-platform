@@ -203,7 +203,7 @@ export default function FlightPaymentForm() {
                         type="button"
                         onClick={applyCoupon}
                         disabled={couponApplied}
-                        className="px-3 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 disabled:bg-slate-300 transition-colors"
+                        className="px-3 py-2 bg-secondary-500 text-white text-xs font-bold rounded-xl hover:bg-secondary-600 disabled:bg-slate-300 transition-colors"
                       >
                         Apply
                       </button>
@@ -237,7 +237,7 @@ export default function FlightPaymentForm() {
                     </div>
                   </div>
 
-                  <Button type="submit" variant="primary" fullWidth size="lg" loading={loading}>
+                  <Button type="submit" variant="accent" fullWidth size="lg" loading={loading}>
                     <Lock size={15} />
                     {loading ? "Processing..." : `Pay ৳${total.toLocaleString()}`}
                   </Button>

@@ -27,6 +27,18 @@
   --color-brand-800: #070f4d;
   --color-brand-900: #050c3a;
   --color-brand-950: #030726;
+  --color-secondary: #f97316;
+  --color-secondary-50: #fff7ed;
+  --color-secondary-100: #ffedd5;
+  --color-secondary-200: #fed7aa;
+  --color-secondary-300: #fdba74;
+  --color-secondary-400: #fb923c;
+  --color-secondary-500: #f97316;
+  --color-secondary-600: #ea580c;
+  --color-secondary-700: #c2410c;
+  --color-secondary-800: #9a3412;
+  --color-secondary-900: #7c2d12;
+  --color-secondary-950: #431407;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

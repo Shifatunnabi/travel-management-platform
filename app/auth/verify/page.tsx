@@ -49,7 +49,7 @@ async function VerifyResult({ searchParams }: { searchParams: Promise<{ token?: 
       )}
       <Link
         href="/account"
-        className="inline-block bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl px-6 py-3 text-sm transition-colors"
+        className="inline-block bg-secondary-500 hover:bg-secondary-600 text-white font-semibold rounded-xl px-6 py-3 text-sm transition-colors"
       >
         Go to my account
       </Link>

@@ -201,7 +201,7 @@ async function FlightDetail({
 
                 <Link
                   href={`/flights/book/passengers?flightId=${flight.id}`}
-                  className="block w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-center rounded-xl transition-colors"
+                  className="block w-full py-3.5 bg-secondary-500 hover:bg-secondary-600 text-white font-bold text-center rounded-xl transition-colors"
                 >
                   Continue to Book
                 </Link>

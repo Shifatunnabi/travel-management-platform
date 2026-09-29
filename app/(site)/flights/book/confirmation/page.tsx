@@ -80,7 +80,7 @@ async function ConfirmationBody() {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-colors">
+            <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-secondary-500 hover:bg-secondary-600 text-white font-bold rounded-xl transition-colors">
               <Download size={18} />
               Download E-Ticket
             </button>

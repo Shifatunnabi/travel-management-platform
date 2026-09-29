@@ -29,7 +29,7 @@ export default function VendorError({
           <button
             type="button"
             onClick={reset}
-            className="mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+            className="mt-4 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
           >
             Try again
           </button>

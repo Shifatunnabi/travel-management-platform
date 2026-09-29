@@ -18,7 +18,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         <FormMessage state={state} />
         <Link
           href="/auth/login"
-          className="block w-full text-center bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
+          className="block w-full text-center bg-secondary-500 hover:bg-secondary-600 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
         >
           Sign in
         </Link>

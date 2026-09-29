@@ -93,8 +93,8 @@ export default function RateCalendar({
             onClick={() => go(r.id, startKey)}
             className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${
               r.id === selectedRoomId
-                ? "bg-brand-600 text-white"
-                : "bg-white border border-slate-200 text-slate-600 hover:border-brand-300"
+                ? "bg-secondary-500 text-white"
+                : "bg-white border border-slate-200 text-slate-600 hover:border-secondary-300"
             }`}
           >
             {r.name}
@@ -260,7 +260,7 @@ export default function RateCalendar({
               {WEEKDAYS.map((d, i) => (
                 <label
                   key={d}
-                  className="cursor-pointer select-none px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:border-brand-300 has-checked:bg-brand-600 has-checked:text-white has-checked:border-brand-600"
+                  className="cursor-pointer select-none px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:border-secondary-300 has-checked:bg-secondary-500 has-checked:text-white has-checked:border-secondary-500"
                 >
                   <input type="checkbox" name="weekdays" value={i} defaultChecked className="sr-only" />
                   {d}
@@ -374,7 +374,7 @@ function NightEditor({
               closed,
             })
           }
-          className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-60"
+          className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-60"
         >
           {pending && <Loader2 size={14} className="animate-spin" />}
           Save night

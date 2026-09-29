@@ -111,7 +111,7 @@ async function Body({ params }: { params: Promise<{ ref: string }> }) {
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <Link
             href="/account/bookings"
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-secondary-500 hover:bg-secondary-600 text-white font-bold rounded-xl transition-colors"
           >
             <LayoutDashboard size={16} aria-hidden="true" /> My bookings
           </Link>

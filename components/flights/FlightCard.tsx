@@ -117,7 +117,7 @@ export default function FlightCard({ flight }: FlightCardProps) {
               <p className="text-xs text-slate-500">per person</p>
               <Link
                 href={`/flights/${flight.id}`}
-                className="mt-2 block px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition-colors text-center"
+                className="mt-2 block px-5 py-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-bold rounded-xl transition-colors text-center"
               >
                 Select
               </Link>

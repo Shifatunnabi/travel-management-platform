@@ -213,7 +213,7 @@ function RoomRow({
                         <span
                           aria-hidden="true"
                           className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                            on ? "bg-brand-600 border-brand-600 text-white" : "border-slate-300 bg-white"
+                            on ? "bg-secondary-500 border-secondary-500 text-white" : "border-slate-300 bg-white"
                           }`}
                         >
                           {on ? <Check size={11} strokeWidth={3} /> : <Plus size={11} className="text-slate-400" />}
@@ -272,7 +272,7 @@ function RoomRow({
                       ...(chosen.length ? { options: chosen.join(",") } : {}),
                     },
                   }}
-                  className="block text-center bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                  className="block text-center bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                 >
                   Reserve
                 </Link>

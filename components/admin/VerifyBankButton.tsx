@@ -19,7 +19,7 @@ export default function VerifyBankButton({ vendorId }: { vendorId: string }) {
             setMessage(result.message ?? null);
           })
         }
-        className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors disabled:opacity-60"
+        className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors disabled:opacity-60"
       >
         {pending ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
         Mark verified

@@ -239,7 +239,7 @@ async function HotelBody({
               </p>
               <a
                 href="#rooms"
-                className="mt-4 block text-center bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition-colors"
+                className="mt-4 block text-center bg-secondary-500 hover:bg-secondary-600 text-white font-semibold py-3 rounded-xl transition-colors"
               >
                 See available rooms
               </a>

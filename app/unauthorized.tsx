@@ -14,7 +14,7 @@ export default function Unauthorized() {
         </p>
         <Link
           href="/auth/login"
-          className="inline-block bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+          className="inline-block bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
         >
           Sign in
         </Link>

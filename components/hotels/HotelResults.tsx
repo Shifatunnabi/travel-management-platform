@@ -4,6 +4,8 @@ import { Building2 } from "lucide-react";
 import { getLivePricing, type HotelCardData } from "@/lib/services/public-hotels";
 import { defaultStay, type Stay } from "@/lib/utils/stay";
 import HotelFilters from "./HotelFilters";
+import HotelFiltersDesktop from "./HotelFiltersDesktop";
+import HotelSearchCard from "./HotelSearchCard";
 import HotelCard from "./HotelCard";
 import SortControl from "./SortControl";
 import type { HotelSearchParams } from "@/app/(site)/hotels/search/page";
@@ -11,9 +13,11 @@ import type { HotelSearchParams } from "@/app/(site)/hotels/search/page";
 export default function HotelResults({
   hotels,
   params,
+  cities,
 }: {
   hotels: HotelCardData[];
   params: HotelSearchParams;
+  cities: string[];
 }) {
   const stay = defaultStay(params.checkIn, params.checkOut);
   const units = Number(params.rooms ?? "1") || 1;
@@ -21,6 +25,22 @@ export default function HotelResults({
 
   return (
     <div className="flex gap-6">
+      {/* Desktop sidebar: search card pinned above the filters, one sticky column */}
+      <div className="hidden lg:block w-64 shrink-0">
+        <div className="flex flex-col gap-6 sticky top-24">
+          <HotelSearchCard
+            destination={params.destination?.trim() ?? ""}
+            checkIn={stay.checkIn}
+            checkOut={stay.checkOut}
+            guests={params.guests ?? "2"}
+            rooms={params.rooms ?? "1"}
+            cities={cities}
+          />
+          <HotelFiltersDesktop params={params} />
+        </div>
+      </div>
+
+      {/* Mobile filters drawer — opened from the header bar, not rendered here */}
       <HotelFilters params={params} />
 
       <div className="flex-1 min-w-0">
@@ -157,7 +177,7 @@ function EmptyResults() {
       </p>
       <Link
         href="/hotels/search"
-        className="inline-block mt-5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+        className="inline-block mt-5 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
       >
         Clear all filters
       </Link>

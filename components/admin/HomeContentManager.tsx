@@ -61,7 +61,7 @@ export function DestinationManager({ rows }: { rows: DestinationRow[] }) {
           <button
             type="button"
             onClick={() => setEditing("new")}
-            className="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 bg-secondary-500 hover:bg-secondary-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
           >
             <Plus size={14} /> Add destination
           </button>
@@ -198,7 +198,7 @@ export function OfferManager({ rows }: { rows: OfferRow[] }) {
           <button
             type="button"
             onClick={() => setEditing("new")}
-            className="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 bg-secondary-500 hover:bg-secondary-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
           >
             <Plus size={14} /> Add offer
           </button>

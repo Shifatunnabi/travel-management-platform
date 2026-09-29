@@ -94,7 +94,7 @@ export default function ReviewForm({
         {TRIP_TYPES.map((t) => (
           <label
             key={t}
-            className="cursor-pointer select-none px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:border-brand-300 has-checked:bg-brand-600 has-checked:text-white has-checked:border-brand-600"
+            className="cursor-pointer select-none px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:border-secondary-300 has-checked:bg-secondary-500 has-checked:text-white has-checked:border-secondary-500"
           >
             <input type="radio" name="tripType" value={t} className="sr-only" />
             {t}

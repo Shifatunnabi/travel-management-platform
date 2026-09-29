@@ -3,7 +3,7 @@
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "accent" | "outline" | "ghost" | "danger";
   size?: "sm" | "md" | "lg" | "xl";
   loading?: boolean;
   fullWidth?: boolean;
@@ -14,6 +14,8 @@ const variantClasses: Record<string, string> = {
     "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-sm hover:shadow-md disabled:bg-brand-300",
   secondary:
     "bg-slate-100 text-slate-800 hover:bg-slate-200 active:bg-slate-300 disabled:bg-slate-50 disabled:text-slate-400",
+  accent:
+    "bg-secondary-500 text-white hover:bg-secondary-600 active:bg-secondary-700 shadow-sm hover:shadow-md disabled:bg-secondary-300",
   outline:
     "border border-brand-600 text-brand-600 hover:bg-brand-50 active:bg-brand-100 disabled:border-brand-200 disabled:text-brand-200",
   ghost:

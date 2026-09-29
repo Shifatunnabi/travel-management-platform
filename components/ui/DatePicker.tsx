@@ -208,7 +208,7 @@ export default function DatePicker({
                   onClick={() => selectDay(day)}
                   className={`w-8 h-8 rounded-full text-xs font-medium flex items-center justify-center transition-colors ${
                     isSelected(day)
-                      ? "bg-brand-600 text-white"
+                      ? "bg-secondary-500 text-white"
                       : isDisabled(day)
                       ? "text-slate-300 cursor-not-allowed"
                       : "text-slate-700 hover:bg-brand-50"

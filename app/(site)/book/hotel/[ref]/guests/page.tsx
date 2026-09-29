@@ -84,7 +84,7 @@ export function AlreadyHandled({
         <div className="flex items-center justify-center gap-3">
           <Link
             href={done ? `/book/hotel/${bookingRef}/confirmation` : "/hotels/search"}
-            className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+            className="bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
           >
             {done ? "View booking" : "Search hotels"}
           </Link>

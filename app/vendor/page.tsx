@@ -18,7 +18,7 @@ export default function VendorDashboardPage() {
         action={
           <Link
             href="/vendor/hotels/new"
-            className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
           >
             <Plus size={16} /> Add property
           </Link>
@@ -100,7 +100,7 @@ async function DashboardBody() {
                 action={
                   <Link
                     href="/vendor/hotels/new"
-                    className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+                    className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
                   >
                     <Plus size={16} /> Add property
                   </Link>
@@ -155,7 +155,7 @@ async function DashboardBody() {
               </div>
               <Link
                 href="/vendor/finance"
-                className="flex items-center justify-center gap-2 w-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+                className="flex items-center justify-center gap-2 w-full bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
               >
                 <Wallet size={15} /> Finance
               </Link>

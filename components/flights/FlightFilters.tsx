@@ -160,7 +160,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
       {/* Mobile trigger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed bottom-5 right-5 z-40 flex items-center gap-2 px-4 py-3 bg-brand-600 text-white rounded-full shadow-xl font-semibold text-sm"
+        className="lg:hidden fixed bottom-5 right-5 z-40 flex items-center gap-2 px-4 py-3 bg-secondary-500 text-white rounded-full shadow-xl font-semibold text-sm"
       >
         <SlidersHorizontal size={16} />
         Filters{activeCount > 0 && ` (${activeCount})`}
@@ -180,7 +180,7 @@ export default function FlightFilters({ onFilterChange }: FlightFiltersProps) {
             <FilterContent />
             <button
               onClick={() => setMobileOpen(false)}
-              className="mt-6 w-full py-3 bg-brand-600 text-white rounded-xl font-semibold"
+              className="mt-6 w-full py-3 bg-secondary-500 text-white rounded-xl font-semibold"
             >
               Apply Filters
             </button>

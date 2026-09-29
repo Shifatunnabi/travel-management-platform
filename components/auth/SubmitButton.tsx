@@ -15,7 +15,7 @@ export default function SubmitButton({
 }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" variant="primary" fullWidth size="lg" loading={pending} className="mt-2">
+    <Button type="submit" variant="accent" fullWidth size="lg" loading={pending} className="mt-2">
       {pending ? pendingLabel : children}
       {!pending && showArrow && <ArrowRight size={16} />}
     </Button>

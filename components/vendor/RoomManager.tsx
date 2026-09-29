@@ -60,7 +60,7 @@ export default function RoomManager({ hotelId, rooms }: { hotelId: string; rooms
             <button
               type="button"
               onClick={() => setEditing("new")}
-              className="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 bg-secondary-500 hover:bg-secondary-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
             >
               <Plus size={14} /> Add room
             </button>
@@ -76,7 +76,7 @@ export default function RoomManager({ hotelId, rooms }: { hotelId: string; rooms
               <button
                 type="button"
                 onClick={() => setEditing("new")}
-                className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
               >
                 <Plus size={16} /> Add a room
               </button>

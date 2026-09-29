@@ -37,7 +37,7 @@ export default function ReviewModeration({
         {options.map((o) => (
           <label
             key={o.value}
-            className="flex-1 text-center cursor-pointer select-none px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:border-brand-300 has-checked:bg-brand-600 has-checked:text-white has-checked:border-brand-600"
+            className="flex-1 text-center cursor-pointer select-none px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:border-secondary-300 has-checked:bg-secondary-500 has-checked:text-white has-checked:border-secondary-500"
           >
             <input
               type="radio"

@@ -46,7 +46,7 @@ function Inner({ amount, redirecting }: { amount: number; redirecting: boolean }
     <button
       type="submit"
       disabled={busy}
-      className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-xl transition-colors disabled:opacity-70"
+      className="w-full flex items-center justify-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white font-bold py-4 rounded-xl transition-colors disabled:opacity-70"
     >
       {busy ? <Loader2 size={16} className="animate-spin" /> : <Lock size={15} />}
       {busy ? "Taking you to the gateway..." : `Pay ${formatCurrency(amount)}`}

@@ -142,7 +142,7 @@ export default function HotelSearchForm({ cities = [] }: { cities?: string[] }) 
       <div className="mt-2 flex justify-center">
         <button
           onClick={handleSearch}
-          className="flex items-center gap-2.5 px-10 py-3 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+          className="flex items-center gap-2.5 px-10 py-3 bg-secondary-500 hover:bg-secondary-600 active:bg-secondary-700 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Search size={16} />
           Search Hotels

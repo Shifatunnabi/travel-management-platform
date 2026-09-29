@@ -49,7 +49,7 @@ async function Body() {
           {FEATURES.flights && (
             <Link
               href="/flights/search"
-              className="flex items-center gap-2 px-4 py-2 bg-brand-800/60 text-white rounded-xl text-sm font-semibold hover:bg-brand-800 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-secondary-700/60 text-white rounded-xl text-sm font-semibold hover:bg-secondary-700 transition-colors"
             >
               <Plane size={15} /> Book a flight
             </Link>
@@ -80,7 +80,7 @@ async function Body() {
             </p>
             <Link
               href="/hotels/search"
-              className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
             >
               Find a hotel <ArrowRight size={15} />
             </Link>

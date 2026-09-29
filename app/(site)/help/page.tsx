@@ -147,7 +147,7 @@ export default function HelpPage() {
           <div className="flex flex-wrap gap-3 shrink-0">
             <a
               href={`tel:${CONTACT.phoneE164}`}
-              className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
             >
               <Phone size={15} />
               {CONTACT.phone}

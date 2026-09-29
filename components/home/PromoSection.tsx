@@ -51,7 +51,7 @@ export default async function PromoSection() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                <div className="absolute top-4 left-4 bg-brand-600 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <div className="absolute top-4 left-4 bg-secondary-500 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
                   <Tag size={13} />
                   {promo.discount}
                 </div>

@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, MapPin, Calendar, Users, Search, SlidersHorizontal, X } from "lucide-react";
 import DatePicker from "@/components/ui/DatePicker";
 import CityInput from "@/components/ui/CityInput";
+import HotelSearchCard from "./HotelSearchCard";
+import { useHotelSearchUI } from "./HotelSearchUIContext";
 import { todayISO } from "@/lib/utils/formatters";
 
 /**
@@ -40,6 +42,7 @@ export default function HotelSearchBar({
   const router = useRouter();
   const search = useSearchParams();
   const today = todayISO();
+  const { setFiltersOpen, modifyOpen, setModifyOpen } = useHotelSearchUI();
 
   const [open, setOpen] = useState(false);
   const [dest, setDest] = useState(destination);
@@ -64,16 +67,19 @@ export default function HotelSearchBar({
   return (
     <div className="bg-brand-700 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-3">
           <Link
             href="/"
             className="flex items-center gap-1.5 text-brand-200 hover:text-white text-sm transition-colors shrink-0"
           >
             <ArrowLeft size={15} aria-hidden="true" />
-            Back
+            Back to Home
           </Link>
 
-          <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
+          {/* Desktop: full summary + inline "Modify search" toggle. The sidebar
+              search card covers this on desktop too, but this stays so the
+              summary (and its expand-in-place editor) is still available here. */}
+          <div className="hidden lg:flex flex-wrap items-center gap-3 text-sm font-medium">
             <div className="flex items-center gap-2 bg-brand-800 rounded-xl px-4 py-2">
               <MapPin size={14} aria-hidden="true" />
               <span className="font-bold">{destination || "All destinations"}</span>
@@ -95,10 +101,31 @@ export default function HotelSearchBar({
               type="button"
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
-              className="sm:ml-auto flex items-center gap-1.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 border border-brand-400/40 rounded-lg px-3 py-1.5 transition-colors"
+              className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-white bg-secondary-500 hover:bg-secondary-400 border border-secondary-400/40 rounded-lg px-3 py-1.5 transition-colors"
             >
               {open ? <X size={13} /> : <SlidersHorizontal size={13} />}
               {open ? "Close" : "Modify search"}
+            </button>
+          </div>
+
+          {/* Mobile/tablet: Modify search opens the same card as the desktop
+              sidebar in a popup; Filters opens the shared drawer. */}
+          <div className="flex lg:hidden items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setModifyOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            >
+              <SlidersHorizontal size={15} aria-hidden="true" />
+              Modify Search
+            </button>
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            >
+              <SlidersHorizontal size={15} aria-hidden="true" />
+              Filters
             </button>
           </div>
         </div>
@@ -131,7 +158,7 @@ export default function HotelSearchBar({
               <button
                 type="button"
                 onClick={submit}
-                className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl transition-colors h-[52px]"
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white font-bold text-sm rounded-xl transition-colors h-[52px]"
               >
                 <Search size={16} aria-hidden="true" />
                 Search
@@ -145,6 +172,44 @@ export default function HotelSearchBar({
           </div>
         )}
       </div>
+
+      {/* Mobile "Modify search" popup — same card as the desktop sidebar */}
+      {modifyOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex items-end">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setModifyOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Modify search"
+            className="relative w-full max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl p-5 text-slate-900"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-slate-900">Modify search</h2>
+              <button
+                type="button"
+                onClick={() => setModifyOpen(false)}
+                aria-label="Close"
+                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <HotelSearchCard
+              destination={destination}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              guests={guests}
+              rooms={rooms}
+              cities={cities}
+              onSubmit={() => setModifyOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

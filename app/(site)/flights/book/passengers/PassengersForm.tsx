@@ -217,7 +217,7 @@ export default function PassengersForm() {
                     <Shield size={13} className="text-emerald-500" />
                     Secured with SSL encryption
                   </div>
-                  <Button type="submit" variant="primary" fullWidth size="lg" className="mt-4">
+                  <Button type="submit" variant="accent" fullWidth size="lg" className="mt-4">
                     Proceed to Payment
                   </Button>
                 </div>

@@ -104,7 +104,7 @@ export default function HotelCard({
             {price}
             <Link
               href={href}
-              className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+              className="bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
             >
               See rooms
             </Link>

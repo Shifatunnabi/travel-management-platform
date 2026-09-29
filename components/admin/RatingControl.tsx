@@ -49,7 +49,7 @@ export default function RatingControl({
           ).map(([m, label]) => (
             <label
               key={m}
-              className="cursor-pointer select-none px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:border-brand-300 has-checked:bg-brand-600 has-checked:text-white has-checked:border-brand-600"
+              className="cursor-pointer select-none px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:border-secondary-300 has-checked:bg-secondary-500 has-checked:text-white has-checked:border-secondary-500"
             >
               <input
                 type="radio"

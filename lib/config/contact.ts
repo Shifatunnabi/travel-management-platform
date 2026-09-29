@@ -10,9 +10,9 @@ export const CONTACT = {
   supportEmail: "support@tofiza.com",
   bookingEmail: "support@tofiza.com",
   /** As written locally. */
-  phone: "01816166563",
+  phone: "01931 113300",
   /** Dialable form, for `tel:` links. */
-  phoneE164: "+8801816166563",
+  phoneE164: "+8801931113300",
   address: "Gulshan, Dhaka 1212, Bangladesh",
 } as const;
 

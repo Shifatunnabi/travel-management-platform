@@ -18,7 +18,7 @@ export function SubmitButton({
 }) {
   const { pending } = useFormStatus();
   const variants = {
-    primary: "bg-brand-600 hover:bg-brand-700 text-white",
+    primary: "bg-secondary-500 hover:bg-secondary-600 text-white",
     secondary: "bg-white border border-slate-200 hover:border-slate-300 text-slate-700",
     danger: "bg-rose-600 hover:bg-rose-700 text-white",
   } as const;
