@@ -8,6 +8,7 @@ import { tags } from "@/lib/cache/tags";
 import type { PricingMode } from "@/lib/models/Room";
 import { checkAvailability, countNights, toNight } from "./inventory";
 import { occupancyFor, resolveRoom } from "./room-pricing";
+import { sweepHolds } from "./holds";
 import { readSettings } from "./settings";
 
 export interface HotelCardData {
@@ -187,6 +188,7 @@ export async function getHotelBySlug(slug: string) {
       const resolved = resolveRoom(r);
       return {
         id: String(r._id),
+        slug: r.slug,
         name: r.name,
         description: r.description,
         bedType: r.bedType,
@@ -283,6 +285,60 @@ export interface RoomOffer {
   unitsLeft: number;
 }
 
+type RoomDoc = Awaited<ReturnType<typeof loadRooms>>[number];
+
+function loadRooms(filter: Record<string, unknown>) {
+  return Room.find({ ...filter, status: "active" }).lean();
+}
+
+async function buildOffer(
+  room: RoomDoc,
+  holdMinutes: number,
+  from: Date,
+  to: Date,
+  units: number,
+  guests: number,
+): Promise<RoomOffer> {
+  const nights = countNights(from, to);
+  const resolved = resolveRoom(room);
+  const occupancy = occupancyFor(resolved.pricingMode, guests);
+  const availability = await checkAvailability(room, from, to, units, holdMinutes);
+  const unitsLeft = availability.nights.length
+    ? Math.min(...availability.nights.map((n) => n.unitsFree))
+    : room.totalUnits;
+
+  const total = availability.nights.reduce((sum, n) => sum + n.price * occupancy * units, 0);
+
+  return {
+    roomId: String(room._id),
+    pricingMode: resolved.pricingMode,
+    nightlyAverage:
+      nights > 0 ? Math.round(total / nights / units) : resolved.basePrice * occupancy,
+    total,
+    nights,
+    units,
+    guests,
+    breakfast: resolved.breakfast,
+    refundable: resolved.refundable,
+    cancellationHours: resolved.cancellationHours,
+    options: resolved.options.map((o) => ({
+      code: o.code,
+      label: o.label,
+      description: o.description,
+      price: o.price,
+      per: o.per,
+      amount: o.price * (o.per === "night" ? Math.max(1, nights) : 1) * units,
+      breakfast: o.breakfast,
+      refundable: o.refundable,
+      cancellationHours: o.cancellationHours,
+    })),
+    available: availability.available,
+    reason: availability.reason,
+    heldOnly: availability.heldOnly,
+    unitsLeft,
+  };
+}
+
 /**
  * Live pricing and availability for every room over a date range.
  * Never cached — a stale price here is a support ticket.
@@ -295,54 +351,34 @@ export async function getRoomOffers(
   guests = 1,
 ): Promise<Record<string, RoomOffer>> {
   await connectDB();
-  const rooms = await Room.find({ hotelId, status: "active" }).lean();
+  await sweepHolds({ hotelIds: [hotelId] });
+  const rooms = await loadRooms({ hotelId });
   const settings = await readSettings();
   const from = toNight(checkIn);
   const to = toNight(checkOut);
-  const nights = countNights(from, to);
   const result: Record<string, RoomOffer> = {};
 
   for (const room of rooms) {
-    const resolved = resolveRoom(room);
-    const occupancy = occupancyFor(resolved.pricingMode, guests);
-    const availability = await checkAvailability(room, from, to, units, settings.holdMinutes);
-    const unitsLeft = availability.nights.length
-      ? Math.min(...availability.nights.map((n) => n.unitsFree))
-      : room.totalUnits;
-
-    const total = availability.nights.reduce((sum, n) => sum + n.price * occupancy * units, 0);
-
-    result[String(room._id)] = {
-      roomId: String(room._id),
-      pricingMode: resolved.pricingMode,
-      nightlyAverage:
-        nights > 0 ? Math.round(total / nights / units) : resolved.basePrice * occupancy,
-      total,
-      nights,
-      units,
-      guests,
-      breakfast: resolved.breakfast,
-      refundable: resolved.refundable,
-      cancellationHours: resolved.cancellationHours,
-      options: resolved.options.map((o) => ({
-        code: o.code,
-        label: o.label,
-        description: o.description,
-        price: o.price,
-        per: o.per,
-        amount: o.price * (o.per === "night" ? Math.max(1, nights) : 1) * units,
-        breakfast: o.breakfast,
-        refundable: o.refundable,
-        cancellationHours: o.cancellationHours,
-      })),
-      available: availability.available,
-      reason: availability.reason,
-      heldOnly: availability.heldOnly,
-      unitsLeft,
-    };
+    result[String(room._id)] = await buildOffer(room, settings.holdMinutes, from, to, units, guests);
   }
 
   return result;
+}
+
+/** The same live offer for a single room — what the room details page prices from. */
+export async function getRoomOffer(
+  roomId: string,
+  checkIn: string,
+  checkOut: string,
+  units = 1,
+  guests = 1,
+): Promise<RoomOffer | null> {
+  await connectDB();
+  await sweepHolds({ roomIds: [roomId] });
+  const [room] = await loadRooms({ _id: roomId });
+  if (!room) return null;
+  const settings = await readSettings();
+  return buildOffer(room, settings.holdMinutes, toNight(checkIn), toNight(checkOut), units, guests);
 }
 
 /** Cheapest live nightly rate across a set of hotels, for search cards. */
@@ -354,6 +390,7 @@ export async function getLivePricing(
   guests = 1,
 ): Promise<Record<string, { from: number; soldOut: boolean }>> {
   await connectDB();
+  await sweepHolds({ hotelIds });
   const rooms = await Room.find({ hotelId: { $in: hotelIds }, status: "active" }).lean();
   const from = toNight(checkIn);
   const to = toNight(checkOut);

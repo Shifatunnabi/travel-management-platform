@@ -31,9 +31,6 @@ export default async function HotelSearchChrome({
       checkOut={stay.checkOut}
       guests={params.guests ?? "2"}
       rooms={params.rooms ?? "1"}
-      nights={stay.nights}
-      checkInLabel={stay.checkInLabel}
-      checkOutLabel={stay.checkOutLabel}
       cities={cities}
     />
   );

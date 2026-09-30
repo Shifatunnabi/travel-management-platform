@@ -56,7 +56,9 @@ async function Body({ searchParams }: { searchParams: Promise<{ status?: string 
       const orphan = !booking;
       const amountMismatch = booking ? booking.pricing.grandTotal !== p.amount : false;
       const paidButUnconfirmed =
-        p.status === "success" && booking != null && booking.status === "pending_payment";
+        p.status === "success" &&
+        booking != null &&
+        (booking.status === "pending_payment" || booking.status === "expired");
       return { p, booking, orphan, amountMismatch, paidButUnconfirmed };
     })
     .filter((r) => (status === "reconcile" ? r.orphan || r.amountMismatch || r.paidButUnconfirmed : true));

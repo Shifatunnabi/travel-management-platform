@@ -19,6 +19,7 @@ export const startBookingSchema = z
     checkIn: isoDate,
     checkOut: isoDate,
     guests: z.coerce.number().int().min(1).max(30).default(2),
+    children: z.coerce.number().int().min(0).max(30).default(0),
     rooms: z.coerce.number().int().min(1).max(10).default(1),
   })
   .refine((d) => d.checkOut > d.checkIn, {

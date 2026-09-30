@@ -1,4 +1,6 @@
+import { randomInt } from "node:crypto";
 import { Schema, model, models, type Model, type Types } from "mongoose";
+import { slugify } from "@/lib/cache/tags";
 import { imageSchema, type IImage } from "./Hotel";
 
 /**
@@ -49,6 +51,8 @@ export interface IRoom {
   hotelId: Types.ObjectId;
   vendorId: Types.ObjectId;
   name: string;
+  /** Public URL segment: the room name plus seven random digits. Set once, never changed. */
+  slug?: string;
   description: string;
   bedType: string;
   sizeSqm?: number;
@@ -105,6 +109,7 @@ const roomSchema = new Schema<IRoom>(
     hotelId: { type: Schema.Types.ObjectId, ref: "Hotel", required: true, index: true },
     vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true, index: true },
     name: { type: String, required: true, trim: true },
+    slug: { type: String, unique: true, sparse: true },
     description: { type: String, default: "" },
     bedType: { type: String, default: "1 Double Bed" },
     sizeSqm: Number,
@@ -127,6 +132,23 @@ const roomSchema = new Schema<IRoom>(
 );
 
 roomSchema.index({ hotelId: 1, status: 1 });
+
+/**
+ * Builds `honeymoon-suite-4829173`. Written once and kept through renames, so a
+ * shared room link never breaks.
+ */
+export async function generateRoomSlug(name: string): Promise<string> {
+  const root = slugify(name).slice(0, 60) || "room";
+  const RoomModel = models.Room as Model<IRoom>;
+  for (;;) {
+    const candidate = `${root}-${randomInt(1_000_000, 10_000_000)}`;
+    if (!(await RoomModel.exists({ slug: candidate }))) return candidate;
+  }
+}
+
+roomSchema.pre("validate", async function () {
+  if (!this.slug) this.slug = await generateRoomSlug(this.name);
+});
 
 export const Room: Model<IRoom> =
   (models.Room as Model<IRoom>) ?? model<IRoom>("Room", roomSchema);

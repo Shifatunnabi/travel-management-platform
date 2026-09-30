@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { toISODate } from "@/lib/utils/formatters";
 
 interface DatePickerProps {
@@ -13,6 +13,8 @@ interface DatePickerProps {
   placeholder?: string;
   containerClassName?: string;
   align?: "left" | "right";
+  /** `row` is a full-width "Label … value ⌄" line, for booking cards. */
+  variant?: "field" | "row";
 }
 
 const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -43,6 +45,7 @@ export default function DatePicker({
   placeholder = "Select date",
   containerClassName = "flex-1 min-w-0 relative",
   align = "left",
+  variant = "field",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
@@ -145,20 +148,36 @@ export default function DatePicker({
 
   return (
     <div className={containerClassName}>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="w-full h-full text-left border border-slate-200 hover:border-brand-400 rounded-xl px-3 py-2.5 transition-all"
-      >
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-        <div className="flex items-center gap-2">
-          <Calendar size={14} className="text-brand-500 shrink-0" />
-          <span className={`text-sm font-bold truncate ${value ? "text-slate-800" : "text-slate-300"}`}>
-            {value ? formatDisplay(value) : placeholder}
+      {variant === "row" ? (
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-label={`${label}: ${value || placeholder}`}
+          className="w-full flex items-center justify-between gap-3 border border-stone-400 hover:border-stone-800 rounded-xl px-3.5 py-3 text-left transition-colors"
+        >
+          <span>{label}</span>
+          <span className="flex items-center gap-2 text-sm tabular-nums">
+            {value || placeholder}
+            <ChevronDown size={14} className="text-stone-400" aria-hidden="true" />
           </span>
-        </div>
-      </button>
+        </button>
+      ) : (
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="w-full h-full text-left border border-slate-200 hover:border-brand-400 rounded-xl px-3 py-2.5 transition-all"
+        >
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+          <div className="flex items-center gap-2">
+            <Calendar size={14} className="text-brand-500 shrink-0" />
+            <span className={`text-sm font-bold truncate ${value ? "text-slate-800" : "text-slate-300"}`}>
+              {value ? formatDisplay(value) : placeholder}
+            </span>
+          </div>
+        </button>
+      )}
 
       {open && mounted && coords && createPortal(
         <div

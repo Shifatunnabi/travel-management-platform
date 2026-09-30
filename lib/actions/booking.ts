@@ -13,10 +13,14 @@ import { InventoryConflictError } from "@/lib/services/inventory";
 import { createSession, makeTranId } from "@/lib/services/sslcommerz";
 import { isPaymentConfigured } from "@/lib/env";
 import { audit } from "@/lib/services/audit";
+import { clientIp } from "@/lib/utils/client-ip";
 import {
   cancelBookingSchema, couponSchema, guestDetailsSchema, startBookingSchema,
 } from "@/lib/validation/booking";
 import { fail, parseForm, succeed, type ActionState } from "./_result";
+
+/** Extra minutes a room stays held while its guest is on the payment gateway. */
+const GATEWAY_GRACE_MINUTES = 10;
 
 /** Creates the hold and sends the guest into the checkout flow. */
 export async function startBookingAction(
@@ -38,8 +42,9 @@ export async function startBookingAction(
       checkOut: d.checkOut,
       units: d.rooms,
       adults: d.guests,
-      children: 0,
+      children: d.children,
       customerId: user?.id,
+      clientIp: await clientIp(),
     });
   } catch (error) {
     if (error instanceof InventoryConflictError || error instanceof BookingError) {
@@ -221,6 +226,15 @@ export async function payBookingAction(
   }
 
   booking.paymentId = payment._id as never;
+  // Someone on the gateway page is paying, not abandoning. Keep the room for
+  // the time a card payment takes, but never past a fixed ceiling, so pressing
+  // Pay over and over cannot keep a room off sale.
+  const settings = await readSettings();
+  const ceiling = booking.createdAt.getTime() + (settings.holdMinutes + GATEWAY_GRACE_MINUTES) * 60_000;
+  const wanted = Date.now() + GATEWAY_GRACE_MINUTES * 60_000;
+  if (booking.holdExpiresAt && wanted > booking.holdExpiresAt.getTime()) {
+    booking.holdExpiresAt = new Date(Math.min(wanted, ceiling));
+  }
   await booking.save();
 
   return succeed(undefined, { gatewayUrl: session.gatewayUrl });

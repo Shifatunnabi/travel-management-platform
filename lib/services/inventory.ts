@@ -224,7 +224,11 @@ export async function holdUnits(
   }
 }
 
-/** Turns a hold into a confirmed booking. */
+/**
+ * Turns a hold into a confirmed booking. Throws if any night has no hold to
+ * convert, so the surrounding transaction aborts rather than confirming a
+ * booking whose room was never actually reserved.
+ */
 export async function commitHold(
   roomId: string,
   checkIn: Date,
@@ -233,11 +237,14 @@ export async function commitHold(
   session?: ClientSession,
 ): Promise<void> {
   for (const date of nightsBetween(checkIn, checkOut)) {
-    await RoomInventory.updateOne(
+    const result = await RoomInventory.updateOne(
       { roomId, date, unitsHeld: { $gte: units } },
       { $inc: { unitsHeld: -units, unitsBooked: units } },
       { session },
     );
+    if (result.matchedCount === 0) {
+      throw new Error(`No held inventory to commit for ${toDateKey(date)}.`);
+    }
   }
 }
 

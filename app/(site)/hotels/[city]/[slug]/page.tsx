@@ -326,6 +326,7 @@ async function LiveRooms({
       items={hotel.rooms.map((room) => ({
         room: {
           id: room.id,
+          slug: room.slug,
           name: room.name,
           description: room.description,
           bedType: room.bedType,
@@ -342,10 +343,23 @@ async function LiveRooms({
 }
 
 function Gallery({ images, name }: { images: { url: string; alt: string }[]; name: string }) {
-  const [cover, ...rest] = images;
+  const [cover, ...others] = images;
+  const rest = others.slice(0, 4);
+  // The cover takes the left half; the rest fill the right half completely, so
+  // a property with two, three or four photos never leaves a blank cell.
+  const span = (i: number) => {
+    switch (rest.length) {
+      case 1: return "sm:col-span-2 sm:row-span-2";
+      case 2: return "sm:col-span-2 sm:row-span-1";
+      case 3: return i === 0 ? "sm:col-span-2 sm:row-span-1" : "sm:col-span-1 sm:row-span-1";
+      default: return "sm:col-span-1 sm:row-span-1";
+    }
+  };
   return (
     <div className="grid grid-cols-4 grid-rows-2 gap-2 h-64 sm:h-96 rounded-2xl overflow-hidden">
-      <div className="col-span-4 sm:col-span-2 row-span-2 relative bg-slate-100">
+      <div
+        className={`col-span-4 ${rest.length > 0 ? "sm:col-span-2" : ""} row-span-2 relative bg-slate-100`}
+      >
         <Image
           src={cdn(cover.url, 900, 700)}
           alt={cover.alt || name}
@@ -355,17 +369,20 @@ function Gallery({ images, name }: { images: { url: string; alt: string }[]; nam
           className="object-cover"
         />
       </div>
-      {rest.slice(0, 4).map((img, i) => (
-        <div key={img.url + i} className="hidden sm:block col-span-1 row-span-1 relative bg-slate-100">
-          <Image
-            src={cdn(img.url, 400, 300)}
-            alt={img.alt || name}
-            fill
-            sizes="25vw"
-            className="object-cover"
-          />
-        </div>
-      ))}
+      {rest.map((img, i) => {
+        const wide = span(i).includes("col-span-2");
+        return (
+          <div key={img.url + i} className={`hidden sm:block ${span(i)} relative bg-slate-100`}>
+            <Image
+              src={cdn(img.url, wide ? 800 : 400, wide ? 600 : 300)}
+              alt={img.alt || name}
+              fill
+              sizes={wide ? "50vw" : "25vw"}
+              className="object-cover"
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

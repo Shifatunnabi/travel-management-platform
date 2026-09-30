@@ -79,7 +79,20 @@ export async function settlePayment(fields: Record<string, string>): Promise<Set
   payment.gatewayPayload = { fields, validation: validation.raw };
   await payment.save();
 
-  await confirmBooking(String(booking._id), String(payment._id));
+  const outcome = await confirmBooking(String(booking._id), String(payment._id));
+
+  if (!outcome.confirmed && !outcome.alreadyDone) {
+    // Money has been taken but there is no room to give for it. The payment
+    // stays "success" — it is real — and shows up under Needs attention in the
+    // admin payments screen, where staff refund it.
+    const reason =
+      "Your payment arrived after your room hold expired, and the room has since been booked. We will refund you in full.";
+    payment.failureReason = "Paid after the hold expired and the room was no longer available — refund due.";
+    await payment.save();
+    console.error("[payments] paid but room lost:", payment.tranId, booking.ref);
+    return { ok: false, ref: booking.ref, reason };
+  }
+
   return { ok: true, ref: booking.ref };
 }
 

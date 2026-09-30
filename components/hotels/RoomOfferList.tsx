@@ -1,17 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Bed, Maximize, Users, Coffee, ShieldCheck, XCircle, AlertCircle, Plus, Check,
+  Bed, Maximize, Users, Coffee, ShieldCheck, XCircle, AlertCircle,
 } from "lucide-react";
 import { cdn } from "@/lib/utils/cdn";
+import { slugify } from "@/lib/cache/tags";
 import { formatCurrency } from "@/lib/utils/formatters";
 import type { RoomOffer } from "@/lib/services/public-hotels";
 
 interface RoomSummary {
   id: string;
+  slug?: string;
   name: string;
   description: string;
   bedType: string;
@@ -23,6 +24,8 @@ interface RoomSummary {
 }
 
 export default function RoomOfferList({
+  hotelSlug,
+  hotelCity,
   items,
   nights,
   checkIn,
@@ -44,6 +47,8 @@ export default function RoomOfferList({
       {items.map(({ room, offer }) => (
         <RoomRow
           key={room.id}
+          hotelSlug={hotelSlug}
+          hotelCity={hotelCity}
           room={room}
           offer={offer}
           nights={nights}
@@ -58,6 +63,8 @@ export default function RoomOfferList({
 }
 
 function RoomRow({
+  hotelSlug,
+  hotelCity,
   room,
   offer,
   nights,
@@ -66,6 +73,8 @@ function RoomRow({
   guests,
   rooms,
 }: {
+  hotelSlug: string;
+  hotelCity: string;
   room: RoomSummary;
   offer?: RoomOffer;
   nights: number;
@@ -74,23 +83,9 @@ function RoomRow({
   guests: string;
   rooms: string;
 }) {
-  const [chosen, setChosen] = useState<string[]>([]);
-
-  const extras = useMemo(
-    () => (offer?.options ?? []).filter((o) => chosen.includes(o.code)),
-    [offer, chosen],
-  );
-  const extrasTotal = extras.reduce((sum, o) => sum + o.amount, 0);
-  const total = (offer?.total ?? 0) + extrasTotal;
-
-  const breakfast = Boolean(offer?.breakfast) || extras.some((o) => o.breakfast);
-  const refundable = Boolean(offer?.refundable) || extras.some((o) => o.refundable);
-  const cancellationHours = offer?.refundable
-    ? offer.cancellationHours
-    : Math.max(0, ...extras.filter((o) => o.refundable).map((o) => o.cancellationHours), 0);
-
-  const toggle = (code: string) =>
-    setChosen((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+  const breakfast = Boolean(offer?.breakfast);
+  const refundable = Boolean(offer?.refundable);
+  const cancellationHours = offer?.cancellationHours ?? 0;
 
   const unitCount = Number(rooms) || 1;
 
@@ -117,7 +112,7 @@ function RoomRow({
             </span>
             {room.sizeSqm && (
               <span className="flex items-center gap-1">
-                <Maximize size={12} aria-hidden="true" /> {room.sizeSqm} sqm
+                <Maximize size={12} aria-hidden="true" /> {room.sizeSqm} m²
               </span>
             )}
             <span className="flex items-center gap-1">
@@ -126,7 +121,11 @@ function RoomRow({
             </span>
           </div>
           {room.description && (
-            <p className="text-sm text-slate-600 mt-1.5 line-clamp-2">{room.description}</p>
+            <p className="text-sm text-slate-600 mt-1.5 line-clamp-2">
+              {/* Vendors type one point per line; in a two-line preview those breaks
+                  would collapse into an unreadable run-on, so make them separators. */}
+              {room.description.trim().split(/\r?\n+/).map((line) => line.trim()).filter(Boolean).join(" · ")}
+            </p>
           )}
           {room.amenities.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2">
@@ -187,61 +186,6 @@ function RoomRow({
             )}
           </div>
 
-          {offer.options.length > 0 && (
-            <fieldset>
-              <legend className="text-xs font-semibold text-slate-600 mb-2">
-                Add to your stay
-              </legend>
-              <ul className="space-y-1.5">
-                {offer.options.map((option) => {
-                  const on = chosen.includes(option.code);
-                  return (
-                    <li key={option.code}>
-                      <label
-                        className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition-colors ${
-                          on
-                            ? "border-brand-300 bg-brand-50/60"
-                            : "border-slate-200 bg-white hover:border-slate-300"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={on}
-                          onChange={() => toggle(option.code)}
-                          className="sr-only"
-                        />
-                        <span
-                          aria-hidden="true"
-                          className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                            on ? "bg-secondary-500 border-secondary-500 text-white" : "border-slate-300 bg-white"
-                          }`}
-                        >
-                          {on ? <Check size={11} strokeWidth={3} /> : <Plus size={11} className="text-slate-400" />}
-                        </span>
-                        <span className="flex-1 min-w-0">
-                          <span className="block text-sm font-medium text-slate-800">{option.label}</span>
-                          {option.description && (
-                            <span className="block text-[11px] text-slate-500">{option.description}</span>
-                          )}
-                        </span>
-                        <span className="text-right shrink-0">
-                          <span className="block text-sm font-semibold text-slate-800 tabular-nums">
-                            + {formatCurrency(option.amount)}
-                          </span>
-                          <span className="block text-[11px] text-slate-400">
-                            {option.per === "night"
-                              ? `${formatCurrency(option.price)} / night`
-                              : "one-off"}
-                          </span>
-                        </span>
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            </fieldset>
-          )}
-
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 pt-1">
             <div>
               <p className="text-lg font-bold text-slate-900 tabular-nums">
@@ -251,40 +195,33 @@ function RoomRow({
               <p className="text-[11px] text-slate-500">
                 {formatCurrency(offer.nightlyAverage)} × {nights} night{nights === 1 ? "" : "s"}
                 {unitCount > 1 ? ` × ${unitCount} rooms` : ""}
-                {extrasTotal > 0 && ` + ${formatCurrency(extrasTotal)} extras`}
               </p>
               <p className="text-sm font-semibold text-slate-900 mt-1 tabular-nums">
-                {formatCurrency(total)} total
+                {formatCurrency(offer.total)} total
               </p>
             </div>
 
             <div className="shrink-0">
-              {offer.available ? (
+              {room.slug ? (
                 <Link
                   href={{
-                    pathname: "/book/hotel/start",
-                    query: {
-                      roomId: offer.roomId,
-                      checkIn,
-                      checkOut,
-                      guests,
-                      rooms,
-                      ...(chosen.length ? { options: chosen.join(",") } : {}),
-                    },
+                    pathname: `/hotels/${slugify(hotelCity)}/${hotelSlug}/${room.slug}`,
+                    query: { checkIn, checkOut, rooms, adults: guests },
                   }}
                   className="block text-center bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                 >
-                  Reserve
+                  View details
                 </Link>
-              ) : (
-                <span
+              ) : null}
+              {!offer.available && (
+                <p
                   title={offer.reason}
-                  className={`block text-center text-sm font-semibold px-5 py-2.5 rounded-xl cursor-not-allowed whitespace-nowrap ${
-                    offer.heldOnly ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-400"
+                  className={`mt-2 text-center text-xs font-semibold ${
+                    offer.heldOnly ? "text-amber-700" : "text-slate-500"
                   }`}
                 >
-                  {offer.heldOnly ? "Held — try again shortly" : "Unavailable"}
-                </span>
+                  {offer.heldOnly ? "Held — try again shortly" : "Unavailable for these dates"}
+                </p>
               )}
             </div>
           </div>

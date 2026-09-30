@@ -14,6 +14,7 @@ import {
   checkAvailability, commitHold, countNights, holdUnits,
   InventoryConflictError, releaseBooked, releaseHold, toNight,
 } from "./inventory";
+import { releaseExpiredHolds, sweepHolds } from "./holds";
 import { sendMail } from "./mailer";
 import { bookingConfirmedTemplate, bookingCancelledTemplate, vendorNewBookingTemplate } from "./email-templates";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils/formatters";
@@ -54,7 +55,12 @@ export interface StartBookingInput {
   adults: number;
   children: number;
   customerId?: string;
+  /** Who is asking, so one visitor cannot hold every room in the hotel. */
+  clientIp?: string;
 }
+
+/** Unpaid checkouts one guest (or one address) may have open at a time. */
+const MAX_OPEN_HOLDS = 3;
 
 /**
  * Creates the booking and holds inventory in one transaction. If anything in
@@ -67,6 +73,10 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
 
   const room = await Room.findOne({ _id: input.roomId, status: "active" }).lean();
   if (!room) throw new BookingError("That room is no longer on sale.");
+
+  // Holds whose time has run out still count against the room until they are
+  // released, so release them before deciding whether it is free.
+  await sweepHolds({ roomIds: [String(room._id)] });
 
   const hotel = await Hotel.findOne({ _id: room.hotelId, status: "published" }).lean();
   if (!hotel) throw new BookingError("That property is not accepting bookings.");
@@ -109,6 +119,23 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
       .select("ref")
       .lean();
     if (mine) return mine.ref;
+  }
+
+  const who = [
+    ...(input.customerId ? [{ customerId: input.customerId }] : []),
+    ...(input.clientIp ? [{ holdIp: input.clientIp }] : []),
+  ];
+  if (who.length) {
+    const open = await Booking.countDocuments({
+      status: "pending_payment",
+      holdExpiresAt: { $gt: new Date() },
+      $or: who,
+    });
+    if (open >= MAX_OPEN_HOLDS) {
+      throw new BookingError(
+        "You already have several rooms waiting for payment. Finish or cancel one before holding another.",
+      );
+    }
   }
 
   const availability = await checkAvailability(
@@ -171,6 +198,7 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
           pricing,
           status: "pending_payment",
           holdExpiresAt,
+          holdIp: input.clientIp ?? null,
           timeline: [{ status: "pending_payment", at: new Date() }],
         },
       ],
@@ -195,18 +223,54 @@ async function uniqueRef(): Promise<string> {
  * the IPN and the browser redirect can both land, in either order, and the
  * second call is a no-op.
  */
-export async function confirmBooking(
-  bookingId: string,
-  paymentId: string,
-): Promise<{ confirmed: boolean; alreadyDone: boolean }> {
+export interface ConfirmOutcome {
+  confirmed: boolean;
+  alreadyDone: boolean;
+  /** Paid, but the hold had been released and the room could not be taken back. */
+  roomLost?: boolean;
+}
+
+export async function confirmBooking(bookingId: string, paymentId: string): Promise<ConfirmOutcome> {
   await connectDB();
   const settings = await readSettings();
 
-  const outcome = await withTransaction(async (session) => {
+  let outcome: ConfirmOutcome;
+  try {
+    outcome = await confirmInTransaction(bookingId, paymentId, settings);
+  } catch (error) {
+    // The guest paid after their hold was released, and someone else has the
+    // room now. Nothing was written; the caller has to make this right.
+    if (error instanceof InventoryConflictError) {
+      return { confirmed: false, alreadyDone: false, roomLost: true };
+    }
+    throw error;
+  }
+
+  if (outcome.confirmed && !outcome.alreadyDone) {
+    afterResponse(() => sendConfirmationEmails(bookingId));
+  }
+  return outcome;
+}
+
+async function confirmInTransaction(
+  bookingId: string,
+  paymentId: string,
+  settings: Awaited<ReturnType<typeof readSettings>>,
+): Promise<ConfirmOutcome> {
+  return withTransaction(async (session) => {
     const booking = await Booking.findById(bookingId).session(session);
     if (!booking) throw new BookingError("Booking not found.");
 
-    if (booking.status !== "pending_payment") {
+    let lateNote: string | undefined;
+    if (booking.status === "expired") {
+      // The money is real even though the hold lapsed. If the room is still
+      // free, take it again; if not, this throws and the transaction rolls back.
+      await holdUnits(
+        String(booking.roomId), String(booking.hotelId),
+        booking.checkIn, booking.checkOut, booking.units, session,
+      );
+      lateNote = "Paid after the hold expired — room re-taken";
+    } else if (booking.status !== "pending_payment") {
       return { confirmed: booking.status === "confirmed", alreadyDone: true };
     }
 
@@ -215,7 +279,7 @@ export async function confirmBooking(
     booking.status = "confirmed";
     booking.paymentId = paymentId as never;
     booking.holdExpiresAt = null;
-    booking.timeline.push({ status: "confirmed", at: new Date() });
+    booking.timeline.push({ status: "confirmed", at: new Date(), note: lateNote });
     await booking.save({ session });
 
     // Earnings become withdrawable a settlement window after check-out.
@@ -256,11 +320,6 @@ export async function confirmBooking(
 
     return { confirmed: true, alreadyDone: false };
   });
-
-  if (outcome.confirmed && !outcome.alreadyDone) {
-    afterResponse(() => sendConfirmationEmails(bookingId));
-  }
-  return outcome;
 }
 
 async function sendConfirmationEmails(bookingId: string): Promise<void> {
@@ -326,24 +385,30 @@ async function sendConfirmationEmails(bookingId: string): Promise<void> {
   }
 }
 
-/** Marks a payment attempt failed and gives the held rooms back immediately. */
+/**
+ * Marks a payment attempt failed and gives the held rooms back immediately.
+ * Transactional and conditional on the booking still being unpaid, so a late
+ * failure notice cannot release rooms that a successful payment just took.
+ */
 export async function failBooking(bookingId: string, reason: string): Promise<void> {
   await connectDB();
-  const booking = await Booking.findById(bookingId);
-  if (!booking || booking.status !== "pending_payment") return;
+  await withTransaction(async (session) => {
+    const booking = await Booking.findOneAndUpdate(
+      { _id: bookingId, status: "pending_payment" },
+      {
+        $set: {
+          status: "cancelled",
+          holdExpiresAt: null,
+          cancellation: { by: null, byRole: "system", reason, at: new Date(), refundAmount: 0 },
+        },
+        $push: { timeline: { status: "cancelled", at: new Date(), note: reason } },
+      },
+      { session, returnDocument: "before" },
+    ).lean();
+    if (!booking) return;
 
-  await releaseHold(String(booking.roomId), booking.checkIn, booking.checkOut, booking.units);
-  booking.status = "cancelled";
-  booking.holdExpiresAt = null;
-  booking.cancellation = {
-    by: null,
-    byRole: "system",
-    reason,
-    at: new Date(),
-    refundAmount: 0,
-  };
-  booking.timeline.push({ status: "cancelled", at: new Date(), note: reason });
-  await booking.save();
+    await releaseHold(String(booking.roomId), booking.checkIn, booking.checkOut, booking.units, session);
+  });
 }
 
 /** What a guest gets back if they cancel right now, per the rate plan. */
@@ -460,31 +525,4 @@ export async function cancelBooking(
   });
 }
 
-/**
- * Releases inventory from checkouts that were never paid. Run on a schedule;
- * also called lazily so a cron outage cannot strand rooms forever.
- */
-export async function releaseExpiredHolds(): Promise<number> {
-  await connectDB();
-  const expired = await Booking.find({
-    status: "pending_payment",
-    holdExpiresAt: { $lt: new Date() },
-  }).limit(200);
-
-  let released = 0;
-  for (const booking of expired) {
-    try {
-      await releaseHold(String(booking.roomId), booking.checkIn, booking.checkOut, booking.units);
-      booking.status = "expired";
-      booking.holdExpiresAt = null;
-      booking.timeline.push({ status: "expired", at: new Date(), note: "Payment not completed in time" });
-      await booking.save();
-      released++;
-    } catch (error) {
-      console.error("[holds] could not release", booking.ref, error);
-    }
-  }
-  return released;
-}
-
-export { InventoryConflictError };
+export { InventoryConflictError, releaseExpiredHolds };

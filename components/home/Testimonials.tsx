@@ -68,6 +68,7 @@ export default function Testimonials() {
                     src={t.avatar}
                     alt={t.name}
                     fill
+                    sizes="40px"
                     className="object-cover"
                   />
                 </div>

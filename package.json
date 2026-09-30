@@ -9,7 +9,7 @@
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx scripts/test-rating.ts && tsx scripts/test-booking.ts && tsx scripts/test-money.ts",
+    "test": "tsx scripts/test-rating.ts && tsx scripts/test-booking.ts && tsx scripts/test-holds.ts && tsx scripts/test-money.ts",
     "sweep": "./scripts/sweep.sh",
     "shots": "tsx scripts/shots.ts"
   },

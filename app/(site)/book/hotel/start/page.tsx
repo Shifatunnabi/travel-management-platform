@@ -6,6 +6,7 @@ import { getSessionUser } from "@/lib/auth/guards";
 import { startBooking, BookingError } from "@/lib/services/booking-flow";
 import { InventoryConflictError } from "@/lib/services/inventory";
 import { startBookingSchema } from "@/lib/validation/booking";
+import { clientIp } from "@/lib/utils/client-ip";
 
 /**
  * Entered from a "Reserve" button. Creates the hold, then hands off to the
@@ -48,8 +49,9 @@ async function Hold({
       checkOut: d.checkOut,
       units: d.rooms,
       adults: d.guests,
-      children: 0,
+      children: d.children,
       customerId: user?.id,
+      clientIp: await clientIp(),
     });
   } catch (error) {
     if (error instanceof InventoryConflictError || error instanceof BookingError) {

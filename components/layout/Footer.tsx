@@ -108,7 +108,7 @@ export default async function Footer() {
       </div>
 
       {/* Main footer */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 sm:gap-10">
           {/* Brand col */}
           <div className="col-span-2 space-y-5">
@@ -231,12 +231,12 @@ export default async function Footer() {
 
             {/* Payment methods (desktop) — sits under the link columns only,
                 in the space Brand's longer content leaves free. */}
-            <div className="hidden lg:flex mt-10 justify-center rounded-xl bg-white px-6 py-5">
+            <div className="hidden lg:flex mt-8 justify-center">
               <Image
                 src="/asset/ssl_banner.png"
                 alt="Accepted payment methods — SSLCommerz verified"
-                width={2048}
-                height={330}
+                width={2116}
+                height={271}
                 className="h-auto w-full object-contain"
               />
             </div>
@@ -244,12 +244,12 @@ export default async function Footer() {
         </div>
 
         {/* Payment methods (mobile/tablet) — full width below everything */}
-        <div className="lg:hidden mt-12 flex justify-center rounded-xl bg-white px-4 py-4 sm:px-6 sm:py-5">
+        <div className="lg:hidden mt-8 flex justify-center">
           <Image
             src="/asset/ssl_banner.png"
             alt="Accepted payment methods — SSLCommerz verified"
-            width={2048}
-            height={330}
+            width={2116}
+            height={271}
             className="h-auto w-full max-w-xl sm:max-w-2xl object-contain"
           />
         </div>

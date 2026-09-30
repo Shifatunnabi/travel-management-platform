@@ -73,6 +73,8 @@ export interface IBooking {
   status: BookingStatus;
   paymentId?: Types.ObjectId | null;
   holdExpiresAt?: Date | null;
+  /** Address that opened the hold, used only to cap how many one visitor can keep open. */
+  holdIp?: string | null;
   cancellation?: {
     by: Types.ObjectId | null;
     byRole: string;
@@ -160,6 +162,7 @@ const bookingSchema = new Schema<IBooking>(
     },
     paymentId: { type: Schema.Types.ObjectId, ref: "Payment", default: null },
     holdExpiresAt: { type: Date, default: null, index: true },
+    holdIp: { type: String, default: null },
     cancellation: { type: Schema.Types.Mixed, default: null },
     reviewedAt: { type: Date, default: null },
     timeline: {

@@ -38,6 +38,7 @@ export default function NotFound() {
             alt=""
             fill
             priority
+            sizes="100vw"
             className="-z-20 origin-top scale-125 object-cover"
           />
           <div
