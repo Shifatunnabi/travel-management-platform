@@ -8,6 +8,7 @@ import { Vendor, Payout, LedgerEntry, Hotel, Room, Booking } from "@/lib/models"
 import { getVendorBalance } from "@/lib/services/ledger";
 import { evaluateCoupon, priceBooking } from "@/lib/services/pricing";
 import { readSettings } from "@/lib/services/settings";
+import { roomSchema } from "@/lib/validation/hotel";
 
 let failures = 0;
 function check(label: string, pass: boolean, detail = "") {
@@ -147,6 +148,32 @@ async function main() {
 
   const capped = priceBooking({ nights, units: 1, taxPct: 5, serviceFee: 0, commissionPct: 15, discount: 999_999 });
   check("a discount cannot exceed the booking value", capped.discount === 22_000, String(capped.discount));
+
+  console.log("\nRegular price");
+  const onSale = priceBooking({
+    nights: [
+      { date: new Date(), price: 10_000, tax: 1_500, regular: 14_000 },
+      { date: new Date(), price: 12_000, tax: 1_800, regular: 11_000 },
+      { date: new Date(), price: 9_000, tax: 0 },
+    ],
+    units: 2, commissionPct: 15,
+  });
+  check("regular total counts each night at the higher of regular and actual",
+    onSale.regularRoomTotal === (14_000 + 12_000 + 9_000) * 2, String(onSale.regularRoomTotal));
+  check("the regular price is never charged",
+    onSale.grandTotal === (10_000 + 12_000 + 9_000) * 2 + (1_500 + 1_800) * 2, String(onSale.grandTotal));
+  check("with no regular price, regular total equals the room total",
+    perRoom.regularRoomTotal === perRoom.roomTotal, String(perRoom.regularRoomTotal));
+  const roomForm = {
+    name: "Twin", bedType: "2 Twin Beds", maxAdults: "2", maxChildren: "0",
+    basePrice: "5000", totalUnits: "3", images: "[]",
+  };
+  check("a regular price above the base price is accepted",
+    roomSchema.safeParse({ ...roomForm, regularPrice: "6500" }).success);
+  check("a regular price at or below the base price is refused",
+    !roomSchema.safeParse({ ...roomForm, regularPrice: "5000" }).success);
+  const blank = roomSchema.safeParse({ ...roomForm, regularPrice: "" });
+  check("an empty regular price means none", blank.success && blank.data.regularPrice === null);
 
   console.log("\nVendor isolation");
   const theirHotels = await Hotel.countDocuments({ vendorId: other!._id });

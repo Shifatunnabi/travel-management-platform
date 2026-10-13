@@ -331,6 +331,7 @@ export async function saveRoomAction(
     maxChildren: d.maxChildren,
     basePrice: d.basePrice,
     taxAndService: d.taxAndService,
+    regularPrice: d.regularPrice,
     pricingMode: d.pricingMode,
     totalUnits: d.totalUnits,
     breakfast: d.breakfast,
@@ -403,12 +404,23 @@ export async function deleteImageAction(publicId: string): Promise<void> {
  */
 async function refreshPriceFrom(hotelId: string): Promise<void> {
   const rooms = await Room.find({ hotelId, status: "active" })
-    .select("basePrice pricingMode breakfast refundable cancellationHours options ratePlans")
+    .select("basePrice regularPrice pricingMode breakfast refundable cancellationHours options ratePlans")
     .lean();
-  const prices = rooms.map((r) => resolveRoom(r).basePrice);
+  const priced = rooms.map((r) => ({ price: resolveRoom(r).basePrice, regular: r.regularPrice ?? null }));
+  const cheapest = priced.reduce<(typeof priced)[number] | null>(
+    (best, r) => (!best || r.price < best.price ? r : best),
+    null,
+  );
   await Hotel.updateOne(
     { _id: hotelId },
-    { $set: { priceFrom: prices.length ? Math.min(...prices) : 0 } },
+    {
+      $set: {
+        priceFrom: cheapest?.price ?? 0,
+        // The strike-through belongs to the room that sets the headline price.
+        regularPriceFrom:
+          cheapest?.regular != null && cheapest.regular > cheapest.price ? cheapest.regular : null,
+      },
+    },
   );
 }
 
@@ -437,6 +449,7 @@ export async function bulkInventoryAction(
   const set: Record<string, unknown> = {};
   if (d.price !== null) set.priceOverride = d.price;
   if (d.tax !== null) set.taxOverride = d.tax;
+  if (d.regular !== null) set.regularOverride = d.regular;
   if (d.unitsTotal !== null) set.unitsTotal = d.unitsTotal;
   if (d.minStay !== null) set.minStay = d.minStay;
   if (d.closed !== "unchanged") set.closed = d.closed === "closed";
@@ -459,6 +472,7 @@ export async function bulkInventoryAction(
             unitsHeld: 0,
             ...(d.price === null ? { priceOverride: null } : {}),
             ...(d.tax === null ? { taxOverride: null } : {}),
+            ...(d.regular === null ? { regularOverride: null } : {}),
             ...(d.minStay === null ? { minStay: 1 } : {}),
             ...(d.closed === "unchanged" ? { closed: false } : {}),
           },
@@ -488,6 +502,7 @@ export async function setNightAction(
   patch: {
     price?: number | null;
     tax?: number | null;
+    regular?: number | null;
     unitsTotal?: number;
     closed?: boolean;
     minStay?: number;
@@ -511,9 +526,17 @@ export async function setNightAction(
     return fail("Tax & service charge must be a whole amount of ৳0 or more.");
   }
 
+  if (
+    patch.regular != null &&
+    (!Number.isInteger(patch.regular) || patch.regular < 0 || patch.regular > 1_000_000)
+  ) {
+    return fail("Regular price must be a whole amount of ৳0 or more.");
+  }
+
   const set: Record<string, unknown> = {};
   if (patch.price !== undefined) set.priceOverride = patch.price;
   if (patch.tax !== undefined) set.taxOverride = patch.tax;
+  if (patch.regular !== undefined) set.regularOverride = patch.regular;
   if (patch.unitsTotal !== undefined) set.unitsTotal = patch.unitsTotal;
   if (patch.closed !== undefined) set.closed = patch.closed;
   if (patch.minStay !== undefined) set.minStay = patch.minStay;

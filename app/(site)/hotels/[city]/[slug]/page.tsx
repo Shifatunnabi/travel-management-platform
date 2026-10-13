@@ -11,6 +11,7 @@ import { cdn } from "@/lib/services/cloudinary";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import { defaultStay } from "@/lib/utils/stay";
 import RoomOfferList from "@/components/hotels/RoomOfferList";
+import RegularPrice from "@/components/ui/RegularPrice";
 
 export async function generateMetadata({
   params,
@@ -233,6 +234,11 @@ async function HotelBody({
           <aside className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 p-5 lg:sticky lg:top-24">
               <p className="text-xs text-slate-500">Rooms from</p>
+              <RegularPrice
+                regular={hotel.regularPriceFrom}
+                price={hotel.priceFrom}
+                currency={hotel.currency}
+              />
               <p className="text-2xl font-bold text-slate-900 tabular-nums">
                 {formatCurrency(hotel.priceFrom, hotel.currency)}
                 <span className="text-sm font-normal text-slate-400"> / night</span>

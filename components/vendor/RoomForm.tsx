@@ -34,6 +34,7 @@ export interface RoomFormValues {
   maxChildren: number;
   basePrice: number;
   taxAndService: number;
+  regularPrice: number | null;
   pricingMode: "per_room" | "per_person";
   totalUnits: number;
   breakfast: boolean;
@@ -139,6 +140,17 @@ export default function RoomForm({
           defaultValue={initial?.taxAndService ?? 0}
           hint="Added on top of the base price and shown to the guest at checkout. Change it for individual nights in the rates calendar."
           errors={e?.taxAndService}
+        />
+        <TextInput
+          label="Regular price per night"
+          name="regularPrice"
+          type="number"
+          min={0}
+          prefix="৳"
+          defaultValue={initial?.regularPrice ?? ""}
+          placeholder="Optional"
+          hint="Shown crossed out next to the base price, like a discount. Guests are charged the base price. Leave empty for no discount."
+          errors={e?.regularPrice}
         />
         <Select
           label="Charged"

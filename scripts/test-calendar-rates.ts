@@ -72,6 +72,7 @@ async function main() {
     assert.equal(row.priceOverride, 1800);
     // An untouched tax field must not pin the room default onto the night.
     assert.equal(row.taxOverride, null);
+    assert.equal(row.regularOverride, null);
     assert.equal(row.unitsTotal, 5);
     assert.equal(row.unitsBooked, 0);
     assert.equal(row.unitsHeld, 0);
@@ -82,6 +83,7 @@ async function main() {
     await firstNight.click();
     await page.locator("#n-price").fill("2200");
     await page.locator("#n-tax").fill("300");
+    await page.locator("#n-regular").fill("2900");
     await page.locator("#n-units").fill("4");
     await page.locator("#n-min").fill("2");
     await save();
@@ -89,6 +91,7 @@ async function main() {
     assert(row);
     assert.equal(row.priceOverride, 2200);
     assert.equal(row.taxOverride, 300);
+    assert.equal(row.regularOverride, 2900);
     assert.equal(row.unitsTotal, 4);
     assert.equal(row.minStay, 2);
     assert.equal(row.unitsBooked, 1);
@@ -101,6 +104,7 @@ async function main() {
     await assertNoCrash();
     assert.equal((await firstRow())?.priceOverride, null);
     assert.equal((await firstRow())?.taxOverride, null);
+    assert.equal((await firstRow())?.regularOverride, null);
     console.log("PASS reset restores the room base price and tax & service charge");
 
     const bulk = page.locator("form").filter({ has: page.locator("#bulk-from") });
@@ -108,6 +112,7 @@ async function main() {
     await bulk.locator("#bulk-to").fill(SECOND);
     await bulk.locator("#bulk-price").fill("2500");
     await bulk.locator("#bulk-tax").fill("450");
+    await bulk.locator("#bulk-regular").fill("3200");
     await bulk.locator("#bulk-units").fill("3");
     await bulk.getByRole("button", { name: "Apply to range", exact: true }).click();
     await bulk.getByRole("status").waitFor();
@@ -117,6 +122,7 @@ async function main() {
       assert(inventory);
       assert.equal(inventory.priceOverride, 2500);
       assert.equal(inventory.taxOverride, 450);
+      assert.equal(inventory.regularOverride, 3200);
       assert.equal(inventory.unitsTotal, 3);
     }
     assert.equal((await firstRow())?.unitsBooked, 1);
@@ -127,11 +133,15 @@ async function main() {
     const prices = await getNightRates(room, toNight(FIRST), toNight("2030-01-12"));
     assert.deepEqual(prices.map((night) => night.price), [2500, 2500]);
     assert.deepEqual(prices.map((night) => night.tax), [450, 450]);
+    assert.deepEqual(prices.map((night) => night.regular), [3200, 3200]);
     assert.deepEqual(prices.map((night) => night.unitsFree), [1, 3]);
     await page.reload();
     await firstNight.click();
     assert.equal(await page.locator("#n-price").inputValue(), "2500");
     assert.equal(await page.locator("#n-tax").inputValue(), "450");
+    assert.equal(await page.locator("#n-regular").inputValue(), "3200");
+    assert.equal(await page.getByText("৳3,200", { exact: true }).first().evaluate(
+      (el) => getComputedStyle(el).textDecorationLine), "line-through");
     if (process.env.CALENDAR_TEST_SHOT) await page.screenshot({ path: process.env.CALENDAR_TEST_SHOT, fullPage: true });
     assert.equal(await page.locator("#n-units").inputValue(), "3");
     console.log("PASS rates survive reload and feed live guest pricing");

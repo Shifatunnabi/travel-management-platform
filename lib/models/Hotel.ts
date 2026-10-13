@@ -68,6 +68,8 @@ export interface IHotel {
 
   /** Denormalized cheapest room price, for search cards and sorting. */
   priceFrom: number;
+  /** Regular price of the room behind `priceFrom`, when it is on discount. */
+  regularPriceFrom?: number | null;
   currency: string;
   featured: boolean;
   listingPriority: number;
@@ -139,6 +141,7 @@ const hotelSchema = new Schema<IHotel>(
     displayReviewCount: { type: Number, default: 0 },
 
     priceFrom: { type: Number, default: 0, index: true },
+    regularPriceFrom: { type: Number, default: null },
     currency: { type: String, default: "BDT" },
     featured: { type: Boolean, default: false, index: true },
     listingPriority: { type: Number, default: 0 },

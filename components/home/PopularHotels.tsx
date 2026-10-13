@@ -6,6 +6,7 @@ import { getPopularHotels } from "@/lib/services/public-hotels";
 import { cdn } from "@/lib/services/cloudinary";
 import { formatCurrency } from "@/lib/utils/formatters";
 import { tags } from "@/lib/cache/tags";
+import RegularPrice from "@/components/ui/RegularPrice";
 
 /**
  * Cached UI, not just cached data: the whole rail becomes part of the static
@@ -80,8 +81,16 @@ export default async function PopularHotels() {
                 </p>
                 <div className="flex items-baseline justify-between mt-3 pt-3 border-t border-slate-100">
                   <span className="text-xs text-slate-400">from</span>
-                  <span className="text-lg font-bold text-slate-900 tabular-nums">
-                    {formatCurrency(hotel.priceFrom, hotel.currency)}
+                  <span className="text-right">
+                    <RegularPrice
+                      regular={hotel.regularPriceFrom}
+                      price={hotel.priceFrom}
+                      currency={hotel.currency}
+                      className="mr-1.5"
+                    />
+                    <span className="text-lg font-bold text-slate-900 tabular-nums">
+                      {formatCurrency(hotel.priceFrom, hotel.currency)}
+                    </span>
                   </span>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/connect";
 import { Coupon } from "@/lib/models/Coupon";
 import { Booking } from "@/lib/models/Booking";
 import type { IRoomOption } from "@/lib/models/Room";
+import { regularTotalOf } from "./inventory";
 
 export interface SelectedOption {
   code: string;
@@ -13,8 +14,10 @@ export interface SelectedOption {
 }
 
 export interface PriceBreakdown {
-  nightlyRates: { date: Date; price: number; tax: number }[];
+  nightlyRates: { date: Date; price: number; tax: number; regular: number | null }[];
   roomTotal: number;
+  /** The room at its regular price. Display only; equals roomTotal when there is no discount. */
+  regularRoomTotal: number;
   options: SelectedOption[];
   extrasTotal: number;
   subtotal: number;
@@ -34,7 +37,7 @@ export interface PriceInput {
    * The room's own rate for each night, for one room, before occupancy, with
    * the vendor's tax & service charge for that night alongside it.
    */
-  nights: { date: Date; price: number; tax?: number }[];
+  nights: { date: Date; price: number; tax?: number; regular?: number | null }[];
   /** How many rooms of this type. */
   units: number;
   /**
@@ -82,8 +85,10 @@ export function priceBooking({
     date: n.date,
     price: n.price * occupancy,
     tax: (n.tax ?? 0) * occupancy,
+    regular: n.regular != null ? n.regular * occupancy : null,
   }));
   const roomTotal = nightlyRates.reduce((sum, n) => sum + n.price, 0) * units;
+  const regularRoomTotal = regularTotalOf(nightlyRates) * units;
   const nightlyTax = nightlyRates.reduce((sum, n) => sum + n.tax, 0) * units;
 
   const selected: SelectedOption[] = options.map((o) => ({
@@ -109,6 +114,7 @@ export function priceBooking({
   return {
     nightlyRates,
     roomTotal,
+    regularRoomTotal,
     options: selected,
     extrasTotal,
     subtotal,

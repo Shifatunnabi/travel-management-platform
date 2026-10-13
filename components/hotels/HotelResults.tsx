@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { Building2 } from "lucide-react";
-import { getLivePricing, type HotelCardData } from "@/lib/services/public-hotels";
+import { getLivePricing, type HotelCardData, type LivePrice } from "@/lib/services/public-hotels";
 import { defaultStay, type Stay } from "@/lib/utils/stay";
 import HotelFilters from "./HotelFilters";
 import HotelFiltersDesktop from "./HotelFiltersDesktop";
@@ -9,6 +9,7 @@ import HotelSearchCard from "./HotelSearchCard";
 import HotelCard from "./HotelCard";
 import SortControl from "./SortControl";
 import type { HotelSearchParams } from "@/app/(site)/hotels/search/page";
+import RegularPrice from "@/components/ui/RegularPrice";
 
 export default function HotelResults({
   hotels,
@@ -95,7 +96,7 @@ function CardList({
   stay,
   params,
   pricing,
-}: ListProps & { pricing?: Record<string, { from: number; soldOut: boolean }> }) {
+}: ListProps & { pricing?: Record<string, LivePrice> }) {
   return (
     <div className="space-y-4">
       {hotels.map((hotel) => (
@@ -105,7 +106,13 @@ function CardList({
           stay={stay}
           guests={params.guests ?? "2"}
           rooms={params.rooms ?? "1"}
-          price={<Price live={pricing?.[hotel.id]} fallback={hotel.priceFrom} />}
+          price={
+            <Price
+              live={pricing?.[hotel.id]}
+              fallback={hotel.priceFrom}
+              fallbackRegular={hotel.regularPriceFrom}
+            />
+          }
         />
       ))}
     </div>
@@ -133,9 +140,11 @@ async function PricedCardList({
 function Price({
   live,
   fallback,
+  fallbackRegular,
 }: {
-  live?: { from: number; soldOut: boolean };
+  live?: LivePrice;
   fallback: number;
+  fallbackRegular: number | null;
 }) {
   if (!live) {
     return (
@@ -158,6 +167,11 @@ function Price({
   return (
     <div className="text-right">
       <p className="text-[11px] text-slate-400">per night from</p>
+      <RegularPrice
+        regular={live.from ? live.regular : fallbackRegular}
+        price={live.from || fallback}
+        className="justify-end"
+      />
       <p className="text-xl font-bold text-slate-900 tabular-nums">
         ৳{(live.from || fallback).toLocaleString("en-BD")}
       </p>

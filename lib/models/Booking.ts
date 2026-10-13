@@ -19,8 +19,10 @@ export interface IBookingSelectedOption {
 
 export interface IBookingPricing {
   /** `tax` is the vendor's tax & service charge for that night; absent on legacy bookings. */
-  nightlyRates: { date: Date; price: number; tax?: number }[];
+  nightlyRates: { date: Date; price: number; tax?: number; regular?: number | null }[];
   roomTotal: number;
+  /** What the room would cost at its regular price — display only, never charged. */
+  regularRoomTotal?: number;
   /** The extras the guest ticked, frozen with what each one cost. */
   options: IBookingSelectedOption[];
   extrasTotal: number;
@@ -125,9 +127,10 @@ const bookingSchema = new Schema<IBooking>(
     },
     pricing: {
       nightlyRates: [
-        new Schema({ date: Date, price: Number, tax: Number }, { _id: false }),
+        new Schema({ date: Date, price: Number, tax: Number, regular: Number }, { _id: false }),
       ],
       roomTotal: { type: Number, required: true },
+      regularRoomTotal: { type: Number, default: 0 },
       options: {
         type: [
           new Schema<IBookingSelectedOption>(

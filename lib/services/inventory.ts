@@ -38,6 +38,8 @@ export interface NightRate {
   price: number;
   /** Tax & service charge for the night, charged on top of `price`. */
   tax: number;
+  /** Regular (strike-through) price, display only. null when none is set. */
+  regular: number | null;
   unitsFree: number;
   /**
    * Units inside somebody else's unfinished checkout. They are not sold — they
@@ -65,7 +67,7 @@ function nightLabel(date: Date): string {
  * has to pre-generate a calendar before their rooms can be booked.
  */
 type PricedRoom = Pick<IRoom, "_id" | "basePrice" | "totalUnits"> &
-  Partial<Pick<IRoom, "taxAndService">>;
+  Partial<Pick<IRoom, "taxAndService" | "regularPrice">>;
 
 export async function getNightRates(
   room: PricedRoom,
@@ -90,6 +92,7 @@ export async function getNightRates(
         date,
         price: room.basePrice,
         tax: room.taxAndService ?? 0,
+        regular: room.regularPrice ?? null,
         unitsFree: room.totalUnits,
         unitsHeld: 0,
         closed: false,
@@ -100,12 +103,21 @@ export async function getNightRates(
       date,
       price: row.priceOverride ?? room.basePrice,
       tax: row.taxOverride ?? room.taxAndService ?? 0,
+      regular: row.regularOverride ?? room.regularPrice ?? null,
       unitsFree: Math.max(0, row.unitsTotal - row.unitsBooked - row.unitsHeld),
       unitsHeld: row.unitsHeld,
       closed: row.closed,
       minStay: row.minStay,
     };
   });
+}
+
+/**
+ * What `nights` would cost at their regular price. A night without one, or
+ * with one at or below its actual price, counts at its actual price.
+ */
+export function regularTotalOf(nights: { price: number; regular?: number | null }[]): number {
+  return nights.reduce((sum, n) => sum + Math.max(n.regular ?? 0, n.price), 0);
 }
 
 export interface Availability {
@@ -203,6 +215,7 @@ export async function holdUnits(
           minStay: 1,
           priceOverride: null,
           taxOverride: null,
+          regularOverride: null,
         },
       },
       { upsert: true, session },

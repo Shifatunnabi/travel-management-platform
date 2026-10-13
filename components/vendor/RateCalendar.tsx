@@ -64,6 +64,7 @@ export default function RateCalendar({
   const saveNight = (patch: {
     price?: number | null;
     tax?: number | null;
+    regular?: number | null;
     unitsTotal?: number;
     closed?: boolean;
     minStay?: number;
@@ -105,7 +106,7 @@ export default function RateCalendar({
 
       <Card
         title={rangeLabel(nights)}
-        description="Five weeks from today. Click any night to change its base fare, tax & service charge, availability, or minimum stay."
+        description="Five weeks from today. Click any night to change its base fare, regular price, tax & service charge, availability, or minimum stay."
         action={
           <div className="flex items-center gap-1">
             <button
@@ -181,8 +182,19 @@ export default function RateCalendar({
                   </span>
                   {n.closed && <Lock size={10} className="text-slate-400 shrink-0" />}
                 </div>
+                {!n.closed && n.regular != null && n.regular > n.price && (
+                  <p
+                    className={`text-[10px] tabular-nums line-through mt-1 ${
+                      n.hasRegularOverride ? "text-brand-400" : "text-slate-400"
+                    }`}
+                  >
+                    {formatCurrency(n.regular)}
+                  </p>
+                )}
                 <p
-                  className={`text-xs font-bold tabular-nums mt-1 ${
+                  className={`text-xs font-bold tabular-nums ${
+                    !n.closed && n.regular != null && n.regular > n.price ? "" : "mt-1"
+                  } ${
                     n.hasOverride ? "text-brand-600" : "text-slate-800"
                   }`}
                 >
@@ -232,7 +244,10 @@ export default function RateCalendar({
             <span className="text-amber-600 font-bold">on hold</span> Unpaid checkout — not a booking
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-brand-600 font-bold">৳</span> Fare or tax overridden for that night
+            <span className="text-slate-400 line-through">৳</span> Regular price, shown crossed out to guests
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-brand-600 font-bold">৳</span> Set for that night only
           </span>
         </div>
       </Card>
@@ -279,10 +294,15 @@ export default function RateCalendar({
             </div>
           </fieldset>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <div>
               <label htmlFor="bulk-price" className="block text-xs font-semibold text-slate-600 mb-1.5">Base fare</label>
               <input id="bulk-price" type="number" name="price" min={100} placeholder="Unchanged"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
+            </div>
+            <div>
+              <label htmlFor="bulk-regular" className="block text-xs font-semibold text-slate-600 mb-1.5">Regular price</label>
+              <input id="bulk-regular" type="number" name="regular" min={0} placeholder="Unchanged"
                 className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
             </div>
             <div>
@@ -330,6 +350,7 @@ function NightEditor({
   onSave: (patch: {
     price?: number | null;
     tax?: number | null;
+    regular?: number | null;
     unitsTotal?: number;
     closed?: boolean;
     minStay?: number;
@@ -337,6 +358,7 @@ function NightEditor({
 }) {
   const [price, setPrice] = useState(String(night.price));
   const [tax, setTax] = useState(String(night.tax));
+  const [regular, setRegular] = useState(night.regular != null ? String(night.regular) : "");
   const [units, setUnits] = useState(String(night.unitsTotal));
   const [minStay, setMinStay] = useState(String(night.minStay));
   const [closed, setClosed] = useState(night.closed);
@@ -353,11 +375,17 @@ function NightEditor({
         </button>
       }
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label htmlFor="n-price" className="block text-xs font-semibold text-slate-600 mb-1.5">Base fare</label>
           <input id="n-price" type="number" min={100} value={price} onChange={(e) => setPrice(e.target.value)}
             className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
+        </div>
+        <div>
+          <label htmlFor="n-regular" className="block text-xs font-semibold text-slate-600 mb-1.5">Regular price</label>
+          <input id="n-regular" type="number" min={0} value={regular} placeholder="None" onChange={(e) => setRegular(e.target.value)}
+            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
+          <p className="text-[11px] text-slate-400 mt-1">Crossed out next to the base fare. Not charged.</p>
         </div>
         <div>
           <label htmlFor="n-tax" className="block text-xs font-semibold text-slate-600 mb-1.5">Tax &amp; service charge</label>
@@ -400,6 +428,10 @@ function NightEditor({
               // Only pin the tax to this night when it was actually changed, so
               // a later change to the room's default still reaches it.
               ...(Number(tax || 0) !== night.tax ? { tax: Math.max(0, Math.round(Number(tax || 0))) } : {}),
+              // Cleared means no strike-through on this night (0 is never shown).
+              ...(Number(regular || 0) !== (night.regular ?? 0)
+                ? { regular: Math.max(0, Math.round(Number(regular || 0))) }
+                : {}),
               unitsTotal: Number(units),
               minStay: Number(minStay) || 1,
               closed,
@@ -410,11 +442,11 @@ function NightEditor({
           {pending && <Loader2 size={14} className="animate-spin" />}
           Save night
         </button>
-        {(night.hasOverride || night.hasTaxOverride) && (
+        {(night.hasOverride || night.hasTaxOverride || night.hasRegularOverride) && (
           <button
             type="button"
             disabled={pending}
-            onClick={() => onSave({ price: null, tax: null })}
+            onClick={() => onSave({ price: null, tax: null, regular: null })}
             className="text-sm font-medium text-slate-500 hover:text-slate-700"
           >
             Reset to room defaults

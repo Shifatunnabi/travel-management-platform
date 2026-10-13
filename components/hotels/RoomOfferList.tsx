@@ -9,6 +9,7 @@ import { cdn } from "@/lib/utils/cdn";
 import { slugify } from "@/lib/cache/tags";
 import { formatCurrency } from "@/lib/utils/formatters";
 import type { RoomOffer } from "@/lib/services/public-hotels";
+import RegularPrice from "@/components/ui/RegularPrice";
 
 interface RoomSummary {
   id: string;
@@ -188,6 +189,7 @@ function RoomRow({
 
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 pt-1">
             <div>
+              <RegularPrice regular={offer.regularNightlyAverage} price={offer.nightlyAverage} />
               <p className="text-lg font-bold text-slate-900 tabular-nums">
                 {formatCurrency(offer.nightlyAverage)}
                 <span className="text-xs font-normal text-slate-400"> / night</span>

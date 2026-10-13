@@ -6,7 +6,7 @@ import { Room } from "@/lib/models/Room";
 import { Review } from "@/lib/models/Review";
 import { tags } from "@/lib/cache/tags";
 import type { PricingMode } from "@/lib/models/Room";
-import { checkAvailability, countNights, toNight } from "./inventory";
+import { checkAvailability, countNights, regularTotalOf, toNight } from "./inventory";
 import { occupancyFor, resolveRoom } from "./room-pricing";
 import { sweepHolds } from "./holds";
 import { readSettings } from "./settings";
@@ -26,6 +26,8 @@ export interface HotelCardData {
   displayRating: number;
   displayReviewCount: number;
   priceFrom: number;
+  /** Struck-through regular price for `priceFrom`; null when not on discount. */
+  regularPriceFrom: number | null;
   currency: string;
   distanceFromCenter?: number;
   freeCancellation: boolean;
@@ -50,6 +52,7 @@ function toCard(doc: unknown): HotelCardData {
     displayRating: (h.displayRating as number) ?? 0,
     displayReviewCount: (h.displayReviewCount as number) ?? 0,
     priceFrom: (h.priceFrom as number) ?? 0,
+    regularPriceFrom: (h.regularPriceFrom as number | null) ?? null,
     currency: (h.currency as string) ?? "BDT",
     distanceFromCenter: h.distanceFromCenter as number | undefined,
     freeCancellation: Boolean((h.policies as { cancellationHours?: number })?.cancellationHours),
@@ -58,7 +61,7 @@ function toCard(doc: unknown): HotelCardData {
 }
 
 const CARD_FIELDS =
-  "name slug city location description images amenities tags starCategory displayRating displayReviewCount priceFrom currency distanceFromCenter policies featured listingPriority";
+  "name slug city location description images amenities tags starCategory displayRating displayReviewCount priceFrom regularPriceFrom currency distanceFromCenter policies featured listingPriority";
 
 /** Cities with at least one live property, for the search form. */
 export async function getDestinationCities(): Promise<{ city: string; count: number; from: number }[]> {
@@ -183,6 +186,7 @@ export async function getHotelBySlug(slug: string) {
     displayRating: hotel.displayRating,
     displayReviewCount: hotel.displayReviewCount,
     priceFrom: hotel.priceFrom,
+    regularPriceFrom: hotel.regularPriceFrom ?? null,
     currency: hotel.currency,
     rooms: rooms.map((r) => {
       const resolved = resolveRoom(r);
@@ -196,6 +200,7 @@ export async function getHotelBySlug(slug: string) {
         maxAdults: r.maxAdults,
         maxChildren: r.maxChildren,
         basePrice: resolved.basePrice,
+        regularPrice: r.regularPrice ?? null,
         pricingMode: resolved.pricingMode,
         totalUnits: r.totalUnits,
         images: r.images.map((i) => i.url),
@@ -271,6 +276,12 @@ export interface RoomOffer {
   nightlyAverage: number;
   /** The room itself for the whole stay: nightly x nights x rooms. */
   total: number;
+  /**
+   * The same at the regular price, shown struck through. Equal to `total`
+   * (and `nightlyAverage`) when the room is not on discount.
+   */
+  regularTotal: number;
+  regularNightlyAverage: number;
   nights: number;
   units: number;
   guests: number;
@@ -308,13 +319,21 @@ async function buildOffer(
     : room.totalUnits;
 
   const total = availability.nights.reduce((sum, n) => sum + n.price * occupancy * units, 0);
+  const regularTotal = regularTotalOf(availability.nights) * occupancy * units;
+  const nightlyAverage =
+    nights > 0 ? Math.round(total / nights / units) : resolved.basePrice * occupancy;
+  const regularNightlyAverage =
+    nights > 0
+      ? Math.round(regularTotal / nights / units)
+      : Math.max(room.regularPrice ?? 0, resolved.basePrice) * occupancy;
 
   return {
     roomId: String(room._id),
     pricingMode: resolved.pricingMode,
-    nightlyAverage:
-      nights > 0 ? Math.round(total / nights / units) : resolved.basePrice * occupancy,
+    nightlyAverage,
     total,
+    regularTotal,
+    regularNightlyAverage,
     nights,
     units,
     guests,
@@ -381,6 +400,13 @@ export async function getRoomOffer(
   return buildOffer(room, settings.holdMinutes, toNight(checkIn), toNight(checkOut), units, guests);
 }
 
+export interface LivePrice {
+  from: number;
+  /** Regular price of that same room, struck through when above `from`. */
+  regular: number;
+  soldOut: boolean;
+}
+
 /** Cheapest live nightly rate across a set of hotels, for search cards. */
 export async function getLivePricing(
   hotelIds: string[],
@@ -388,7 +414,7 @@ export async function getLivePricing(
   checkOut: string,
   units = 1,
   guests = 1,
-): Promise<Record<string, { from: number; soldOut: boolean }>> {
+): Promise<Record<string, LivePrice>> {
   await connectDB();
   await sweepHolds({ hotelIds });
   const rooms = await Room.find({ hotelId: { $in: hotelIds }, status: "active" }).lean();
@@ -396,14 +422,14 @@ export async function getLivePricing(
   const to = toNight(checkOut);
   const nights = Math.max(1, countNights(from, to));
 
-  const out: Record<string, { from: number; soldOut: boolean }> = {};
+  const out: Record<string, LivePrice> = {};
 
   for (const room of rooms) {
     const hotelId = String(room.hotelId);
     const occupancy = occupancyFor(resolveRoom(room).pricingMode, guests);
     const availability = await checkAvailability(room, from, to, units);
     if (!availability.available) {
-      out[hotelId] ??= { from: Number.POSITIVE_INFINITY, soldOut: true };
+      out[hotelId] ??= { from: Number.POSITIVE_INFINITY, regular: 0, soldOut: true };
       continue;
     }
     // The headline price is the room on its own — extras are opt-in, so they
@@ -411,12 +437,13 @@ export async function getLivePricing(
     const nightly = Math.round((availability.total / nights / units) * occupancy);
     const existing = out[hotelId];
     if (!existing || nightly < existing.from) {
-      out[hotelId] = { from: nightly, soldOut: false };
+      const regular = Math.round((regularTotalOf(availability.nights) / nights) * occupancy);
+      out[hotelId] = { from: nightly, regular, soldOut: false };
     }
   }
 
   for (const [id, value] of Object.entries(out)) {
-    if (!Number.isFinite(value.from)) out[id] = { from: 0, soldOut: true };
+    if (!Number.isFinite(value.from)) out[id] = { from: 0, regular: 0, soldOut: true };
   }
   return out;
 }

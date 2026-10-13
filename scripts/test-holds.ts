@@ -162,6 +162,24 @@ async function main() {
       tp.nightlyRates.map((n) => n.tax).join(","));
     check("the total is base fare plus tax & service charge, no platform fee",
       tp.grandTotal === 1000 * 2 * 2 + tp.taxes && tp.serviceFee === 0, String(tp.grandTotal));
+
+    console.log("\nRegular price");
+    await Room.updateOne({ _id: roomId }, { $set: { regularPrice: 1500 } });
+    await RoomInventory.create({
+      roomId, hotelId: hotel._id, date: toNight(day(70)), unitsTotal: 10, regularOverride: 1800,
+    });
+    const offer = await getRoomOffer(roomId, day(70), day(72), 1, 2);
+    check("the offer carries the regular total, night by night",
+      offer?.total === 2000 && offer.regularTotal === 1800 + 1500, `${offer?.total} vs ${offer?.regularTotal}`);
+    check("…and a regular nightly average", offer?.regularNightlyAverage === 1650, String(offer?.regularNightlyAverage));
+    const sale = await startBooking({
+      ...base, checkIn: day(70), checkOut: day(72), customerId: String(new mongoose.Types.ObjectId()),
+    });
+    made.push(sale);
+    const sp = (await Booking.findOne({ ref: sale }).lean())!.pricing;
+    check("the booking keeps the regular total for checkout", sp.regularRoomTotal === 3300, String(sp.regularRoomTotal));
+    check("the guest is charged the base fare, not the regular price",
+      sp.roomTotal === 2000 && sp.grandTotal === 2000 + sp.taxes, `${sp.roomTotal} / ${sp.grandTotal}`);
   } finally {
     const bookings = await Booking.find({ roomId }).select("_id").lean();
     await LedgerEntry.deleteMany({ bookingId: { $in: bookings.map((b) => b._id) } });

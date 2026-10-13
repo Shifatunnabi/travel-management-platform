@@ -10,6 +10,7 @@ import DatePicker from "@/components/ui/DatePicker";
 import { addOnIcon } from "@/lib/utils/room-info";
 import { formatCurrency } from "@/lib/utils/formatters";
 import type { RoomOffer } from "@/lib/services/public-hotels";
+import RegularPrice from "@/components/ui/RegularPrice";
 
 const GOLD = "text-[#b08d57]";
 
@@ -281,7 +282,10 @@ export function BookingCard({
                 {formatCurrency(offer.nightlyAverage)} × {nights} night{nights === 1 ? "" : "s"}
                 {sel.rooms > 1 ? ` × ${sel.rooms} rooms` : ""}
               </dt>
-              <dd className="tabular-nums">{formatCurrency(offer.total)}</dd>
+              <dd className="tabular-nums text-right">
+                <RegularPrice regular={offer.regularTotal} price={offer.total} className="mr-1.5" />
+                {formatCurrency(offer.total)}
+              </dd>
             </div>
             {extras.map((o) => (
               <div key={o.code} className="flex justify-between gap-4">

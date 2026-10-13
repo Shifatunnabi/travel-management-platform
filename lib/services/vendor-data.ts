@@ -54,6 +54,8 @@ export interface CalendarNight {
   price: number;
   /** Tax & service charge for the night, on top of `price`. */
   tax: number;
+  /** Regular (strike-through) price; only shown to guests when above `price`. */
+  regular: number | null;
   unitsTotal: number;
   unitsBooked: number;
   unitsHeld: number;
@@ -62,6 +64,7 @@ export interface CalendarNight {
   minStay: number;
   hasOverride: boolean;
   hasTaxOverride: boolean;
+  hasRegularOverride: boolean;
 }
 
 /** A room's calendar for `days` nights from `startKey`, filling gaps from defaults. */
@@ -94,6 +97,7 @@ export async function getRoomCalendar(
       dateKey: key,
       price: row?.priceOverride ?? room.basePrice,
       tax: row?.taxOverride ?? room.taxAndService ?? 0,
+      regular: row?.regularOverride ?? room.regularPrice ?? null,
       unitsTotal: row?.unitsTotal ?? room.totalUnits,
       unitsBooked: row?.unitsBooked ?? 0,
       unitsHeld: row?.unitsHeld ?? 0,
@@ -105,6 +109,7 @@ export async function getRoomCalendar(
       minStay: row?.minStay ?? 1,
       hasOverride: row?.priceOverride != null,
       hasTaxOverride: row?.taxOverride != null,
+      hasRegularOverride: row?.regularOverride != null,
     });
   }
 

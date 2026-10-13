@@ -5,6 +5,7 @@ import { cdn } from "@/lib/services/cloudinary";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import type { CheckoutBooking } from "@/lib/services/booking-read";
 import HoldTimer from "./HoldTimer";
+import RegularPrice from "@/components/ui/RegularPrice";
 
 const STEPS = ["Guest details", "Review & pay", "Confirmation"] as const;
 
@@ -111,7 +112,17 @@ export function BookingSummary({ booking }: { booking: CheckoutBooking }) {
             label={`${formatCurrency(p.nightlyRate, p.currency)} × ${booking.nights} night${
               booking.nights === 1 ? "" : "s"
             }${booking.units > 1 ? ` × ${booking.units} rooms` : ""}`}
-            value={formatCurrency(p.roomTotal, p.currency)}
+            value={
+              <>
+                <RegularPrice
+                  regular={p.regularRoomTotal}
+                  price={p.roomTotal}
+                  currency={p.currency}
+                  className="mr-1.5"
+                />
+                {formatCurrency(p.roomTotal, p.currency)}
+              </>
+            }
           />
           {p.options.map((o) => (
             <Row key={o.code} label={o.label} value={formatCurrency(o.amount, p.currency)} />
@@ -147,7 +158,7 @@ export function BookingSummary({ booking }: { booking: CheckoutBooking }) {
   );
 }
 
-function Row({ label, value, tone }: { label: string; value: string; tone?: "emerald" }) {
+function Row({ label, value, tone }: { label: string; value: React.ReactNode; tone?: "emerald" }) {
   return (
     <div className="flex justify-between gap-3">
       <dt className="text-slate-500">{label}</dt>

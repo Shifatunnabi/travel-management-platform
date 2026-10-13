@@ -103,6 +103,10 @@ export const roomSchema = z.object({
     (value) => value === "" || value == null ? 0 : value,
     z.coerce.number().int().min(0, "Cannot be negative").max(1_000_000),
   ),
+  regularPrice: z.preprocess(
+    (value) => value === "" || value == null ? null : value,
+    z.coerce.number().int().min(0, "Cannot be negative").max(1_000_000).nullable(),
+  ),
   pricingMode: z.enum(PRICING_MODES).default("per_room"),
   totalUnits: z.coerce.number().int().min(1, "At least one room").max(500),
   breakfast: z.stringbool().default(false),
@@ -111,7 +115,10 @@ export const roomSchema = z.object({
   amenities: csv(30, "amenities"),
   images: imagesField,
   options: roomOptionsField,
-});
+}).refine(
+  (d) => d.regularPrice == null || d.regularPrice > d.basePrice,
+  { message: "Regular price must be higher than the base price, or left empty", path: ["regularPrice"] },
+);
 
 export const inventoryBulkSchema = z
   .object({
@@ -139,6 +146,14 @@ export const inventoryBulkSchema = z
         (v) => v === null || (Number.isInteger(v) && v >= 0 && v <= 1_000_000),
         "Tax & service charge must be ৳0 or more",
       ),
+    regular: z
+      .string()
+      .optional()
+      .transform((v) => (v === "" || v == null ? null : Number(v)))
+      .refine(
+        (v) => v === null || (Number.isInteger(v) && v >= 0 && v <= 1_000_000),
+        "Regular price must be ৳0 or more",
+      ),
     unitsTotal: z
       .string()
       .optional()
@@ -153,7 +168,7 @@ export const inventoryBulkSchema = z
   })
   .refine((d) => d.from <= d.to, { message: "End date must be after the start date", path: ["to"] })
   .refine(
-    (d) => d.price !== null || d.tax !== null || d.unitsTotal !== null || d.minStay !== null || d.closed !== "unchanged",
+    (d) => d.price !== null || d.tax !== null || d.regular !== null || d.unitsTotal !== null || d.minStay !== null || d.closed !== "unchanged",
     { message: "Change at least one field", path: ["price"] },
   );
 
