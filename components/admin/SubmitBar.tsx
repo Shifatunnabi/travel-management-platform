@@ -9,12 +9,14 @@ export function SubmitButton({
   variant = "primary",
   size = "md",
   className = "",
+  disabled = false,
 }: {
   children: React.ReactNode;
   pendingLabel?: string;
   variant?: "primary" | "secondary" | "danger";
   size?: "sm" | "md";
   className?: string;
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
   const variants = {
@@ -27,7 +29,7 @@ export function SubmitButton({
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || disabled}
       className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {pending && <Loader2 size={14} className="animate-spin" />}

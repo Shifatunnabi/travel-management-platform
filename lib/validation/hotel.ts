@@ -92,7 +92,10 @@ export const roomSchema = z.object({
   name: z.string().min(2, "Room name is required").max(90),
   description: z.string().max(1200).default(""),
   bedType: z.string().min(2, "Describe the beds").max(60),
-  sizeSqm: z.coerce.number().min(5).max(1000).optional(),
+  sizeSqm: z.preprocess(
+    (value) => value === "" ? undefined : value,
+    z.coerce.number().min(5).max(1000).optional(),
+  ),
   maxAdults: z.coerce.number().int().min(1).max(20),
   maxChildren: z.coerce.number().int().min(0).max(20),
   basePrice: z.coerce.number().int().min(100, "Minimum ৳100 per night").max(1_000_000),

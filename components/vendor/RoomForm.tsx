@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { saveRoomAction } from "@/lib/actions/vendor";
 import { idleState } from "@/lib/actions/_result";
@@ -67,10 +67,17 @@ export default function RoomForm({
   initial?: RoomFormValues;
   onDone?: () => void;
 }) {
-  const [state, action] = useActionState(saveRoomAction, idleState);
+  const [state, action, pending] = useActionState(saveRoomAction, idleState);
+  const [uploading, setUploading] = useState(false);
   const [options, setOptions] = useState<RoomOptionValue[]>(initial?.options ?? []);
   const [refundable, setRefundable] = useState(initial?.refundable ?? true);
   const e = state.ok ? undefined : state.fieldErrors;
+
+  useEffect(() => {
+    // Close after the successful action and refreshed room list have rendered.
+    // The dispatcher returns void; awaiting it would hide errors and old photos.
+    if (!pending && state.ok && state.message) onDone?.();
+  }, [pending, state, onDone]);
 
   const update = (i: number, patch: Partial<RoomOptionValue>) =>
     setOptions((prev) => prev.map((o, idx) => (idx === i ? { ...o, ...patch } : o)));
@@ -95,10 +102,7 @@ export default function RoomForm({
 
   return (
     <form
-      action={async (fd) => {
-        await action(fd);
-        onDone?.();
-      }}
+      action={action}
       className="space-y-5"
     >
       <input type="hidden" name="hotelId" value={hotelId} />
@@ -201,7 +205,8 @@ export default function RoomForm({
         initial={initial?.images ?? []}
         max={8}
         label="Room photos"
-        hint="First image shows on the room list."
+        hint="First photo is the cover everywhere. Choose the star to set a cover; drag or use the arrows to reorder. Click Save room to publish your changes."
+        onUploadingChange={setUploading}
       />
 
       <div>
@@ -338,7 +343,9 @@ export default function RoomForm({
         )}
       </div>
 
-      <SubmitButton pendingLabel="Saving...">{initial?._id ? "Save room" : "Add room"}</SubmitButton>
+      <SubmitButton disabled={uploading || pending} pendingLabel="Saving...">
+        {uploading ? "Uploading photos..." : initial?._id ? "Save room" : "Add room"}
+      </SubmitButton>
     </form>
   );
 }

@@ -157,7 +157,7 @@ export async function getHotelBySlug(slug: string) {
   const hotel = await Hotel.findOne({ slug, status: "published" }).lean();
   if (!hotel) return null;
 
-  cacheTag(tags.hotel(String(hotel._id)));
+  cacheTag(tags.hotel(String(hotel._id)), tags.rooms(String(hotel._id)));
 
   const rooms = await Room.find({ hotelId: hotel._id, status: "active" })
     .sort({ basePrice: 1 })

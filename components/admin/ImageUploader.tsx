@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
-import { ImagePlus, Loader2, Star, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Star, X } from "lucide-react";
 
 export interface UploadedImage {
   publicId: string;
@@ -28,6 +28,7 @@ export default function ImageUploader({
   max = 20,
   label = "Photos",
   hint = "First image is the cover. Drag to reorder.",
+  onUploadingChange,
 }: {
   name: string;
   folder: "hotels" | "rooms" | "kyc" | "avatars";
@@ -36,12 +37,13 @@ export default function ImageUploader({
   max?: number;
   label?: string;
   hint?: string;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const [images, setImages] = useState<UploadedImage[]>(initial);
   const [busy, setBusy] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const dragIndex = useRef<number | null>(null);
+  const dragId = useRef<string | null>(null);
 
   const upload = useCallback(
     async (files: FileList) => {
@@ -53,6 +55,7 @@ export default function ImageUploader({
         return;
       }
 
+      onUploadingChange?.(true);
       for (const file of chosen) {
         if (!ACCEPTED.includes(file.type)) {
           setError(`${file.name} is not a JPEG, PNG, WebP or AVIF image.`);
@@ -107,31 +110,29 @@ export default function ImageUploader({
           setBusy((n) => n - 1);
         }
       }
+      onUploadingChange?.(false);
       if (inputRef.current) inputRef.current.value = "";
     },
-    [folder, images.length, max, scopeId],
+    [folder, images.length, max, scopeId, onUploadingChange],
   );
 
   const remove = (publicId: string) =>
     setImages((prev) => prev.filter((i) => i.publicId !== publicId));
 
-  const makeCover = (index: number) =>
+  const move = (publicId: string, target: number) =>
     setImages((prev) => {
-      const next = [...prev];
-      const [item] = next.splice(index, 1);
-      return [item, ...next];
-    });
-
-  const onDrop = (target: number) => {
-    const from = dragIndex.current;
-    dragIndex.current = null;
-    if (from === null || from === target) return;
-    setImages((prev) => {
+      const from = prev.findIndex((img) => img.publicId === publicId);
+      if (from < 0 || target < 0 || target >= prev.length || from === target) return prev;
       const next = [...prev];
       const [item] = next.splice(from, 1);
       next.splice(target, 0, item);
       return next;
     });
+
+  const onDrop = (target: number) => {
+    const publicId = dragId.current;
+    dragId.current = null;
+    if (publicId !== null) move(publicId, target);
   };
 
   return (
@@ -144,28 +145,57 @@ export default function ImageUploader({
         </span>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {images.map((img, i) => (
           <div
             key={img.publicId}
             draggable
-            onDragStart={() => (dragIndex.current = i)}
+            onDragStart={(e) => {
+              dragId.current = img.publicId;
+              e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData("text/plain", img.publicId);
+            }}
+            onDragEnd={() => (dragId.current = null)}
             onDragOver={(e) => e.preventDefault()}
-            onDrop={() => onDrop(i)}
+            onDrop={(e) => {
+              e.preventDefault();
+              onDrop(i);
+            }}
             className="relative group aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-slate-50 cursor-grab active:cursor-grabbing"
           >
-            <Image src={img.url} alt={img.alt || ""} fill sizes="200px" className="object-cover" />
+            <Image src={img.url} alt={img.alt || ""} draggable={false} fill sizes="200px" className="object-cover" />
             {i === 0 && (
               <span className="absolute top-1.5 left-1.5 bg-brand-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                 Cover
               </span>
             )}
-            <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 p-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent">
+            <div className="absolute inset-x-0 bottom-0 flex flex-wrap justify-end gap-1 p-1.5 sm:opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent">
+              <button
+                type="button"
+                onClick={() => move(img.publicId, i - 1)}
+                disabled={i === 0}
+                aria-label={`Move photo ${i + 1} earlier`}
+                title="Move earlier"
+                className="p-1 rounded bg-white/90 hover:bg-white text-slate-700 disabled:opacity-40"
+              >
+                <ArrowLeft size={13} />
+              </button>
+              <button
+                type="button"
+                onClick={() => move(img.publicId, i + 1)}
+                disabled={i === images.length - 1}
+                aria-label={`Move photo ${i + 1} later`}
+                title="Move later"
+                className="p-1 rounded bg-white/90 hover:bg-white text-slate-700 disabled:opacity-40"
+              >
+                <ArrowRight size={13} />
+              </button>
               {i !== 0 && (
                 <button
                   type="button"
-                  onClick={() => makeCover(i)}
+                  onClick={() => move(img.publicId, 0)}
                   title="Make cover image"
+                  aria-label={`Make photo ${i + 1} the cover`}
                   className="p-1 rounded bg-white/90 hover:bg-white text-slate-700"
                 >
                   <Star size={13} />
@@ -175,6 +205,7 @@ export default function ImageUploader({
                 type="button"
                 onClick={() => remove(img.publicId)}
                 title="Remove image"
+                aria-label={`Remove photo ${i + 1}`}
                 className="p-1 rounded bg-white/90 hover:bg-white text-rose-600"
               >
                 <X size={13} />
@@ -187,6 +218,7 @@ export default function ImageUploader({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
+            disabled={busy > 0}
             className="aspect-[4/3] rounded-xl border-2 border-dashed border-slate-300 hover:border-brand-400 hover:bg-brand-50/40 flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-brand-600 transition-colors"
           >
             {busy > 0 ? <Loader2 size={20} className="animate-spin" /> : <ImagePlus size={20} />}
@@ -202,6 +234,7 @@ export default function ImageUploader({
         type="file"
         accept={ACCEPTED.join(",")}
         multiple
+        disabled={busy > 0}
         className="sr-only"
         onChange={(e) => e.target.files && upload(e.target.files)}
       />
