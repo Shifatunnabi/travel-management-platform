@@ -358,6 +358,7 @@ async function sendConfirmationEmails(bookingId: string): Promise<void> {
     total: money(p.grandTotal),
     charges,
     paidAt: formatDateTime(new Date().toISOString()),
+    guestCheckout: !booking.customerId,
   };
 
   if (booking.guestDetails.email) {

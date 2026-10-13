@@ -79,6 +79,11 @@ export interface BookingEmailData {
   charges?: [string, string][];
   /** When the payment was taken, in Bangladesh time. */
   paidAt?: string;
+  /**
+   * Booked without signing in. Such a guest has no account to open, so their
+   * link goes to the booking's own page, which the reference unlocks.
+   */
+  guestCheckout?: boolean;
 }
 
 export function bookingConfirmedTemplate(d: BookingEmailData) {
@@ -99,8 +104,17 @@ export function bookingConfirmedTemplate(d: BookingEmailData) {
       `<p style="margin:0 0 20px;">Thank you, ${escapeHtml(d.guestName)}. Your reservation is confirmed and the property has been notified. Your invoice is below.</p>
        ${table(rows)}
        ${invoice(d)}
-       <p style="margin:20px 0 0;">Present this reference at check-in. You can view or cancel this booking any time from your account.</p>`,
-      { label: "View booking", href: `${publicEnv.appUrl}/account/bookings` },
+       <p style="margin:20px 0 0;">Present this reference at check-in. ${
+         d.guestCheckout
+           ? "Keep this email — the button below opens your booking any time."
+           : "You can view or cancel this booking any time from your account."
+       }</p>`,
+      {
+        label: "View booking",
+        href: d.guestCheckout
+          ? `${publicEnv.appUrl}/book/hotel/${encodeURIComponent(d.ref)}/confirmation`
+          : `${publicEnv.appUrl}/account/bookings`,
+      },
     ),
   };
 }
@@ -195,7 +209,10 @@ export function reviewInviteTemplate(name: string, hotelName: string, bookingRef
       "Tell us about your stay",
       `<p style="margin:0 0 12px;">Hello ${escapeHtml(name)}, we hope you enjoyed <strong>${escapeHtml(hotelName)}</strong>.</p>
        <p style="margin:0;">Your review helps other travellers choose well — it takes under a minute.</p>`,
-      { label: "Write a review", href: `${publicEnv.appUrl}/account/bookings/${bookingRef}?review=1` },
+      {
+        label: "Write a review",
+        href: `${publicEnv.appUrl}/account/bookings?filter=past&review=${encodeURIComponent(bookingRef)}`,
+      },
     ),
   };
 }
