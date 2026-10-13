@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Star, X } from "lucide-react";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, prepareImageForUpload } from "@/lib/utils/prepare-upload";
 
 export interface UploadedImage {
   publicId: string;
@@ -12,12 +13,11 @@ export interface UploadedImage {
   alt?: string;
 }
 
-const MAX_BYTES = 8 * 1024 * 1024;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 /**
  * Uploads straight from the browser to Cloudinary using a short-lived signature
- * from our server, so an 8 MB photo never passes through the app. The resulting
+ * from our server, so a large photo never passes through the app. The resulting
  * list is serialized into a hidden field the server action reads.
  */
 export default function ImageUploader({
@@ -61,13 +61,14 @@ export default function ImageUploader({
           setError(`${file.name} is not a JPEG, PNG, WebP or AVIF image.`);
           continue;
         }
-        if (file.size > MAX_BYTES) {
-          setError(`${file.name} is larger than 8 MB.`);
+        if (file.size > MAX_UPLOAD_BYTES) {
+          setError(`${file.name} is larger than ${MAX_UPLOAD_LABEL}.`);
           continue;
         }
 
         setBusy((n) => n + 1);
         try {
+          const prepared = await prepareImageForUpload(file);
           const signRes = await fetch("/api/uploads/cloudinary-signature", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -80,7 +81,7 @@ export default function ImageUploader({
           const sign = await signRes.json();
 
           const body = new FormData();
-          body.append("file", file);
+          body.append("file", prepared);
           body.append("api_key", sign.apiKey);
           body.append("signature", sign.signature);
           // Forwarded verbatim — these are the parameters the signature covers.

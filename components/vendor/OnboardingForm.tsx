@@ -7,6 +7,7 @@ import { idleState } from "@/lib/actions/_result";
 import { Card } from "@/components/admin/Shell";
 import { SubmitButton, ActionMessage } from "@/components/admin/SubmitBar";
 import { FormGrid, TextInput } from "@/components/admin/Inputs";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, prepareImageForUpload } from "@/lib/utils/prepare-upload";
 
 interface KycDoc {
   label: string;
@@ -34,7 +35,6 @@ const DOC_TYPES = ["Trade licence", "TIN certificate", "Owner NID", "Bank statem
  */
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const ACCEPT_ATTR = ACCEPTED.join(",");
-const MAX_BYTES = 8 * 1024 * 1024;
 
 export default function OnboardingForm({
   vendorId,
@@ -58,13 +58,14 @@ export default function OnboardingForm({
       );
       return;
     }
-    if (file.size > MAX_BYTES) {
-      setUploadError(`${file.name} is larger than 8 MB.`);
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setUploadError(`${file.name} is larger than ${MAX_UPLOAD_LABEL}.`);
       return;
     }
 
     setUploading(label);
     try {
+      const prepared = await prepareImageForUpload(file);
       const signRes = await fetch("/api/uploads/cloudinary-signature", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -77,7 +78,7 @@ export default function OnboardingForm({
       const sign = await signRes.json();
 
       const body = new FormData();
-      body.append("file", file);
+      body.append("file", prepared);
       body.append("api_key", sign.apiKey);
       body.append("signature", sign.signature);
       // Forwarded verbatim — these are the parameters the signature covers.
@@ -123,7 +124,7 @@ export default function OnboardingForm({
 
       <Card
         title="Verification documents"
-        description="Clear photos of each document — JPEG, PNG or WebP, up to 8 MB. Only Tofiza's platform team can see these. They are never shown publicly."
+        description="Clear photos of each document — JPEG, PNG or WebP, up to 25 MB. Only Tofiza's platform team can see these. They are never shown publicly."
       >
         <div className="space-y-2">
           {DOC_TYPES.map((label) => {
