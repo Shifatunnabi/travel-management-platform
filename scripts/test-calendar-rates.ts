@@ -66,6 +66,8 @@ async function main() {
     await page.goto(calendarUrl);
     await firstNight.click();
     await page.locator("#n-price").fill("1800");
+    // No regular price set: the field shows the base fare and follows it.
+    assert.equal(await page.locator("#n-regular").inputValue(), "1800");
     await save();
     let row = await firstRow();
     assert(row);

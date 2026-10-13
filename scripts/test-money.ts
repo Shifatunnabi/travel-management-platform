@@ -170,8 +170,10 @@ async function main() {
   };
   check("a regular price above the base price is accepted",
     roomSchema.safeParse({ ...roomForm, regularPrice: "6500" }).success);
-  check("a regular price at or below the base price is refused",
-    !roomSchema.safeParse({ ...roomForm, regularPrice: "5000" }).success);
+  check("a regular price equal to the base price is accepted (no discount)",
+    roomSchema.safeParse({ ...roomForm, regularPrice: "5000" }).success);
+  check("a regular price below the base price is refused",
+    !roomSchema.safeParse({ ...roomForm, regularPrice: "4999" }).success);
   const blank = roomSchema.safeParse({ ...roomForm, regularPrice: "" });
   check("an empty regular price means none", blank.success && blank.data.regularPrice === null);
 

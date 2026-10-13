@@ -331,7 +331,9 @@ export async function saveRoomAction(
     maxChildren: d.maxChildren,
     basePrice: d.basePrice,
     taxAndService: d.taxAndService,
-    regularPrice: d.regularPrice,
+    // Equal to the base price means "no discount": store nothing, so the
+    // regular price keeps following the base price if that changes later.
+    regularPrice: d.regularPrice != null && d.regularPrice > d.basePrice ? d.regularPrice : null,
     pricingMode: d.pricingMode,
     totalUnits: d.totalUnits,
     breakfast: d.breakfast,

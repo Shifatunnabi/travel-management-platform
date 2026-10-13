@@ -116,8 +116,8 @@ export const roomSchema = z.object({
   images: imagesField,
   options: roomOptionsField,
 }).refine(
-  (d) => d.regularPrice == null || d.regularPrice > d.basePrice,
-  { message: "Regular price must be higher than the base price, or left empty", path: ["regularPrice"] },
+  (d) => d.regularPrice == null || d.regularPrice >= d.basePrice,
+  { message: "Regular price cannot be below the base price", path: ["regularPrice"] },
 );
 
 export const inventoryBulkSchema = z

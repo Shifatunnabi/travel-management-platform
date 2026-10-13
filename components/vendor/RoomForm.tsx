@@ -147,9 +147,9 @@ export default function RoomForm({
           type="number"
           min={0}
           prefix="৳"
-          defaultValue={initial?.regularPrice ?? ""}
-          placeholder="Optional"
-          hint="Shown crossed out next to the base price, like a discount. Guests are charged the base price. Leave empty for no discount."
+          defaultValue={initial?.regularPrice ?? initial?.basePrice ?? ""}
+          placeholder="Same as base price"
+          hint="Set it above the base price to show it crossed out, like a discount. Guests are charged the base price. Same as the base price (or empty) means no discount."
           errors={e?.regularPrice}
         />
         <Select

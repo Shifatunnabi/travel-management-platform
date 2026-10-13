@@ -358,7 +358,11 @@ function NightEditor({
 }) {
   const [price, setPrice] = useState(String(night.price));
   const [tax, setTax] = useState(String(night.tax));
-  const [regular, setRegular] = useState(night.regular != null ? String(night.regular) : "");
+  // A night with no regular price is sold at its base fare — show that.
+  // Until the vendor types one, it follows the base fare field.
+  const shownRegular = night.regular ?? night.price;
+  const [typedRegular, setRegular] = useState<string | null>(null);
+  const regular = typedRegular ?? (night.regular != null ? String(night.regular) : price);
   const [units, setUnits] = useState(String(night.unitsTotal));
   const [minStay, setMinStay] = useState(String(night.minStay));
   const [closed, setClosed] = useState(night.closed);
@@ -383,7 +387,7 @@ function NightEditor({
         </div>
         <div>
           <label htmlFor="n-regular" className="block text-xs font-semibold text-slate-600 mb-1.5">Regular price</label>
-          <input id="n-regular" type="number" min={0} value={regular} placeholder="None" onChange={(e) => setRegular(e.target.value)}
+          <input id="n-regular" type="number" min={0} value={regular} placeholder="Same as base fare" onChange={(e) => setRegular(e.target.value)}
             className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
           <p className="text-[11px] text-slate-400 mt-1">Crossed out next to the base fare. Not charged.</p>
         </div>
@@ -429,7 +433,7 @@ function NightEditor({
               // a later change to the room's default still reaches it.
               ...(Number(tax || 0) !== night.tax ? { tax: Math.max(0, Math.round(Number(tax || 0))) } : {}),
               // Cleared means no strike-through on this night (0 is never shown).
-              ...(Number(regular || 0) !== (night.regular ?? 0)
+              ...(typedRegular !== null && Number(regular || 0) !== shownRegular
                 ? { regular: Math.max(0, Math.round(Number(regular || 0))) }
                 : {}),
               unitsTotal: Number(units),
