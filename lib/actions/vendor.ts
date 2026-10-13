@@ -445,7 +445,9 @@ export async function bulkInventoryAction(
           $set: set,
           $setOnInsert: {
             hotelId: room.hotelId,
-            unitsTotal: d.unitsTotal ?? room.totalUnits,
+            // MongoDB rejects a field present in both $set and $setOnInsert,
+            // even when the inventory row already exists.
+            ...(d.unitsTotal === null ? { unitsTotal: room.totalUnits } : {}),
             unitsBooked: 0,
             unitsHeld: 0,
             ...(d.price === null ? { priceOverride: null } : {}),
@@ -503,7 +505,7 @@ export async function setNightAction(
       $set: set,
       $setOnInsert: {
         hotelId: room.hotelId,
-        unitsTotal: room.totalUnits,
+        ...(patch.unitsTotal === undefined ? { unitsTotal: room.totalUnits } : {}),
         unitsBooked: 0,
         unitsHeld: 0,
       },
