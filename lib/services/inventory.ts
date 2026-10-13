@@ -36,6 +36,8 @@ export function countNights(checkIn: Date, checkOut: Date): number {
 export interface NightRate {
   date: Date;
   price: number;
+  /** Tax & service charge for the night, charged on top of `price`. */
+  tax: number;
   unitsFree: number;
   /**
    * Units inside somebody else's unfinished checkout. They are not sold — they
@@ -62,8 +64,11 @@ function nightLabel(date: Date): string {
  * inventory document fall back to the room's own defaults, so a vendor never
  * has to pre-generate a calendar before their rooms can be booked.
  */
+type PricedRoom = Pick<IRoom, "_id" | "basePrice" | "totalUnits"> &
+  Partial<Pick<IRoom, "taxAndService">>;
+
 export async function getNightRates(
-  room: Pick<IRoom, "_id" | "basePrice" | "totalUnits">,
+  room: PricedRoom,
   checkIn: Date,
   checkOut: Date,
 ): Promise<NightRate[]> {
@@ -84,6 +89,7 @@ export async function getNightRates(
       return {
         date,
         price: room.basePrice,
+        tax: room.taxAndService ?? 0,
         unitsFree: room.totalUnits,
         unitsHeld: 0,
         closed: false,
@@ -93,6 +99,7 @@ export async function getNightRates(
     return {
       date,
       price: row.priceOverride ?? room.basePrice,
+      tax: row.taxOverride ?? room.taxAndService ?? 0,
       unitsFree: Math.max(0, row.unitsTotal - row.unitsBooked - row.unitsHeld),
       unitsHeld: row.unitsHeld,
       closed: row.closed,
@@ -116,7 +123,7 @@ export interface Availability {
 
 /** Whether `units` of this room can be sold for every night in the range. */
 export async function checkAvailability(
-  room: Pick<IRoom, "_id" | "basePrice" | "totalUnits">,
+  room: PricedRoom,
   checkIn: Date,
   checkOut: Date,
   units = 1,
@@ -195,6 +202,7 @@ export async function holdUnits(
           closed: false,
           minStay: 1,
           priceOverride: null,
+          taxOverride: null,
         },
       },
       { upsert: true, session },

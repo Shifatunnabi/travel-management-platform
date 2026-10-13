@@ -79,10 +79,12 @@ export default function FareRulesPage() {
                   {
                     term: "Discount",
                     detail:
-                      "Any valid code, applied before tax so the tax is calculated on what you actually pay. A discount can never exceed the value of the booking.",
+                      "Any valid code, taken off the room and extras. A discount can never exceed the value of the booking.",
                   },
-                  { term: "Taxes", detail: "Applied to the discounted amount." },
-                  { term: "Service fee", detail: "Added last, where one applies." },
+                  {
+                    term: "Tax & service charge",
+                    detail: "Set by the property for each night and added at checkout, before you pay.",
+                  },
                 ]}
               />
               <p>

@@ -75,6 +75,7 @@ async function RoomsBody({ params }: { params: Promise<{ id: string }> }) {
           maxAdults: r.maxAdults,
           maxChildren: r.maxChildren,
           totalUnits: r.totalUnits,
+          taxAndService: r.taxAndService ?? 0,
           amenities: r.amenities,
           status: r.status,
           images: r.images.map((i) => ({

@@ -301,6 +301,7 @@ export function BookingCard({
             {offer ? formatCurrency(total) : "—"}
           </span>
         </div>
+        <p className="mt-2 text-xs text-stone-500">Tax &amp; service charge is added at checkout.</p>
       </div>
 
       {offer && !offer.available && offer.reason && (

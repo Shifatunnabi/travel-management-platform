@@ -49,7 +49,16 @@ async function main() {
   await Booking.deleteMany({ roomId: room!._id, checkIn: { $gte: toNight(checkIn) } });
   await RoomInventory.updateMany(
     { roomId: room!._id, date: { $gte: toNight(checkIn), $lt: toNight(day(firstFriday + 3)) } },
-    { $set: { unitsHeld: 0, unitsBooked: 0, closed: false } },
+    { $set: { unitsHeld: 0, unitsBooked: 0, closed: false, taxOverride: null } },
+  );
+  // One night carries its own tax & service charge; the other falls back to the room's.
+  await RoomInventory.updateOne(
+    { roomId: room!._id, date: toNight(checkIn) },
+    {
+      $set: { taxOverride: 777 },
+      $setOnInsert: { hotelId: hotel!._id, unitsTotal: room!.totalUnits, unitsBooked: 0, unitsHeld: 0 },
+    },
+    { upsert: true },
   );
 
   const before = await freeUnits(roomId, checkIn);
@@ -95,6 +104,13 @@ async function main() {
   check("weekend uplift is actually applied",
     rows.some((r) => r.priceOverride != null),
     rows.map((r) => `${toDateKey(r.date)}:${r.priceOverride ?? "base"}`).join(" "));
+  const expectedTax = rows.reduce((sum, r) => sum + (r.taxOverride ?? room!.taxAndService ?? 0), 0);
+  check("tax & service charge follows per-night overrides and the room default",
+    booking!.pricing.taxes === expectedTax && rows.some((r) => r.taxOverride === 777),
+    `${booking!.pricing.taxes} = ${rows.map((r) => r.taxOverride ?? room!.taxAndService ?? 0).join(" + ")}`);
+  check("grand total is room, extras and tax & service charge",
+    booking!.pricing.grandTotal === booking!.pricing.subtotal + expectedTax && booking!.pricing.serviceFee === 0,
+    String(booking!.pricing.grandTotal));
   check("commission split adds up",
     booking!.pricing.commissionAmount + booking!.pricing.vendorEarning === booking!.pricing.grandTotal,
     `${booking!.pricing.commissionAmount} + ${booking!.pricing.vendorEarning} = ${booking!.pricing.grandTotal}`);
@@ -179,7 +195,7 @@ async function main() {
   await LedgerEntry.deleteMany({ bookingId: booking!._id });
   await RoomInventory.updateMany(
     { roomId: room!._id, date: { $gte: toNight(checkIn), $lt: toNight(day(firstFriday + 3)) } },
-    { $set: { unitsTotal: room!.totalUnits, unitsHeld: 0, unitsBooked: 0 } },
+    { $set: { unitsTotal: room!.totalUnits, unitsHeld: 0, unitsBooked: 0, taxOverride: null } },
   );
 
   console.log(failures === 0 ? "\n✓ all booking checks passed\n" : `\n✗ ${failures} check(s) failed\n`);

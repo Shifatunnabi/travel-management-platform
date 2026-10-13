@@ -145,6 +145,23 @@ async function main() {
       }
     }
     check("the fourth and fifth open holds are refused", refused === 2, `${refused} refused`);
+
+    console.log("\nTax & service charge");
+    await Room.updateOne({ _id: roomId }, { $set: { taxAndService: 150 } });
+    await RoomInventory.create({
+      roomId, hotelId: hotel._id, date: toNight(day(60)), unitsTotal: 10, taxOverride: 400,
+    });
+    const taxed = await startBooking({
+      ...base, units: 2, checkIn: day(60), checkOut: day(62), customerId: String(new mongoose.Types.ObjectId()),
+    });
+    made.push(taxed);
+    const tp = (await Booking.findOne({ ref: taxed }).lean())!.pricing;
+    check("a night's own charge wins, the room default fills the rest — per room",
+      tp.taxes === (400 + 150) * 2, String(tp.taxes));
+    check("each night records its charge", tp.nightlyRates.map((n) => n.tax).join(",") === "400,150",
+      tp.nightlyRates.map((n) => n.tax).join(","));
+    check("the total is base fare plus tax & service charge, no platform fee",
+      tp.grandTotal === 1000 * 2 * 2 + tp.taxes && tp.serviceFee === 0, String(tp.grandTotal));
   } finally {
     const bookings = await Booking.find({ roomId }).select("_id").lean();
     await LedgerEntry.deleteMany({ bookingId: { $in: bookings.map((b) => b._id) } });

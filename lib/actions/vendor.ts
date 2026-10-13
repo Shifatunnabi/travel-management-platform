@@ -330,6 +330,7 @@ export async function saveRoomAction(
     maxAdults: d.maxAdults,
     maxChildren: d.maxChildren,
     basePrice: d.basePrice,
+    taxAndService: d.taxAndService,
     pricingMode: d.pricingMode,
     totalUnits: d.totalUnits,
     breakfast: d.breakfast,
@@ -346,12 +347,17 @@ export async function saveRoomAction(
   if (roomId) {
     const room = await Room.findOne({ _id: roomId, hotelId, vendorId: user.vendorId });
     if (!room) return fail("That room does not exist.");
-    const before = { basePrice: room.basePrice, totalUnits: room.totalUnits };
+    const before = {
+      basePrice: room.basePrice,
+      taxAndService: room.taxAndService ?? 0,
+      totalUnits: room.totalUnits,
+    };
     room.set(fields);
     await room.save();
     await audit({
       actor: user, action: "room.update", entity: "Room", entityId: roomId,
-      before, after: { basePrice: d.basePrice, totalUnits: d.totalUnits },
+      before,
+      after: { basePrice: d.basePrice, taxAndService: d.taxAndService, totalUnits: d.totalUnits },
     });
   } else {
     const room = await Room.create({ ...fields, hotelId, vendorId: user.vendorId });
@@ -430,6 +436,7 @@ export async function bulkInventoryAction(
 
   const set: Record<string, unknown> = {};
   if (d.price !== null) set.priceOverride = d.price;
+  if (d.tax !== null) set.taxOverride = d.tax;
   if (d.unitsTotal !== null) set.unitsTotal = d.unitsTotal;
   if (d.minStay !== null) set.minStay = d.minStay;
   if (d.closed !== "unchanged") set.closed = d.closed === "closed";
@@ -451,6 +458,7 @@ export async function bulkInventoryAction(
             unitsBooked: 0,
             unitsHeld: 0,
             ...(d.price === null ? { priceOverride: null } : {}),
+            ...(d.tax === null ? { taxOverride: null } : {}),
             ...(d.minStay === null ? { minStay: 1 } : {}),
             ...(d.closed === "unchanged" ? { closed: false } : {}),
           },
@@ -477,7 +485,13 @@ export async function bulkInventoryAction(
 export async function setNightAction(
   roomId: string,
   dateKey: string,
-  patch: { price?: number | null; unitsTotal?: number; closed?: boolean; minStay?: number },
+  patch: {
+    price?: number | null;
+    tax?: number | null;
+    unitsTotal?: number;
+    closed?: boolean;
+    minStay?: number;
+  },
 ): Promise<ActionState> {
   const user = await requireVendor(["owner", "manager"]);
   await connectDB();
@@ -493,8 +507,13 @@ export async function setNightAction(
     return fail(`${committed} already sold for ${dateKey} — you cannot drop below that.`);
   }
 
+  if (patch.tax != null && (!Number.isInteger(patch.tax) || patch.tax < 0 || patch.tax > 1_000_000)) {
+    return fail("Tax & service charge must be a whole amount of ৳0 or more.");
+  }
+
   const set: Record<string, unknown> = {};
   if (patch.price !== undefined) set.priceOverride = patch.price;
+  if (patch.tax !== undefined) set.taxOverride = patch.tax;
   if (patch.unitsTotal !== undefined) set.unitsTotal = patch.unitsTotal;
   if (patch.closed !== undefined) set.closed = patch.closed;
   if (patch.minStay !== undefined) set.minStay = patch.minStay;

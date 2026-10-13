@@ -112,12 +112,15 @@ function reprice(
   discount: number,
   couponCode: string | null,
 ) {
+  // Bookings held before per-night tax existed have no `tax` on their rates
+  // and were priced with the platform-wide tax and fee; keep them that way.
+  const legacy = booking.pricing.nightlyRates.every((n) => n.tax == null);
   return priceBooking({
-    nights: booking.pricing.nightlyRates.map((n) => ({ date: n.date, price: n.price })),
+    nights: booking.pricing.nightlyRates.map((n) => ({ date: n.date, price: n.price, tax: n.tax ?? 0 })),
     units: booking.units,
     options: booking.pricing.options ?? [],
-    taxPct: settings.taxPct,
-    serviceFee: settings.serviceFee,
+    taxPct: legacy ? settings.taxPct : 0,
+    serviceFee: legacy ? settings.serviceFee : 0,
     commissionPct: booking.pricing.commissionPct,
     discount,
     couponCode,

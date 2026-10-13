@@ -16,6 +16,8 @@ export interface IRoomInventory {
   unitsHeld: number;
   /** null → fall back to room.basePrice */
   priceOverride?: number | null;
+  /** Tax & service charge for this night. null → fall back to room.taxAndService */
+  taxOverride?: number | null;
   closed: boolean;
   minStay: number;
   createdAt: Date;
@@ -31,6 +33,7 @@ const roomInventorySchema = new Schema<IRoomInventory>(
     unitsBooked: { type: Number, default: 0, min: 0 },
     unitsHeld: { type: Number, default: 0, min: 0 },
     priceOverride: { type: Number, default: null },
+    taxOverride: { type: Number, default: null, min: 0 },
     closed: { type: Boolean, default: false },
     minStay: { type: Number, default: 1, min: 1 },
   },

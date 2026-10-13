@@ -350,7 +350,7 @@ async function main() {
         name: r.name,
         description: `${r.bed} · ${r.size} sqm · sleeps ${r.adults} adults`,
         bedType: r.bed, sizeSqm: r.size, maxAdults: r.adults, maxChildren: r.children,
-        basePrice: r.price, totalUnits: r.units,
+        basePrice: r.price, taxAndService: Math.round(r.price * 0.15), totalUnits: r.units,
         amenities: ["Air Conditioning", "Free WiFi", "Flat-screen TV", "Mini-bar", "Safe"],
         images: await Promise.all(
           (r.image ? [r.image] : hotelImages(spec).slice(0, 2)).map(async (url, i) => {
@@ -427,7 +427,8 @@ async function main() {
       const roomTotal = nightly * nights;
       const extrasTotal = extra ? extra.price * nights : 0;
       const subtotal = roomTotal + extrasTotal;
-      const taxes = Math.round(subtotal * (settings.taxPct / 100));
+      const nightlyTax = room.taxAndService ?? 0;
+      const taxes = nightlyTax * nights;
       const grandTotal = subtotal + taxes;
       const commissionAmount = Math.round((grandTotal * commissionPct) / 100);
 
@@ -447,7 +448,7 @@ async function main() {
         guests: { adults: 2, children: 0 },
         guestDetails: { fullName: customer.name, email: customer.email, phone: customer.phone ?? "" },
         pricing: {
-          nightlyRates: Array.from({ length: nights }, (_, n) => ({ date: day(-30 + i * 5 + n), price: nightly })),
+          nightlyRates: Array.from({ length: nights }, (_, n) => ({ date: day(-30 + i * 5 + n), price: nightly, tax: nightlyTax })),
           roomTotal,
           options: extra
             ? [{ code: extra.code, label: extra.label, price: extra.price, per: extra.per, amount: extrasTotal }]

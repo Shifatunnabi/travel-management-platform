@@ -157,8 +157,7 @@ export async function startBooking(input: StartBookingInput): Promise<string> {
     units: input.units,
     occupancy: occupancyFor(resolved.pricingMode, input.adults + input.children),
     options,
-    taxPct: settings.taxPct,
-    serviceFee: settings.serviceFee,
+    // Tax & service charge comes from the vendor's rates in `nights`.
     commissionPct: vendor.commissionPct ?? settings.defaultCommissionPct,
     currency: settings.currency,
   });
@@ -342,7 +341,7 @@ async function sendConfirmationEmails(bookingId: string): Promise<void> {
   if (p.discount > 0) {
     charges.push([`Discount${p.couponCode ? ` (${p.couponCode})` : ""}`, `− ${money(p.discount)}`]);
   }
-  if (p.taxes > 0) charges.push(["Taxes & VAT", money(p.taxes)]);
+  if (p.taxes > 0) charges.push(["Tax & service charge", money(p.taxes)]);
   if (p.serviceFee > 0) charges.push(["Service fee", money(p.serviceFee)]);
 
   const data = {
