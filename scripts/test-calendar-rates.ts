@@ -37,7 +37,7 @@ async function main() {
     });
     const room = await Room.create({
       _id: roomId, hotelId, vendorId: vendor._id, name: "Calendar test room",
-      bedType: "1 King Bed", basePrice: 1000, totalUnits: 5,
+      bedType: "1 King Bed", basePrice: 1000, taxAndService: 120, totalUnits: 5,
     });
     browser = await chromium.launch();
     const page = await browser.newPage();
@@ -70,6 +70,8 @@ async function main() {
     let row = await firstRow();
     assert(row);
     assert.equal(row.priceOverride, 1800);
+    // An untouched tax field must not pin the room default onto the night.
+    assert.equal(row.taxOverride, null);
     assert.equal(row.unitsTotal, 5);
     assert.equal(row.unitsBooked, 0);
     assert.equal(row.unitsHeld, 0);
@@ -79,12 +81,14 @@ async function main() {
     await page.reload();
     await firstNight.click();
     await page.locator("#n-price").fill("2200");
+    await page.locator("#n-tax").fill("300");
     await page.locator("#n-units").fill("4");
     await page.locator("#n-min").fill("2");
     await save();
     row = await firstRow();
     assert(row);
     assert.equal(row.priceOverride, 2200);
+    assert.equal(row.taxOverride, 300);
     assert.equal(row.unitsTotal, 4);
     assert.equal(row.minStay, 2);
     assert.equal(row.unitsBooked, 1);
@@ -92,16 +96,18 @@ async function main() {
     console.log("PASS existing-night edits preserve bookings and holds");
 
     await firstNight.click();
-    await page.getByRole("button", { name: "Reset to base price", exact: true }).click();
+    await page.getByRole("button", { name: "Reset to room defaults", exact: true }).click();
     await page.locator("#n-price").waitFor({ state: "detached" });
     await assertNoCrash();
     assert.equal((await firstRow())?.priceOverride, null);
-    console.log("PASS reset restores the room base price");
+    assert.equal((await firstRow())?.taxOverride, null);
+    console.log("PASS reset restores the room base price and tax & service charge");
 
     const bulk = page.locator("form").filter({ has: page.locator("#bulk-from") });
     await bulk.locator("#bulk-from").fill(FIRST);
     await bulk.locator("#bulk-to").fill(SECOND);
     await bulk.locator("#bulk-price").fill("2500");
+    await bulk.locator("#bulk-tax").fill("450");
     await bulk.locator("#bulk-units").fill("3");
     await bulk.getByRole("button", { name: "Apply to range", exact: true }).click();
     await bulk.getByRole("status").waitFor();
@@ -110,6 +116,7 @@ async function main() {
     for (const inventory of [await firstRow(), await secondRow()]) {
       assert(inventory);
       assert.equal(inventory.priceOverride, 2500);
+      assert.equal(inventory.taxOverride, 450);
       assert.equal(inventory.unitsTotal, 3);
     }
     assert.equal((await firstRow())?.unitsBooked, 1);
@@ -119,10 +126,13 @@ async function main() {
 
     const prices = await getNightRates(room, toNight(FIRST), toNight("2030-01-12"));
     assert.deepEqual(prices.map((night) => night.price), [2500, 2500]);
+    assert.deepEqual(prices.map((night) => night.tax), [450, 450]);
     assert.deepEqual(prices.map((night) => night.unitsFree), [1, 3]);
     await page.reload();
     await firstNight.click();
     assert.equal(await page.locator("#n-price").inputValue(), "2500");
+    assert.equal(await page.locator("#n-tax").inputValue(), "450");
+    if (process.env.CALENDAR_TEST_SHOT) await page.screenshot({ path: process.env.CALENDAR_TEST_SHOT, fullPage: true });
     assert.equal(await page.locator("#n-units").inputValue(), "3");
     console.log("PASS rates survive reload and feed live guest pricing");
   } finally {

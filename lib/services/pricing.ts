@@ -13,7 +13,7 @@ export interface SelectedOption {
 }
 
 export interface PriceBreakdown {
-  nightlyRates: { date: Date; price: number }[];
+  nightlyRates: { date: Date; price: number; tax: number }[];
   roomTotal: number;
   options: SelectedOption[];
   extrasTotal: number;
@@ -30,8 +30,11 @@ export interface PriceBreakdown {
 }
 
 export interface PriceInput {
-  /** The room's own rate for each night, for one room, before occupancy. */
-  nights: { date: Date; price: number }[];
+  /**
+   * The room's own rate for each night, for one room, before occupancy, with
+   * the vendor's tax & service charge for that night alongside it.
+   */
+  nights: { date: Date; price: number; tax?: number }[];
   /** How many rooms of this type. */
   units: number;
   /**
@@ -41,8 +44,12 @@ export interface PriceInput {
   occupancy?: number;
   /** Extras the guest ticked. Additive on top of the room, never instead of it. */
   options?: Pick<IRoomOption, "code" | "label" | "price" | "per">[];
-  taxPct: number;
-  serviceFee: number;
+  /**
+   * Legacy platform-wide tax and fee. Hotel bookings now carry the vendor's
+   * per-night tax & service charge instead, so new bookings leave these at 0.
+   */
+  taxPct?: number;
+  serviceFee?: number;
   commissionPct: number;
   discount?: number;
   couponCode?: string | null;
@@ -61,16 +68,23 @@ export function priceBooking({
   units,
   occupancy = 1,
   options = [],
-  taxPct,
-  serviceFee,
+  taxPct = 0,
+  serviceFee = 0,
   commissionPct,
   discount = 0,
   couponCode = null,
   currency = "BDT",
 }: PriceInput): PriceBreakdown {
   const nightCount = nights.length;
-  const nightlyRates = nights.map((n) => ({ date: n.date, price: n.price * occupancy }));
+  // Tax & service charge follows the base fare's unit — per room, or per
+  // guest when the room is sold by the head.
+  const nightlyRates = nights.map((n) => ({
+    date: n.date,
+    price: n.price * occupancy,
+    tax: (n.tax ?? 0) * occupancy,
+  }));
   const roomTotal = nightlyRates.reduce((sum, n) => sum + n.price, 0) * units;
+  const nightlyTax = nightlyRates.reduce((sum, n) => sum + n.tax, 0) * units;
 
   const selected: SelectedOption[] = options.map((o) => ({
     code: o.code,
@@ -84,7 +98,9 @@ export function priceBooking({
   const subtotal = roomTotal + extrasTotal;
   const cappedDiscount = Math.min(Math.max(0, Math.round(discount)), subtotal);
   const taxable = subtotal - cappedDiscount;
-  const taxes = Math.round(taxable * (taxPct / 100));
+  // The vendor's charge is a fixed amount per night, so a discount does not
+  // shrink it. A legacy percentage still applies to the discounted amount.
+  const taxes = nightlyTax + Math.round(taxable * (taxPct / 100));
   const grandTotal = taxable + taxes + serviceFee;
 
   // Commission is taken on the whole booking value, and frozen onto the record.

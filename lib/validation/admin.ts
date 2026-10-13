@@ -84,8 +84,6 @@ export const reviewModerationSchema = z.object({
 
 export const settingsSchema = z.object({
   defaultCommissionPct: z.coerce.number().min(0).max(100),
-  taxPct: z.coerce.number().min(0).max(100),
-  serviceFee: z.coerce.number().min(0).max(100_000),
   settlementDays: z.coerce.number().int().min(0).max(90),
   holdMinutes: z.coerce.number().int().min(1).max(240),
   maxRatingOffset: z.coerce.number().min(0).max(5),

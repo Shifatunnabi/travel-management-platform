@@ -62,6 +62,11 @@ export interface IRoom {
   amenities: string[];
   /** Per night. Per room by default; per guest when `pricingMode` says so. */
   basePrice: number;
+  /**
+   * Tax & service charge per night, on top of the base price, in the same unit
+   * (per room or per guest). Shown to the guest at checkout, not in listings.
+   */
+  taxAndService: number;
   pricingMode: PricingMode;
   currency: string;
   /** How many physical rooms of this type exist. */
@@ -118,6 +123,7 @@ const roomSchema = new Schema<IRoom>(
     images: { type: [imageSchema], default: [] },
     amenities: { type: [String], default: [] },
     basePrice: { type: Number, required: true, min: 0 },
+    taxAndService: { type: Number, default: 0, min: 0 },
     pricingMode: { type: String, enum: PRICING_MODES, default: "per_room" },
     currency: { type: String, default: "BDT" },
     totalUnits: { type: Number, required: true, min: 1, default: 1 },

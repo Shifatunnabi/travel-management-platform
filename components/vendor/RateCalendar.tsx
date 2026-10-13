@@ -63,6 +63,7 @@ export default function RateCalendar({
 
   const saveNight = (patch: {
     price?: number | null;
+    tax?: number | null;
     unitsTotal?: number;
     closed?: boolean;
     minStay?: number;
@@ -104,7 +105,7 @@ export default function RateCalendar({
 
       <Card
         title={rangeLabel(nights)}
-        description="Five weeks from today. Click any night to change its price, availability, or minimum stay."
+        description="Five weeks from today. Click any night to change its base fare, tax & service charge, availability, or minimum stay."
         action={
           <div className="flex items-center gap-1">
             <button
@@ -187,6 +188,15 @@ export default function RateCalendar({
                 >
                   {n.closed ? "—" : formatCurrency(n.price)}
                 </p>
+                {!n.closed && n.tax > 0 && (
+                  <p
+                    className={`text-[10px] tabular-nums ${
+                      n.hasTaxOverride ? "text-brand-600 font-semibold" : "text-slate-500"
+                    }`}
+                  >
+                    + {formatCurrency(n.tax)} tax
+                  </p>
+                )}
                 <p className="text-[10px] text-slate-400 tabular-nums mt-0.5">
                   {n.closed ? "Closed" : `${n.unitsFree}/${n.unitsTotal} left`}
                 </p>
@@ -222,7 +232,7 @@ export default function RateCalendar({
             <span className="text-amber-600 font-bold">on hold</span> Unpaid checkout — not a booking
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-brand-600 font-bold">৳</span> Price overridden for that night
+            <span className="text-brand-600 font-bold">৳</span> Fare or tax overridden for that night
           </span>
         </div>
       </Card>
@@ -269,10 +279,15 @@ export default function RateCalendar({
             </div>
           </fieldset>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <div>
-              <label htmlFor="bulk-price" className="block text-xs font-semibold text-slate-600 mb-1.5">Price</label>
+              <label htmlFor="bulk-price" className="block text-xs font-semibold text-slate-600 mb-1.5">Base fare</label>
               <input id="bulk-price" type="number" name="price" min={100} placeholder="Unchanged"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
+            </div>
+            <div>
+              <label htmlFor="bulk-tax" className="block text-xs font-semibold text-slate-600 mb-1.5">Tax &amp; service charge</label>
+              <input id="bulk-tax" type="number" name="tax" min={0} placeholder="Unchanged"
                 className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
             </div>
             <div>
@@ -312,9 +327,16 @@ function NightEditor({
   night: CalendarNight;
   pending: boolean;
   onClose: () => void;
-  onSave: (patch: { price?: number | null; unitsTotal?: number; closed?: boolean; minStay?: number }) => void;
+  onSave: (patch: {
+    price?: number | null;
+    tax?: number | null;
+    unitsTotal?: number;
+    closed?: boolean;
+    minStay?: number;
+  }) => void;
 }) {
   const [price, setPrice] = useState(String(night.price));
+  const [tax, setTax] = useState(String(night.tax));
   const [units, setUnits] = useState(String(night.unitsTotal));
   const [minStay, setMinStay] = useState(String(night.minStay));
   const [closed, setClosed] = useState(night.closed);
@@ -331,11 +353,17 @@ function NightEditor({
         </button>
       }
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label htmlFor="n-price" className="block text-xs font-semibold text-slate-600 mb-1.5">Price for this night</label>
+          <label htmlFor="n-price" className="block text-xs font-semibold text-slate-600 mb-1.5">Base fare</label>
           <input id="n-price" type="number" min={100} value={price} onChange={(e) => setPrice(e.target.value)}
             className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
+        </div>
+        <div>
+          <label htmlFor="n-tax" className="block text-xs font-semibold text-slate-600 mb-1.5">Tax &amp; service charge</label>
+          <input id="n-tax" type="number" min={0} value={tax} onChange={(e) => setTax(e.target.value)}
+            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-500 tabular-nums" />
+          <p className="text-[11px] text-slate-400 mt-1">Shown to the guest at checkout.</p>
         </div>
         <div>
           <label htmlFor="n-units" className="block text-xs font-semibold text-slate-600 mb-1.5">Rooms open</label>
@@ -369,6 +397,9 @@ function NightEditor({
           onClick={() =>
             onSave({
               price: Number(price) || night.price,
+              // Only pin the tax to this night when it was actually changed, so
+              // a later change to the room's default still reaches it.
+              ...(Number(tax || 0) !== night.tax ? { tax: Math.max(0, Math.round(Number(tax || 0))) } : {}),
               unitsTotal: Number(units),
               minStay: Number(minStay) || 1,
               closed,
@@ -379,14 +410,14 @@ function NightEditor({
           {pending && <Loader2 size={14} className="animate-spin" />}
           Save night
         </button>
-        {night.hasOverride && (
+        {(night.hasOverride || night.hasTaxOverride) && (
           <button
             type="button"
             disabled={pending}
-            onClick={() => onSave({ price: null })}
+            onClick={() => onSave({ price: null, tax: null })}
             className="text-sm font-medium text-slate-500 hover:text-slate-700"
           >
-            Reset to base price
+            Reset to room defaults
           </button>
         )}
       </div>

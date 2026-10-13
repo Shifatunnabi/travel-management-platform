@@ -199,6 +199,7 @@ function RoomRow({
               <p className="text-sm font-semibold text-slate-900 mt-1 tabular-nums">
                 {formatCurrency(offer.total)} total
               </p>
+              <p className="text-[11px] text-slate-400">+ tax &amp; service charge at checkout</p>
             </div>
 
             <div className="shrink-0">

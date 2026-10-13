@@ -52,6 +52,8 @@ export async function getRoom(roomId: string, vendorId: string) {
 export interface CalendarNight {
   dateKey: string;
   price: number;
+  /** Tax & service charge for the night, on top of `price`. */
+  tax: number;
   unitsTotal: number;
   unitsBooked: number;
   unitsHeld: number;
@@ -59,6 +61,7 @@ export interface CalendarNight {
   closed: boolean;
   minStay: number;
   hasOverride: boolean;
+  hasTaxOverride: boolean;
 }
 
 /** A room's calendar for `days` nights from `startKey`, filling gaps from defaults. */
@@ -90,6 +93,7 @@ export async function getRoomCalendar(
     nights.push({
       dateKey: key,
       price: row?.priceOverride ?? room.basePrice,
+      tax: row?.taxOverride ?? room.taxAndService ?? 0,
       unitsTotal: row?.unitsTotal ?? room.totalUnits,
       unitsBooked: row?.unitsBooked ?? 0,
       unitsHeld: row?.unitsHeld ?? 0,
@@ -100,6 +104,7 @@ export async function getRoomCalendar(
       closed: row?.closed ?? false,
       minStay: row?.minStay ?? 1,
       hasOverride: row?.priceOverride != null,
+      hasTaxOverride: row?.taxOverride != null,
     });
   }
 

@@ -102,21 +102,23 @@ async function main() {
 
   console.log("\nPricing");
   const nights = [
-    { date: new Date(), price: 10_000, unitsFree: 5, closed: false, minStay: 1 },
-    { date: new Date(), price: 12_000, unitsFree: 5, closed: false, minStay: 1 },
+    { date: new Date(), price: 10_000, tax: 1_500, unitsFree: 5, closed: false, minStay: 1 },
+    { date: new Date(), price: 12_000, tax: 1_800, unitsFree: 5, closed: false, minStay: 1 },
   ];
   const breakfast = {
     code: "breakfast", label: "Breakfast", price: 500, per: "night" as const,
     breakfast: true, refundable: false, cancellationHours: 0,
   };
   const p = priceBooking({
-    nights, units: 1, options: [breakfast], taxPct: 5, serviceFee: 0,
+    nights, units: 1, options: [breakfast],
     commissionPct: 15, discount: 500, couponCode: "TOFIZA500",
   });
   check("room total is the nightly rates alone", p.roomTotal === 22_000, String(p.roomTotal));
   check("extras are added on top, not folded in", p.extrasTotal === 1_000, String(p.extrasTotal));
   check("subtotal is room plus extras", p.subtotal === 23_000, String(p.subtotal));
-  check("tax applies after the discount", p.taxes === Math.round((23_000 - 500) * 0.05), String(p.taxes));
+  check("tax & service charge is the vendor's per-night amounts, untouched by the discount",
+    p.taxes === 3_300, String(p.taxes));
+  check("no platform service fee on a new booking", p.serviceFee === 0, String(p.serviceFee));
   check("grand total is consistent",
     p.grandTotal === 23_000 - 500 + p.taxes, String(p.grandTotal));
   check("commission plus earning equals the total",
@@ -129,9 +131,19 @@ async function main() {
     perRoom.roomTotal === 22_000, String(perRoom.roomTotal));
   check("per-person pricing is opt-in, and then doubles for two",
     twoGuests.roomTotal === 44_000, String(twoGuests.roomTotal));
+  check("tax & service charge follows the per-person unit",
+    twoGuests.taxes === 6_600, String(twoGuests.taxes));
 
   const twoRooms = priceBooking({ nights, units: 2, taxPct: 0, serviceFee: 0, commissionPct: 15 });
   check("two rooms cost twice one room", twoRooms.roomTotal === 44_000, String(twoRooms.roomTotal));
+  check("two rooms pay tax & service charge twice", twoRooms.taxes === 6_600, String(twoRooms.taxes));
+
+  const legacy = priceBooking({
+    nights: nights.map(({ date, price }) => ({ date, price })),
+    units: 1, taxPct: 5, serviceFee: 200, commissionPct: 15,
+  });
+  check("a legacy hold still prices with the platform tax and fee",
+    legacy.taxes === 1_100 && legacy.grandTotal === 22_000 + 1_100 + 200, `${legacy.taxes} / ${legacy.grandTotal}`);
 
   const capped = priceBooking({ nights, units: 1, taxPct: 5, serviceFee: 0, commissionPct: 15, discount: 999_999 });
   check("a discount cannot exceed the booking value", capped.discount === 22_000, String(capped.discount));

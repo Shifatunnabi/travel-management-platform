@@ -18,7 +18,8 @@ export interface IBookingSelectedOption {
 }
 
 export interface IBookingPricing {
-  nightlyRates: { date: Date; price: number }[];
+  /** `tax` is the vendor's tax & service charge for that night; absent on legacy bookings. */
+  nightlyRates: { date: Date; price: number; tax?: number }[];
   roomTotal: number;
   /** The extras the guest ticked, frozen with what each one cost. */
   options: IBookingSelectedOption[];
@@ -124,7 +125,7 @@ const bookingSchema = new Schema<IBooking>(
     },
     pricing: {
       nightlyRates: [
-        new Schema({ date: Date, price: Number }, { _id: false }),
+        new Schema({ date: Date, price: Number, tax: Number }, { _id: false }),
       ],
       roomTotal: { type: Number, required: true },
       options: {

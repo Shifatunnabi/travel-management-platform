@@ -11,8 +11,6 @@ export default function SettingsForm({
 }: {
   initial: {
     defaultCommissionPct: number;
-    taxPct: number;
-    serviceFee: number;
     settlementDays: number;
     holdMinutes: number;
     maxRatingOffset: number;
@@ -37,9 +35,10 @@ export default function SettingsForm({
             hint="Percent of each booking Tofiza keeps."
             errors={e?.defaultCommissionPct}
           />
-          <TextInput label="Tax rate" name="taxPct" type="number" step={0.5} min={0} required defaultValue={initial.taxPct} hint="Added to the room total." errors={e?.taxPct} />
-          <TextInput label="Service fee" name="serviceFee" type="number" min={0} required prefix="৳" defaultValue={initial.serviceFee} hint="Flat, per booking." errors={e?.serviceFee} />
         </FormGrid>
+        <p className="text-xs text-slate-500 mt-2">
+          Tax &amp; service charge is set by each vendor per room and per night in their rates calendar.
+        </p>
       </section>
 
       <section>

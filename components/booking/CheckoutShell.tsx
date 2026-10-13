@@ -123,7 +123,9 @@ export function BookingSummary({ booking }: { booking: CheckoutBooking }) {
               tone="emerald"
             />
           )}
-          <Row label="Taxes" value={formatCurrency(p.taxes, p.currency)} />
+          {p.taxes > 0 && (
+            <Row label="Tax & service charge" value={formatCurrency(p.taxes, p.currency)} />
+          )}
           {p.serviceFee > 0 && <Row label="Service fee" value={formatCurrency(p.serviceFee, p.currency)} />}
         </dl>
 
