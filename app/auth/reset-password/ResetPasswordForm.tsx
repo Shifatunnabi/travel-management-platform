@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { resetPasswordAction } from "@/lib/actions/auth";
@@ -10,6 +10,9 @@ import SubmitButton from "@/components/auth/SubmitButton";
 
 export default function ResetPasswordForm({ token }: { token: string }) {
   const [state, action] = useActionState(resetPasswordAction, idleState);
+  // Controlled so React 19's post-action form reset keeps both fields after a rejection.
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const done = state.ok && Boolean(state.message);
 
   if (done) {
@@ -37,6 +40,8 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         icon={Lock}
         placeholder="At least 8 characters"
         autoComplete="new-password"
+        value={password}
+        onValueChange={setPassword}
         errors={state.ok ? undefined : state.fieldErrors?.password}
       />
       <Field
@@ -46,6 +51,8 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         icon={Lock}
         placeholder="Re-enter your password"
         autoComplete="new-password"
+        value={confirmPassword}
+        onValueChange={setConfirmPassword}
         errors={state.ok ? undefined : state.fieldErrors?.confirmPassword}
       />
       <SubmitButton pendingLabel="Updating...">Update password</SubmitButton>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Mail, Lock } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth";
@@ -10,6 +10,8 @@ import SubmitButton from "@/components/auth/SubmitButton";
 
 export default function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const [state, action] = useActionState(loginAction, idleState);
+  // Controlled so React 19's post-action form reset keeps the email after a failed sign-in.
+  const [email, setEmail] = useState("");
 
   return (
     <form action={action} className="space-y-4">
@@ -23,6 +25,8 @@ export default function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         icon={Mail}
         placeholder="you@email.com"
         autoComplete="email"
+        value={email}
+        onValueChange={setEmail}
         errors={state.ok ? undefined : state.fieldErrors?.email}
       />
 
